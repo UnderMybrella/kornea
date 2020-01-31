@@ -1,0 +1,8 @@
+enableFeaturePreview('GRADLE_METADATA')
+
+rootProject.name = 'kornea'
+
+include ':io'
+include ':img'
+
+rootProject.children.each { child -> child.name = "kornea-${child.name}"}
