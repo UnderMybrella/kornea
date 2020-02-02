@@ -4,14 +4,20 @@ import org.abimon.kornea.io.common.DataCloseableEventHandler
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
-open class BitwiseInputFlow(protected val flow: InputFlow) : InputFlow {
+open class BitwiseInputFlow protected constructor(protected val flow: InputFlow) : InputFlow {
+    companion object {
+        fun subflow(flow: InputFlow): BitwiseInputFlow = BitwiseInputFlow(flow)
+        operator fun invoke(flow: InputFlow): BitwiseInputFlow = if (flow is BitwiseInputFlow) flow else BitwiseInputFlow(flow)
+    }
+
     constructor(str: String) : this(BinaryInputFlow(str.chunked(2).map { it.toInt(16).toByte() }.toByteArray()))
     constructor(data: ByteArray) : this(BinaryInputFlow(data))
 
     var currentInt: Int? = null
     var currentPos = 0
 
-    suspend fun readBoolean(): Boolean? = decodeData { bit() }?.equals(1)
+    suspend fun readBoolean(): Boolean? = readBit()?.equals(1)
+    suspend fun readBit(): Int? = decodeData { bit() }
     suspend fun readByte(): Byte? = readNumber(8)?.toByte()
     suspend fun readShort(): Short? = readNumber(16)?.toShort()
     suspend fun readInt(): Int? = readNumber(32)?.toInt()

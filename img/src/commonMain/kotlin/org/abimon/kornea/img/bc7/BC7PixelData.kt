@@ -3,6 +3,7 @@ package org.abimon.kornea.img.bc7
 import org.abimon.kornea.img.RgbColour
 import org.abimon.kornea.img.RgbMatrix
 import org.abimon.kornea.img.rgba
+import org.abimon.kornea.io.common.flow.BitwiseInputFlow
 import org.abimon.kornea.io.common.flow.InputFlow
 
 object BC7PixelData {
@@ -190,76 +191,104 @@ object BC7PixelData {
     suspend fun read(width: Int, height: Int, flow: InputFlow): RgbMatrix {
         val rgb = RgbMatrix(width, height)
 
-        val block = BC7Block(flow)
+        @Suppress("NAME_SHADOWING")
+        val flow = BitwiseInputFlow(flow)
 
         loop@ for (supposedIndex in 0 until ((height * width) / 16)) {
             val mode: BC7Mode
             var modeBit: Int = 0
 
             for (i in 0 until 8) {
-                if (block.read(1) == 1)
+                if (requireNotNull(flow.readBit()) == 1)
                     break
                 modeBit++
             }
 
             when (modeBit) {
                 0 -> {
-                    val partition = block.read(4)
-                    val red = (0 until 6).map { block.read(4) }
-                    val green = (0 until 6).map { block.read(4) }
-                    val blue = (0 until 6).map { block.read(4) }
-                    val p = (0 until 6).map { block.read(1) }
+                    val partition = requireNotNull(flow.readNumber(4)).toInt()
+                    val red = IntArray(6) { requireNotNull(flow.readNumber(4)).toInt() }
+                    val green = IntArray(6) { requireNotNull(flow.readNumber(4)).toInt() }
+                    val blue = IntArray(6) { requireNotNull(flow.readNumber(4)).toInt() }
+                    val p = IntArray(6) { requireNotNull(flow.readBit()) }
                     val indices =
-                        (0 until 16).map { if (isAnchorIndex(partition, modeBit, it)) block.read(2) else block.read(3) }
+                        IntArray(16) { i ->
+                            if (isAnchorIndex(partition, modeBit, i))
+                                requireNotNull(flow.readNumber(2)).toInt()
+                            else
+                                requireNotNull(flow.readNumber(3)).toInt()
+                        }
 
                     mode = BC7Mode(modeBit, partition, red, green, blue, null, p, indices, null, null, null)
                 }
                 1 -> {
-                    val partition = block.read(6)
-                    val red = (0 until 4).map { block.read(6) }
-                    val green = (0 until 4).map { block.read(6) }
-                    val blue = (0 until 4).map { block.read(6) }
-                    val p = (0 until 2).map { block.read(1) }
+                    val partition = requireNotNull(flow.readNumber(6)).toInt()
+                    val red = IntArray(4) { requireNotNull(flow.readNumber(6)).toInt() }
+                    val green = IntArray(4) { requireNotNull(flow.readNumber(6)).toInt() }
+                    val blue = IntArray(4) { requireNotNull(flow.readNumber(6)).toInt() }
+                    val p = IntArray(2) { requireNotNull(flow.readBit()) }
                     val indices =
-                        (0 until 16).map { if (isAnchorIndex(partition, modeBit, it)) block.read(2) else block.read(3) }
+                        IntArray(16) { i ->
+                            if (isAnchorIndex(partition, modeBit, i))
+                                requireNotNull(flow.readNumber(2)).toInt()
+                            else
+                                requireNotNull(flow.readNumber(3)).toInt()
+                        }
 
                     mode = BC7Mode(modeBit, partition, red, green, blue, null, p, indices, null, null, null)
                 }
                 2 -> {
-                    val partition = block.read(6)
-                    val red = (0 until 6).map { block.read(5) }
-                    val green = (0 until 6).map { block.read(5) }
-                    val blue = (0 until 6).map { block.read(5) }
+                    val partition = requireNotNull(flow.readNumber(6)).toInt()
+                    val red = IntArray(6) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val green = IntArray(6) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val blue = IntArray(6) { requireNotNull(flow.readNumber(5)).toInt() }
                     val indices =
-                        (0 until 16).map { if (isAnchorIndex(partition, modeBit, it)) block.read(1) else block.read(2) }
+                        IntArray(16) { i ->
+                            if (isAnchorIndex(partition, modeBit, i))
+                                requireNotNull(flow.readBit()).toInt()
+                            else
+                                requireNotNull(flow.readNumber(2)).toInt()
+                        }
 
                     mode = BC7Mode(modeBit, partition, red, green, blue, null, null, indices, null, null, null)
                 }
                 3 -> {
-                    val partition = block.read(6)
-                    val red = (0 until 4).map { block.read(7) }
-                    val green = (0 until 4).map { block.read(7) }
-                    val blue = (0 until 4).map { block.read(7) }
-                    val p = (0 until 4).map { block.read(1) }
+                    val partition = requireNotNull(flow.readNumber(6)).toInt()
+                    val red = IntArray(4) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val green = IntArray(4) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val blue = IntArray(4) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val p = IntArray(4) { requireNotNull(flow.readBit()) }
 
-                    val indices =
-                        (0 until 16).map { if (isAnchorIndex(partition, modeBit, it)) block.read(1) else block.read(2) }
+                    val indices = IntArray(16) { i ->
+                        if (isAnchorIndex(partition, modeBit, i))
+                            requireNotNull(flow.readBit()).toInt()
+                        else
+                            requireNotNull(flow.readNumber(2)).toInt()
+                    }
 
                     mode = BC7Mode(modeBit, partition, red, green, blue, null, p, indices, null, null, null)
                 }
                 4 -> {
-                    val rotation = block.read(2)
-                    val idxMode = block.read(1)
+                    val rotation = requireNotNull(flow.readNumber(2)).toInt()
+                    val idxMode = requireNotNull(flow.readBit()).toInt()
 
-                    val red = (0 until 2).map { block.read(5) }
-                    val green = (0 until 2).map { block.read(5) }
-                    val blue = (0 until 2).map { block.read(5) }
-                    val alpha = (0 until 2).map { block.read(6) }
+                    val red = IntArray(2) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val green = IntArray(2) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val blue = IntArray(2) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val alpha = IntArray(2) { requireNotNull(flow.readNumber(6)).toInt() }
 
-                    val twoBitIndices =
-                        (0 until 16).map { if (isAnchorIndex(0, modeBit, it)) block.read(1) else block.read(2) }
-                    val threeBitIndices =
-                        (0 until 16).map { if (isAnchorIndex(0, modeBit, it)) block.read(2) else block.read(3) }
+                    val twoBitIndices = IntArray(16) { i ->
+                        if (isAnchorIndex(0, modeBit, i))
+                            requireNotNull(flow.readBit()).toInt()
+                        else
+                            requireNotNull(flow.readNumber(2)).toInt()
+                    }
+                    val threeBitIndices = IntArray(16) { i ->
+                        if (isAnchorIndex(0, modeBit, i))
+                            requireNotNull(flow.readNumber(2)).toInt()
+                        else
+                            requireNotNull(flow.readNumber(3)).toInt()
+                    }
 
                     mode = BC7Mode(
                         modeBit,
@@ -276,51 +305,64 @@ object BC7PixelData {
                     )
                 }
                 5 -> {
-                    val rotation = block.read(2)
+                    val rotation = requireNotNull(flow.readNumber(2)).toInt()
 
-                    val red = (0 until 2).map { block.read(7) }
-                    val green = (0 until 2).map { block.read(7) }
-                    val blue = (0 until 2).map { block.read(7) }
-                    val alpha = (0 until 2).map { block.read(8) }
+                    val red = IntArray(2) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val green = IntArray(2) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val blue = IntArray(2) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val alpha = IntArray(2) { requireNotNull(flow.readNumber(8)).toInt() }
 
-                    val rgbIndices =
-                        (0 until 16).map { if (isAnchorIndex(0, modeBit, it)) block.read(1) else block.read(2) }
-                    val alphaIndices =
-                        (0 until 16).map { if (isAnchorIndex(0, modeBit, it)) block.read(1) else block.read(2) }
+                    val rgbIndices = IntArray(16) { i ->
+                        if (isAnchorIndex(0, modeBit, i))
+                            requireNotNull(flow.readBit()).toInt()
+                        else
+                            requireNotNull(flow.readNumber(2)).toInt()
+                    }
+
+                    val alphaIndices = IntArray(16) { i ->
+                        if (isAnchorIndex(0, modeBit, i))
+                            requireNotNull(flow.readBit()).toInt()
+                        else
+                            requireNotNull(flow.readNumber(2)).toInt()
+                    }
 
                     mode = BC7Mode(modeBit, 0, red, green, blue, alpha, null, rgbIndices, alphaIndices, rotation, null)
                 }
                 6 -> {
-                    val red = (0 until 2).map { block.read(7) }
-                    val green = (0 until 2).map { block.read(7) }
-                    val blue = (0 until 2).map { block.read(7) }
-                    val alpha = (0 until 2).map { block.read(7) }
-                    val p = (0 until 2).map { block.read(1) }
-                    val indices =
-                        (0 until 16).map { if (isAnchorIndex(0, modeBit, it)) block.read(3) else block.read(4) }
+                    val red = IntArray(2) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val green = IntArray(2) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val blue = IntArray(2) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val alpha = IntArray(2) { requireNotNull(flow.readNumber(7)).toInt() }
+                    val p = IntArray(2) { requireNotNull(flow.readBit()).toInt() }
+                    val indices = IntArray(16) { i ->
+                        if (isAnchorIndex(0, modeBit, i))
+                            requireNotNull(flow.readNumber(3)).toInt()
+                        else
+                            requireNotNull(flow.readNumber(4)).toInt()
+                    }
 
                     mode = BC7Mode(modeBit, 0, red, green, blue, alpha, p, indices, null, null, null)
                 }
                 7 -> {
-                    val partition = block.read(6)
-                    val red = (0 until 4).map { block.read(5) }
-                    val green = (0 until 4).map { block.read(5) }
-                    val blue = (0 until 4).map { block.read(5) }
-                    val alpha = (0 until 4).map { block.read(5) }
-                    val p = (0 until 4).map { block.read(1) }
-                    val indices =
-                        (0 until 16).map { if (isAnchorIndex(partition, modeBit, it)) block.read(1) else block.read(2) }
+                    val partition = requireNotNull(flow.readNumber(6)).toInt()
+                    val red = IntArray(4) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val green = IntArray(4) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val blue = IntArray(4) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val alpha = IntArray(4) { requireNotNull(flow.readNumber(5)).toInt() }
+                    val p = IntArray(4) { requireNotNull(flow.readBit()).toInt() }
+                    val indices = IntArray(16) { i ->
+                            if (isAnchorIndex(partition, modeBit, i))
+                                requireNotNull(flow.readBit()).toInt()
+                            else
+                                requireNotNull(flow.readNumber(2)).toInt()
+                        }
 
                     mode = BC7Mode(modeBit, partition, red, green, blue, alpha, p, indices, null, null, null)
                 }
                 else -> {
                     println("Mode: $modeBit")
-                    val buffer = block.read(127 - modeBit)
-//                    for (index in 0 until 16) {
-//                        val x = (supposedIndex % (width / 4)) * 4 + (index % 4)
-//                        val y = (supposedIndex / (width / 4)) * 4 + (index / 4)
-//                        rgb[x, y] = 0
-//                    }
+                    flow.readNumber(127 - modeBit)
+//                    val buffer = block.read(127 - modeBit)
                     continue@loop
                 }
             }
@@ -370,7 +412,7 @@ object BC7PixelData {
 
     fun extractEndpoints(mode: BC7Mode): Array<Pair<IntArray, IntArray>> {
         val numSubsets = NUMBER_OF_SUBSETS[mode.mode]
-        return (0 until numSubsets).map { subset ->
+        return Array(numSubsets) { subset ->
             intArrayOf(
                 mode.red[subset * 2],
                 mode.green[subset * 2],
@@ -382,7 +424,7 @@ object BC7PixelData {
                 mode.blue[subset * 2 + 1],
                 mode.alpha?.get(subset * 2 + 1) ?: -1
             )
-        }.toTypedArray()
+        }
     }
 
     fun getEndpoints(mode: BC7Mode): Array<Pair<RgbColour, RgbColour>> {
@@ -481,7 +523,7 @@ object BC7PixelData {
             return rgba(r, g, b, a)
         }
     }
-    //= Color(endpoints.first[0], endpoints.first[1], endpoints.first[2], endpoints.first[3])
+//= Color(endpoints.first[0], endpoints.first[1], endpoints.first[2], endpoints.first[3])
 
     fun interpolate(e0: Int, e1: Int, index: Int, indexPrecision: Int): Int {
         when (indexPrecision) {
