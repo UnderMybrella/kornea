@@ -1,6 +1,6 @@
 package org.abimon.kornea.img
 
-data class RgbMatrix(val width: Int, val height: Int, val rgb: IntArray) {
+open class RgbMatrix(val width: Int, val height: Int, val rgb: IntArray) {
     constructor(width: Int, height: Int): this(width, height, IntArray(width * height))
 
     operator fun get(x: Int, y: Int): RgbColour = RgbColour(rgb[x * width + y])

@@ -1,6 +1,5 @@
 package org.abimon.kornea.img
 
-import org.abimon.kornea.img.bc7.BC7Mode
 import org.abimon.kornea.img.bc7.BC7PixelData
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.isBitSet
@@ -187,8 +186,15 @@ data class DirectDrawSurfaceHeaderDX10(
     }
 }
 
+class DirectDrawSurfaceImage(
+    val header: DirectDrawSurfaceHeader,
+    val headerDX10: DirectDrawSurfaceHeaderDX10?,
+    rgb: IntArray
+) : RgbMatrix(header.width, header.height, rgb)
+
+@Suppress("NAME_SHADOWING")
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readDDSImage(): RgbMatrix? {
+suspend fun InputFlow.readDDSImage(): DirectDrawSurfaceImage? {
     var magic = readInt32LE() ?: return null
     if (magic == DDS1_MAGIC_NUMBER_LE)
         magic = readInt32LE() ?: return null
@@ -203,12 +209,17 @@ suspend fun InputFlow.readDDSImage(): RgbMatrix? {
             null
         }
 
+    val rgb: IntArray?
+
     if (header.pixelFormat.flags isBitSet DirectDrawSurfacePixelFormat.DDPF_FOURCC) {
         when (header.pixelFormat.fourCC) {
-            DirectDrawSurfacePixelFormat.DXT1 -> return DXT1PixelData.read(header.width, header.height, this)
-            DirectDrawSurfacePixelFormat.DX10 -> return BC7PixelData.read(header.width, header.height, this)
+            DirectDrawSurfacePixelFormat.DXT1 -> rgb = DXT1PixelData.read(header.width, header.height, this).rgb
+            DirectDrawSurfacePixelFormat.DX10 -> rgb = BC7PixelData.read(header.width, header.height, this).rgb
+            else -> rgb = null
         }
+    } else {
+        rgb = null
     }
 
-    return null
+    return rgb?.let { rgb -> DirectDrawSurfaceImage(header, header10, rgb) }
 }
