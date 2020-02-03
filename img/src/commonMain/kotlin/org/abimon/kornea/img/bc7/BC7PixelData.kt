@@ -7,16 +7,16 @@ import org.abimon.kornea.io.common.flow.BitwiseInputFlow
 import org.abimon.kornea.io.common.flow.InputFlow
 
 object BC7PixelData {
-    val NUMBER_OF_SUBSETS = arrayOf(3, 2, 3, 2, 1, 1, 1, 2)
-    val UNIQUE_PBITS = arrayOf(true, false, false, true, false, false, true, true)
+    private val NUMBER_OF_SUBSETS = arrayOf(3, 2, 3, 2, 1, 1, 1, 2)
+    private val UNIQUE_PBITS = arrayOf(true, false, false, true, false, false, true, true)
 
-    val COLOUR_PRECISION_PLUS_PBIT = arrayOf(5, 7, 5, 8, 5, 7, 8, 6)
-    val ALPHA_PRECISION_PLUS_PBIT = arrayOf(0, 0, 0, 0, 6, 8, 8, 6)
+    private val COLOUR_PRECISION_PLUS_PBIT = arrayOf(5, 7, 5, 8, 5, 7, 8, 6)
+    private val ALPHA_PRECISION_PLUS_PBIT = arrayOf(0, 0, 0, 0, 6, 8, 8, 6)
 
-    val COLOUR_INDEX_BITCOUNT = arrayOf(3, 3, 2, 2, 2, 2, 4, 2)
-    val ALPHA_INDEX_BITCOUNT = arrayOf(3, 3, 2, 2, 3, 2, 4, 2)
+    private val COLOUR_INDEX_BITCOUNT = arrayOf(3, 3, 2, 2, 2, 2, 4, 2)
+    private val ALPHA_INDEX_BITCOUNT = arrayOf(3, 3, 2, 2, 3, 2, 4, 2)
 
-    val PARTITION_TABLE_P2 = arrayOf(
+    private val PARTITION_TABLE_P2 = arrayOf(
         0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
         0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
         0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1,
@@ -83,7 +83,7 @@ object BC7PixelData {
         0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1
     )
 
-    val PARTITION_TABLE_P3 = arrayOf(
+    private val PARTITION_TABLE_P3 = arrayOf(
         0, 0, 1, 1, 0, 0, 1, 1, 0, 2, 2, 1, 2, 2, 2, 2,
         0, 0, 0, 1, 0, 0, 1, 1, 2, 2, 1, 1, 2, 2, 2, 1,
         0, 0, 0, 0, 2, 0, 0, 1, 2, 2, 1, 1, 2, 2, 1, 1,
@@ -150,7 +150,7 @@ object BC7PixelData {
         0, 1, 1, 1, 2, 0, 1, 1, 2, 2, 0, 1, 2, 2, 2, 0
     )
 
-    val ANCHOR_INDEX_SECOND_SUBSET = arrayOf(
+    private val ANCHOR_INDEX_SECOND_SUBSET = arrayOf(
         15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15,
         15, 2, 8, 2, 2, 8, 8, 15,
@@ -161,7 +161,7 @@ object BC7PixelData {
         15, 15, 15, 15, 15, 2, 2, 15
     )
 
-    val ANCHOR_INDEX_SECOND_SUBSET_OF_THREE = arrayOf(
+    private val ANCHOR_INDEX_SECOND_SUBSET_OF_THREE = arrayOf(
         3, 3, 15, 15, 8, 3, 15, 15,
         8, 8, 6, 6, 6, 5, 3, 3,
         3, 3, 8, 15, 3, 3, 6, 10,
@@ -172,7 +172,7 @@ object BC7PixelData {
         5, 10, 8, 13, 15, 12, 3, 3
     )
 
-    val ANCHOR_INDEX_THIRD_SUBSET = arrayOf(
+    private val ANCHOR_INDEX_THIRD_SUBSET = arrayOf(
         15, 8, 8, 3, 15, 15, 3, 8,
         15, 15, 15, 15, 15, 15, 15, 8,
         15, 8, 15, 3, 15, 8, 15, 8,
@@ -183,9 +183,9 @@ object BC7PixelData {
         15, 15, 15, 15, 3, 15, 15, 8
     )
 
-    val A_WEIGHT_2 = arrayOf(0, 21, 43, 64)
-    val A_WEIGHT_3 = arrayOf(0, 9, 18, 27, 37, 46, 55, 64)
-    val A_WEIGHT_4 = arrayOf(0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64)
+    private val A_WEIGHT_2 = arrayOf(0, 21, 43, 64)
+    private val A_WEIGHT_3 = arrayOf(0, 9, 18, 27, 37, 46, 55, 64)
+    private val A_WEIGHT_4 = arrayOf(0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64)
 
     @ExperimentalUnsignedTypes
     suspend fun read(width: Int, height: Int, flow: InputFlow): RgbMatrix {
@@ -199,7 +199,7 @@ object BC7PixelData {
 
         loop@ for (supposedIndex in 0 until ((height * width) / 16)) {
             val mode: BC7Mode
-            var modeBit: Int = 0
+            var modeBit = 0
             startingPos = flow.position().toInt() - 1
 
             for (i in 0 until 8) {
@@ -355,11 +355,11 @@ object BC7PixelData {
                     val alpha = IntArray(4) { requireNotNull(flow.readNumber(5)).toInt() }
                     val p = IntArray(4) { requireNotNull(flow.readBit()).toInt() }
                     val indices = IntArray(16) { i ->
-                            if (isAnchorIndex(partition, modeBit, i))
-                                requireNotNull(flow.readBit()).toInt()
-                            else
-                                requireNotNull(flow.readNumber(2)).toInt()
-                        }
+                        if (isAnchorIndex(partition, modeBit, i))
+                            requireNotNull(flow.readBit()).toInt()
+                        else
+                            requireNotNull(flow.readNumber(2)).toInt()
+                    }
 
                     mode = BC7Mode(modeBit, partition, red, green, blue, alpha, p, indices, null, null, null)
                 }
@@ -403,24 +403,22 @@ object BC7PixelData {
         return rgb
     }
 
-    fun getSubset(partitions: Int, index: Int, numberOfSubsets: Int): Int {
+    private fun getSubset(partitions: Int, index: Int, numberOfSubsets: Int): Int =
         when (numberOfSubsets) {
-            1 -> return 0
-            2 -> return PARTITION_TABLE_P2[partitions * 16 + index]
-            else -> return PARTITION_TABLE_P3[partitions * 16 + index]
+            1 -> 0
+            2 -> PARTITION_TABLE_P2[partitions * 16 + index]
+            else -> PARTITION_TABLE_P3[partitions * 16 + index]
         }
-    }
 
-    fun isAnchorIndex(partitions: Int, mode: Int, index: Int): Boolean {
+    private fun isAnchorIndex(partitions: Int, mode: Int, index: Int): Boolean =
         when {
-            index == 0 -> return true
-            NUMBER_OF_SUBSETS[mode] == 2 -> return ANCHOR_INDEX_SECOND_SUBSET[partitions] == index
-            NUMBER_OF_SUBSETS[mode] == 3 -> return ANCHOR_INDEX_SECOND_SUBSET_OF_THREE[partitions] == index || ANCHOR_INDEX_THIRD_SUBSET[partitions] == index
-            else -> return false
+            index == 0 -> true
+            NUMBER_OF_SUBSETS[mode] == 2 -> ANCHOR_INDEX_SECOND_SUBSET[partitions] == index
+            NUMBER_OF_SUBSETS[mode] == 3 -> ANCHOR_INDEX_SECOND_SUBSET_OF_THREE[partitions] == index || ANCHOR_INDEX_THIRD_SUBSET[partitions] == index
+            else -> false
         }
-    }
 
-    fun extractEndpoints(mode: BC7Mode): Array<Pair<IntArray, IntArray>> {
+    private fun extractEndpoints(mode: BC7Mode): Array<Pair<IntArray, IntArray>> {
         val numSubsets = NUMBER_OF_SUBSETS[mode.mode]
         return Array(numSubsets) { subset ->
             intArrayOf(
@@ -437,7 +435,7 @@ object BC7PixelData {
         }
     }
 
-    fun getEndpoints(mode: BC7Mode): Array<Pair<RgbColour, RgbColour>> {
+    private fun getEndpoints(mode: BC7Mode): Array<Pair<RgbColour, RgbColour>> {
         val endpoints = extractEndpoints(mode)
 
         val colourPrecision = COLOUR_PRECISION_PLUS_PBIT[mode.mode]
@@ -446,26 +444,26 @@ object BC7PixelData {
         for (i in endpoints.indices) {
             if (mode.pBits != null) {
                 if (UNIQUE_PBITS[mode.mode]) {
-                    endpoints[i].first.apply {
+                    with(endpoints[i].first) {
                         for (j in indices) {
                             this[j] = this[j] shl 1
                             this[j] = this[j] or mode.pBits[i * 2]
                         }
                     }
-                    endpoints[i].second.apply {
+                    with(endpoints[i].second) {
                         for (j in indices) {
                             this[j] = this[j] shl 1
                             this[j] = this[j] or mode.pBits[i * 2 + 1]
                         }
                     }
                 } else {
-                    endpoints[i].first.apply {
+                    with(endpoints[i].first) {
                         for (j in indices) {
                             this[j] = this[j] shl 1
                             this[j] = this[j] or mode.pBits[i]
                         }
                     }
-                    endpoints[i].second.apply {
+                    with(endpoints[i].second) {
                         for (j in indices) {
                             this[j] = this[j] shl 1
                             this[j] = this[j] or mode.pBits[i]
@@ -473,44 +471,32 @@ object BC7PixelData {
                     }
                 }
             }
+            fun shiftEndpoint(endpoint: IntArray) {
+                for (ei in 0 until 3) endpoint[ei] = endpoint[ei] shl (8 - colourPrecision)
+                endpoint[3] = endpoint[3] shl (8 - alphaPrecision)
 
-            endpoints[i].first.apply {
-                this[0] = this[0] shl (8 - colourPrecision)
-                this[1] = this[1] shl (8 - colourPrecision)
-                this[2] = this[2] shl (8 - colourPrecision)
-                this[3] = this[3] shl (8 - alphaPrecision)
-
-                this[0] = this[0] or (this[0] shr colourPrecision)
-                this[1] = this[1] or (this[1] shr colourPrecision)
-                this[2] = this[2] or (this[2] shr colourPrecision)
-                this[3] = this[3] or (this[3] shr alphaPrecision)
+                for (ei in 0 until 3) endpoint[ei] = endpoint[ei] or (endpoint[ei] shr colourPrecision)
+                endpoint[3] = endpoint[3] or (endpoint[3] shr alphaPrecision)
             }
 
-            endpoints[i].second.apply {
-                this[0] = this[0] shl (8 - colourPrecision)
-                this[1] = this[1] shl (8 - colourPrecision)
-                this[2] = this[2] shl (8 - colourPrecision)
-                this[3] = this[3] shl (8 - alphaPrecision)
+            shiftEndpoint(endpoints[i].first)
+            shiftEndpoint(endpoints[i].second)
+        }
 
-                this[0] = this[0] or (this[0] shr colourPrecision)
-                this[1] = this[1] or (this[1] shr colourPrecision)
-                this[2] = this[2] or (this[2] shr colourPrecision)
-                this[3] = this[3] or (this[3] shr alphaPrecision)
+        if (mode.mode <= 3) {
+            for (i in endpoints.indices) {
+                endpoints[i].first[3] = 0xFF
+                endpoints[i].second[3] = 0xFF
             }
         }
 
-        if (mode.mode <= 3)
-            endpoints.forEachIndexed { index, pair ->
-                endpoints[index] = pair.apply {
-                    first[3] = 0xFF
-                    second[3] = 0xFF
-                }
-            }
-
-        return endpoints.map { (a, b) -> RgbColour.rgba(a[0], a[1], a[2], a[3]) to RgbColour.rgba(b[0], b[1], b[2], b[3]) }.toTypedArray()
+        return Array(endpoints.size) { index ->
+            val (a, b) = endpoints[index]
+            RgbColour.rgba(a[0], a[1], a[2], a[3]) to RgbColour.rgba(b[0], b[1], b[2], b[3])
+        }
     }
 
-    fun interpolate(
+    private fun interpolate(
         endpoints: Pair<RgbColour, RgbColour>,
         index: Int,
         alphaIndex: Int,
@@ -535,11 +521,10 @@ object BC7PixelData {
     }
 //= Color(endpoints.first[0], endpoints.first[1], endpoints.first[2], endpoints.first[3])
 
-    fun interpolate(e0: Int, e1: Int, index: Int, indexPrecision: Int): Int {
+    private fun interpolate(e0: Int, e1: Int, index: Int, indexPrecision: Int): Int =
         when (indexPrecision) {
-            2 -> return (((64 - A_WEIGHT_2[index]) * e0 + A_WEIGHT_2[index] * e1 + 32) shr 6)
-            3 -> return (((64 - A_WEIGHT_3[index]) * e0 + A_WEIGHT_3[index] * e1 + 32) shr 6)
-            else -> return (((64 - A_WEIGHT_4[index]) * e0 + A_WEIGHT_4[index] * e1 + 32) shr 6)
+            2 -> (((64 - A_WEIGHT_2[index]) * e0 + A_WEIGHT_2[index] * e1 + 32) shr 6)
+            3 -> (((64 - A_WEIGHT_3[index]) * e0 + A_WEIGHT_3[index] * e1 + 32) shr 6)
+            else -> (((64 - A_WEIGHT_4[index]) * e0 + A_WEIGHT_4[index] * e1 + 32) shr 6)
         }
-    }
 }
