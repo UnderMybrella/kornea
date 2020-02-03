@@ -4,5 +4,6 @@ rootProject.name = 'kornea'
 
 include ':io'
 include ':img'
+include ':bootstrap'
 
 rootProject.children.each { child -> child.name = "kornea-${child.name}"}

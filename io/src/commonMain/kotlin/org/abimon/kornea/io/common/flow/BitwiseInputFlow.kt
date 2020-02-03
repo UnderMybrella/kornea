@@ -16,6 +16,25 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow)
     var currentInt: Int? = null
     var currentPos = 0
 
+    suspend fun skipBits(bits: Int) {
+        if (bits == 0) return
+        require(bits > 0)
+
+        if (bits >= 8 && bits % 8 == 0) {
+            flow.skip((bits / 8).toULong())
+        } else {
+            if (8 - currentPos > bits) {
+                currentPos += bits
+            } else {
+                val bitsRemain = bits - (8 - currentPos)
+                val bytesToSkip = bitsRemain / 8
+                if (bytesToSkip > 0)
+                    flow.skip(bytesToSkip.toULong())
+                currentPos = bitsRemain % 8
+            }
+        }
+    }
+
     suspend fun readBoolean(): Boolean? = readBit()?.equals(1)
     suspend fun readBit(): Int? = decodeData { bit() }
     suspend fun readByte(): Byte? = readNumber(8)?.toByte()
@@ -28,7 +47,7 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow)
         var result = 0L
 
         //Read first x bits
-        val availableBits = 8 - currentPos
+        val availableBits = min(8 - currentPos, bits)
         checkBefore(availableBits)
         for (i in 0 until availableBits)
             result = result or ((bit() ?: return null).toLong() shl i)
@@ -42,7 +61,7 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow)
         checkAfter() //This goes after the read calls so that we ensure we don't skip a byte
 
         //Read last x bits
-        checkBefore(8 - availableBits)
+        checkBefore(bits - offset)
         for (i in offset until bits)
             result = result or ((bit() ?: return null).toLong() shl i)
         checkAfter()
@@ -61,14 +80,14 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow)
 
     fun bit(): Int? = currentInt?.and(0xFF)?.shr(currentPos++)?.and(1)
 
-    protected suspend fun checkBefore(needed: Int = 1) {
+    suspend fun checkBefore(needed: Int = 1) {
         if (currentInt == null || currentPos > (8 - needed)) { //hardcoded check just to make sure we don't write a 0 byte
             currentInt = flow.read()
             currentPos = 0
         }
     }
 
-    protected suspend fun checkAfter() {
+    suspend fun checkAfter() {
         if (currentInt == null || currentPos >= 8) {
             currentInt = flow.read()
             currentPos = 0

@@ -193,10 +193,14 @@ object BC7PixelData {
 
         @Suppress("NAME_SHADOWING")
         val flow = BitwiseInputFlow(flow)
+        var startingPos: Int
+
+        flow.checkAfter() //Make the pos work
 
         loop@ for (supposedIndex in 0 until ((height * width) / 16)) {
             val mode: BC7Mode
             var modeBit: Int = 0
+            startingPos = flow.position().toInt() - 1
 
             for (i in 0 until 8) {
                 if (requireNotNull(flow.readBit()) == 1)
@@ -361,7 +365,7 @@ object BC7PixelData {
                 }
                 else -> {
                     println("Mode: $modeBit")
-                    flow.readNumber(127 - modeBit)
+                    flow.skipBits(127 - modeBit)
 //                    val buffer = block.read(127 - modeBit)
                     continue@loop
                 }
@@ -388,6 +392,12 @@ object BC7PixelData {
                     else -> rgb[x, y] = interpolated.rgb
                 }
             }
+
+            val currentPosition = flow.position().toInt()
+            val bytesRead = (currentPosition - startingPos)
+            val bitsUnread = (8 - flow.currentPos)
+            val bitsToSkip = 128 - (bytesRead * 8) + bitsUnread
+            flow.skipBits(bitsToSkip)
         }
 
         return rgb
