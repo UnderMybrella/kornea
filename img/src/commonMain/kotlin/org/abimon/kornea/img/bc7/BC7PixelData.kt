@@ -497,7 +497,7 @@ object BC7PixelData {
                 }
             }
 
-        return endpoints.map { (a, b) -> rgba(a[0], a[1], a[2], a[3]) to rgba(b[0], b[1], b[2], b[3]) }.toTypedArray()
+        return endpoints.map { (a, b) -> RgbColour.rgba(a[0], a[1], a[2], a[3]) to RgbColour.rgba(b[0], b[1], b[2], b[3]) }.toTypedArray()
     }
 
     fun interpolate(
@@ -513,14 +513,14 @@ object BC7PixelData {
             val b = interpolate(endpoints.first.blue, endpoints.second.blue, alphaIndex, ALPHA_INDEX_BITCOUNT[mode])
             val a = interpolate(endpoints.first.alpha, endpoints.second.alpha, index, COLOUR_INDEX_BITCOUNT[mode])
 
-            return rgba(r, g, b, a)
+            return RgbColour.rgba(r, g, b, a)
         } else {
             val r = interpolate(endpoints.first.red, endpoints.second.red, index, COLOUR_INDEX_BITCOUNT[mode])
             val g = interpolate(endpoints.first.green, endpoints.second.green, index, COLOUR_INDEX_BITCOUNT[mode])
             val b = interpolate(endpoints.first.blue, endpoints.second.blue, index, COLOUR_INDEX_BITCOUNT[mode])
             val a = interpolate(endpoints.first.alpha, endpoints.second.alpha, alphaIndex, ALPHA_INDEX_BITCOUNT[mode])
 
-            return rgba(r, g, b, a)
+            return RgbColour.rgba(r, g, b, a)
         }
     }
 //= Color(endpoints.first[0], endpoints.first[1], endpoints.first[2], endpoints.first[3])
