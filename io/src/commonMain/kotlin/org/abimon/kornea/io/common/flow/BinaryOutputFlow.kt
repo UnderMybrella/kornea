@@ -19,7 +19,7 @@ open class BinaryOutputFlow(val buffer: MutableList<Byte>): CountingOutputFlow {
     }
     override suspend fun write(b: ByteArray) = write(b, 0, b.size)
     override suspend fun write(b: ByteArray, off: Int, len: Int) {
-        b.slice(off until off + len).forEach { buffer.add(it) }
+        buffer.addAll(b.slice(off until off + len))
     }
     override suspend fun flush() {}
     fun getData(): ByteArray = buffer.toByteArray()
