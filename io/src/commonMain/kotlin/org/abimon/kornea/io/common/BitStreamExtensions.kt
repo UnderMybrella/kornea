@@ -295,11 +295,10 @@ suspend fun InputFlow.readVariableInt16(): Int? = readVariableInt(2)?.toInt()
 suspend fun InputFlow.readVariableInt(bytes: Int): Long? {
     var output: Long = 0
     var byte = read() ?: return null
-    output = byte.toLong()
+    if (byte < 0x80)
+        return byte.toLong()
 
-    if (output < 0x80)
-        return output
-
+    output = byte.toLong() and 0x7F
     var shift = 7
     for (i in 0 until bytes-1) {
         byte = read() ?: return null
