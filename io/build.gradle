@@ -35,15 +35,11 @@ kotlin {
             }
         }
         mingwX64Main {
-            kotlin.srcDirs += file("src/posixMain/kotlin")
-
             dependencies {
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.3'
             }
         }
         linuxX64Main {
-            kotlin.srcDirs += file("src/posixMain/kotlin")
-
             dependencies {
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.3'
             }
