@@ -239,6 +239,24 @@ suspend fun InputFlow.readUInt32BE(): UInt? {
 }
 
 @ExperimentalUnsignedTypes
+suspend fun InputFlow.readInt24LE(): Int? {
+    val a = read() ?: return null
+    val b = read() ?: return null
+    val c = read() ?: return null
+
+    return (b shl 16) or (b shl 8) or a
+}
+
+@ExperimentalUnsignedTypes
+suspend fun InputFlow.readInt24BE(): Int? {
+    val a = read() ?: return null
+    val b = read() ?: return null
+    val c = read() ?: return null
+
+    return (a shl 16) or (b shl 8) or c
+}
+
+@ExperimentalUnsignedTypes
 suspend fun InputFlow.readInt16LE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
@@ -584,6 +602,25 @@ suspend fun OutputFlow.writeUInt32BE(num: Number) {
     write((int ushr 8) and 0xFF)
     write(int and 0xFF)
 }
+
+@ExperimentalUnsignedTypes
+suspend fun OutputFlow.writeInt24LE(num: Number) {
+    val int = num.toShort().toInt()
+
+    write(int and 0xFF)
+    write((int shr 8) and 0xFF)
+    write((int shr 16) and 0xFF)
+}
+
+@ExperimentalUnsignedTypes
+suspend fun OutputFlow.writeInt24BE(num: Number) {
+    val int = num.toShort().toInt()
+
+    write((int shr 16) and 0xFF)
+    write((int shr 8) and 0xFF)
+    write(int and 0xFF)
+}
+
 
 @ExperimentalUnsignedTypes
 suspend fun OutputFlow.writeInt16LE(num: Number) {
