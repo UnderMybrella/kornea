@@ -289,44 +289,12 @@ suspend fun InputFlow.readUInt16BE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt64(): Long? = readVariableInt(8)
-
-@ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt56(): Long? = readVariableInt(7)
-
-@ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt48(): Long? = readVariableInt(6)
-
-@ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt40(): Long? = readVariableInt(5)
-
-@ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt32(): Int? = readVariableInt(4)?.toInt()
-
-@ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt24(): Int? = readVariableInt(3)?.toInt()
-
-@ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt16(): Int? = readVariableInt(2)?.toInt()
-
-@ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt(bytes: Int): Long? {
-    var output: Long = 0
-    var byte = read() ?: return null
+suspend fun InputFlow.readVariableInt16(): Int? {
+    val byte = read() ?: return null
     if (byte < 0x80)
-        return byte.toLong()
+        return byte
 
-    output = byte.toLong() and 0x7F
-    var shift = 7
-    for (i in 0 until bytes-1) {
-        byte = read() ?: return null
-        output = output or ((byte and 0x7F).toLong() shl shift)
-        if (byte < 0x80)
-            return output
-        shift += 8
-    }
-    
-    return output
+    return (byte and 0x7F) or ((read() ?: return null) shl 7)
 }
 
 @ExperimentalUnsignedTypes
@@ -637,27 +605,16 @@ suspend fun OutputFlow.writeInt16BE(num: Number) {
     write((int shr 8) and 0xFF)
     write(int and 0xFF)
 }
-
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt64(num: Number) = writeVariableInt(num, 8)
-
-@ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt56(num: Number) = writeVariableInt(num, 7)
-
-@ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt48(num: Number) = writeVariableInt(num, 6)
-
-@ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt40(num: Number) = writeVariableInt(num, 5)
-
-@ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt32(num: Number) = writeVariableInt(num, 4)
-
-@ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt24(num: Number) = writeVariableInt(num, 3)
-
-@ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt16(num: Number) = writeVariableInt(num, 2)
+suspend fun OutputFlow.writeVariableInt16(num: Number) {
+    val n = num.toInt()
+    if (n < 0x80) {
+        write(n)
+    } else {
+        write(n or 0x80)
+        write(n shr 7)
+    }
+}
 
 @ExperimentalUnsignedTypes
 suspend fun OutputFlow.writeVariableInt(num: Number, bytes: Int) {
@@ -667,7 +624,7 @@ suspend fun OutputFlow.writeVariableInt(num: Number, bytes: Int) {
     } else {
         write(input.toInt() and 0xFF or 0x80)
         input = input shr 7
-        for (i in 0 until bytes-1) {
+        for (i in 0 until bytes - 1) {
             if (input < 0x80) {
                 return write(input.toInt())
             } else {
