@@ -6,7 +6,15 @@ kotlin {
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
     js()
-    mingwX64()
+    mingwX64() {
+        binaries {
+            sharedLib {
+            }
+
+            staticLib {
+            }
+        }
+    }
     linuxX64()
 
     sourceSets {
