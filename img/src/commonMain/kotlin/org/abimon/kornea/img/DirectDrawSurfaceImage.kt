@@ -199,7 +199,7 @@ suspend fun InputFlow.readDDSImage(): DirectDrawSurfaceImage? {
     if (magic == DDS1_MAGIC_NUMBER_LE)
         magic = readInt32LE() ?: return null
 
-    require(magic == DDS_MAGIC_NUMBER_LE)
+    require(magic == DDS_MAGIC_NUMBER_LE) { "Invalid magic number $magic" }
 
     val header = DirectDrawSurfaceHeader.unsafe(this)
     val header10: DirectDrawSurfaceHeaderDX10? =
