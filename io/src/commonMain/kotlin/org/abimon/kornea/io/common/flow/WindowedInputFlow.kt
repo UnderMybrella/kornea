@@ -15,7 +15,7 @@ open class WindowedInputFlow private constructor(val window: InputFlow, override
 
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
     private var position: ULong = 0uL
-    private var closed: Boolean = true
+    private var closed: Boolean = false
     override val isClosed: Boolean
         get() = closed
 
