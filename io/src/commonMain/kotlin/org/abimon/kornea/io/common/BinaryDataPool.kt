@@ -5,7 +5,7 @@ import org.abimon.kornea.io.common.flow.BinaryOutputFlow
 import kotlin.math.max
 
 @ExperimentalUnsignedTypes
-class BinaryDataPool(val output: BinaryOutputFlow = BinaryOutputFlow(), val maxInstanceCount: Int = -1):
+class BinaryDataPool(override val location: String? = null, val output: BinaryOutputFlow = BinaryOutputFlow(), val maxInstanceCount: Int = -1):
     DataPool<BinaryInputFlow, BinaryOutputFlow> {
     override val dataSize: ULong?
         get() = output.getDataSize()
@@ -19,9 +19,9 @@ class BinaryDataPool(val output: BinaryOutputFlow = BinaryOutputFlow(), val maxI
     override val isClosed: Boolean
         get() = closed
 
-    override suspend fun openInputFlow(): BinaryInputFlow? {
+    override suspend fun openNamedInputFlow(location: String?): BinaryInputFlow? {
         if (canOpenInputFlow()) {
-            val stream = BinaryInputFlow(output.getData())
+            val stream = BinaryInputFlow(output.getData(), location = location ?: this.location)
             stream.addCloseHandler(this::instanceClosed)
             openInstances.add(stream)
             return stream

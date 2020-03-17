@@ -3,11 +3,25 @@ package org.abimon.kornea.io.common.flow
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 
 @ExperimentalUnsignedTypes
-open class WindowedInputFlow private constructor(val window: InputFlow, override val baseOffset: ULong, val windowSize: ULong) :
+open class WindowedInputFlow private constructor(
+    val window: InputFlow,
+    override val baseOffset: ULong,
+    val windowSize: ULong,
+    override val location: String? = "${window.location}[${baseOffset.toString(16).toUpperCase()}h,${baseOffset.plus(
+        windowSize
+    ).toString(16).toUpperCase()}h]"
+) :
     OffsetInputFlow {
     companion object {
-        suspend operator fun invoke(window: InputFlow, offset: ULong, windowSize: ULong): WindowedInputFlow {
-            val flow = WindowedInputFlow(window, offset, windowSize)
+        suspend operator fun invoke(
+            window: InputFlow,
+            offset: ULong,
+            windowSize: ULong,
+            location: String? =
+                "${window.location}[${offset.toString(16).toUpperCase()}h,${offset.plus(windowSize).toString(16)
+                    .toUpperCase()}h]"
+        ): WindowedInputFlow {
+            val flow = WindowedInputFlow(window, offset, windowSize, location)
             flow.initialSkip()
             return flow
         }
@@ -25,6 +39,7 @@ open class WindowedInputFlow private constructor(val window: InputFlow, override
     } else {
         null
     }
+
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? {
         if (len < 0 || off < 0 || len > b.size - off)
             throw IndexOutOfBoundsException()

@@ -6,7 +6,7 @@ import org.abimon.kornea.io.common.DataSourceReproducibility
 import java.io.InputStream
 
 @ExperimentalUnsignedTypes
-class JVMDataSource(val func: () -> InputStream): DataSource<JVMInputFlow> {
+class JVMDataSource(val func: () -> InputStream, override val location: String? = null): DataSource<JVMInputFlow> {
     override val dataSize: ULong? = null
     private var closed: Boolean = false
     override val isClosed: Boolean
@@ -24,7 +24,7 @@ class JVMDataSource(val func: () -> InputStream): DataSource<JVMInputFlow> {
                 isUnreliable = true
         )
 
-    override suspend fun openInputFlow(): JVMInputFlow = JVMInputFlow(func())
+    override suspend fun openNamedInputFlow(location: String?): JVMInputFlow? = if (!closed) JVMInputFlow(func(), location ?: this.location) else null
 
     override suspend fun canOpenInputFlow(): Boolean = !closed
 

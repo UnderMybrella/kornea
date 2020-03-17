@@ -9,7 +9,7 @@ import java.io.File
 import java.io.RandomAccessFile
 
 @ExperimentalUnsignedTypes
-class FileInputFlow(val backingFile: File) : InputFlow {
+class FileInputFlow(val backingFile: File, override val location: String? = backingFile.absolutePath) : InputFlow {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     private val channel = RandomAccessFile(backingFile, "r")

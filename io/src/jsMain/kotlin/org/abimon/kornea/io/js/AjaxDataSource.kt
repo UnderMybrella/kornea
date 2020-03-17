@@ -16,9 +16,9 @@ import kotlin.js.Promise
 import kotlin.math.max
 
 @ExperimentalUnsignedTypes
-class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1) : DataSource<BinaryInputFlow> {
+class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1, override val location: String? = url) : DataSource<BinaryInputFlow> {
     companion object {
-        fun async(url: String, maxInstanceCount: Int = -1): Promise<AjaxDataSource> = GlobalScope.promise { AjaxDataSource(url, maxInstanceCount) }
+        fun async(url: String, maxInstanceCount: Int = -1, location: String? = url): Promise<AjaxDataSource> = GlobalScope.promise { AjaxDataSource(url, maxInstanceCount, location) }
     }
 
     private var data: ByteArray? = null
@@ -34,11 +34,11 @@ class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1) : DataSou
     override val isClosed: Boolean
         get() = closed
 
-    override suspend fun openInputFlow(): BinaryInputFlow? {
+    override suspend fun openNamedInputFlow(location: String?): BinaryInputFlow? {
         waitIfNeeded()
 
         if (canOpenInputFlow()) {
-            val stream = BinaryInputFlow(data!!)
+            val stream = BinaryInputFlow(data!!, location = location ?: this.location)
             stream.addCloseHandler(this::instanceClosed)
             openInstances.add(stream)
             return stream

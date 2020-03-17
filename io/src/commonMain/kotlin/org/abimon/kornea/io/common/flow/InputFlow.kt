@@ -12,6 +12,8 @@ interface InputFlow : ObservableDataCloseable {
         const val FROM_POSITION = 2
     }
 
+    val location: String?
+
     suspend fun read(): Int?
     suspend fun read(b: ByteArray): Int? = read(b, 0, b.size)
     suspend fun read(b: ByteArray, off: Int, len: Int): Int?

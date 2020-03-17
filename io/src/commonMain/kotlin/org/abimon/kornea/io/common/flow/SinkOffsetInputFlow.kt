@@ -3,16 +3,19 @@ package org.abimon.kornea.io.common.flow
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 
 @ExperimentalUnsignedTypes
-interface OffsetInputFlow: InputFlow {
+interface OffsetInputFlow : InputFlow {
     val baseOffset: ULong
 }
 
 @ExperimentalUnsignedTypes
-open class SinkOffsetInputFlow private constructor(val backing: InputFlow, override val baseOffset: ULong) :
-    OffsetInputFlow {
+open class SinkOffsetInputFlow private constructor(
+    val backing: InputFlow, override val baseOffset: ULong,
+    override val location: String? =
+        "${backing.location}+${baseOffset.toString(16)}h"
+) : OffsetInputFlow {
     companion object {
-        suspend operator fun invoke(backing: InputFlow, offset: ULong): SinkOffsetInputFlow {
-            val flow = SinkOffsetInputFlow(backing, offset)
+        suspend operator fun invoke(backing: InputFlow, offset: ULong, location: String? = "${backing.location}+${offset.toString(16)}h"): SinkOffsetInputFlow {
+            val flow = SinkOffsetInputFlow(backing, offset, location)
             flow.initialSkip()
             return flow
         }

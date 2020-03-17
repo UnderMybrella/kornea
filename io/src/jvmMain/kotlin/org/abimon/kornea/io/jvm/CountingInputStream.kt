@@ -11,7 +11,7 @@ open class CountingInputStream(countedInputStream: InputStream) : DelegatedInput
 
     open val streamOffset: Long by run {
         if (countedInputStream is CountingInputStream) {
-            return@run countedInputStream::streamOffset
+            return@run (countedInputStream as CountingInputStream)::streamOffset
         }
 
         return@run this::count

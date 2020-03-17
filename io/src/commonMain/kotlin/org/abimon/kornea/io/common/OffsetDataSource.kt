@@ -4,7 +4,8 @@ import org.abimon.kornea.io.common.flow.SinkOffsetInputFlow
 import kotlin.math.max
 
 @ExperimentalUnsignedTypes
-open class OffsetDataSource(val parent: DataSource<*>, val offset: ULong, val maxInstanceCount: Int = -1, val closeParent: Boolean = true) :
+open class OffsetDataSource(val parent: DataSource<*>, val offset: ULong, val maxInstanceCount: Int = -1, val closeParent: Boolean = true,
+                            override val location: String? = "${parent.location}+${offset.toString(16).toUpperCase()}h") :
     DataSource<SinkOffsetInputFlow> {
     companion object {}
 
@@ -21,10 +22,10 @@ open class OffsetDataSource(val parent: DataSource<*>, val offset: ULong, val ma
     override val reproducibility: DataSourceReproducibility
         get() = parent.reproducibility or DataSourceReproducibility.DETERMINISTIC_MASK
 
-    override suspend fun openInputFlow(): SinkOffsetInputFlow? {
+    override suspend fun openNamedInputFlow(location: String?): SinkOffsetInputFlow? {
         if (canOpenInputFlow()) {
             val parentFlow = parent.openInputFlow() ?: return null
-            val flow = SinkOffsetInputFlow(parentFlow, offset)
+            val flow = SinkOffsetInputFlow(parentFlow, offset, location ?: this.location)
             flow.addCloseHandler(this::instanceClosed)
             openInstances.add(flow)
             return flow

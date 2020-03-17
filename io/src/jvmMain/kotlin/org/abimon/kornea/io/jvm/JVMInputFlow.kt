@@ -8,8 +8,8 @@ import org.abimon.kornea.io.common.flow.readResultIsValid
 import java.io.InputStream
 
 @ExperimentalUnsignedTypes
-open class JVMInputFlow private constructor(val stream: CountingInputStream): InputFlow {
-    constructor(stream: InputStream): this(CountingInputStream(stream))
+open class JVMInputFlow private constructor(val stream: CountingInputStream, override val location: String? = null): InputFlow {
+    constructor(stream: InputStream, location: String?): this(CountingInputStream(stream), location)
 
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 

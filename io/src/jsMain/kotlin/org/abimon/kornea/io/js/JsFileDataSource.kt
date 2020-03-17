@@ -15,9 +15,9 @@ import kotlin.js.Promise
 import kotlin.math.max
 
 @ExperimentalUnsignedTypes
-class JsFileDataSource(val file: File, val maxInstanceCount: Int = -1) : DataSource<BinaryInputFlow> {
+class JsFileDataSource(val file: File, val maxInstanceCount: Int = -1, override val location: String? = file.name) : DataSource<BinaryInputFlow> {
     companion object {
-        fun async(file: File, maxInstanceCount: Int = -1): Promise<JsFileDataSource> = GlobalScope.promise { JsFileDataSource(file, maxInstanceCount) }
+        fun async(file: File, maxInstanceCount: Int = -1, location: String? = file.name): Promise<JsFileDataSource> = GlobalScope.promise { JsFileDataSource(file, maxInstanceCount, location) }
     }
 
     private var data: ByteArray? = null
@@ -34,11 +34,11 @@ class JsFileDataSource(val file: File, val maxInstanceCount: Int = -1) : DataSou
     override val isClosed: Boolean
         get() = closed
 
-    override suspend fun openInputFlow(): BinaryInputFlow? {
+    override suspend fun openNamedInputFlow(location: String?): BinaryInputFlow? {
         waitIfNeeded()
 
         if (canOpenInputFlow()) {
-            val stream = BinaryInputFlow(data!!)
+            val stream = BinaryInputFlow(data!!, location = location ?: this.location)
             stream.addCloseHandler(this::instanceClosed)
             openInstances.add(stream)
             return stream

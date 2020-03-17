@@ -12,6 +12,8 @@ interface DataSource<I : InputFlow>: ObservableDataCloseable {
 
     val dataSize: ULong?
 
+    val location: String?
+
     /**
      * The reproducibility traits of this data source.
      *
@@ -19,7 +21,8 @@ interface DataSource<I : InputFlow>: ObservableDataCloseable {
      */
     val reproducibility: DataSourceReproducibility
 
-    suspend fun openInputFlow(): I?
+    suspend fun openInputFlow(): I? = openNamedInputFlow(null)
+    suspend fun openNamedInputFlow(location: String? = null): I?
     suspend fun canOpenInputFlow(): Boolean
 }
 

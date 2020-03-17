@@ -4,10 +4,10 @@ import org.abimon.kornea.io.common.DataCloseableEventHandler
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
-open class BitwiseInputFlow protected constructor(protected val flow: InputFlow) : InputFlow {
+open class BitwiseInputFlow protected constructor(protected val flow: InputFlow, override val location: String? = null) : InputFlow {
     companion object {
-        fun subflow(flow: InputFlow): BitwiseInputFlow = BitwiseInputFlow(flow)
-        operator fun invoke(flow: InputFlow): BitwiseInputFlow = if (flow is BitwiseInputFlow) flow else BitwiseInputFlow(flow)
+        fun subflow(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = BitwiseInputFlow(flow, location)
+        operator fun invoke(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = if (flow is BitwiseInputFlow) flow else BitwiseInputFlow(flow, location)
     }
 
     constructor(str: String) : this(BinaryInputFlow(str.chunked(2).map { it.toInt(16).toByte() }.toByteArray()))

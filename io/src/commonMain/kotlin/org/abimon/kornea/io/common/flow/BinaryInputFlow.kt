@@ -4,7 +4,8 @@ import org.abimon.kornea.io.common.DataCloseableEventHandler
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
-class BinaryInputFlow(private val array: ByteArray, private var pos: Int = 0, private var size: Int = array.size):
+class BinaryInputFlow(private val array: ByteArray, private var pos: Int = 0, private var size: Int = array.size,
+                      override val location: String? = null):
     PeekableInputFlow {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 

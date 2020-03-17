@@ -9,8 +9,8 @@ import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 
 @ExperimentalUnsignedTypes
-class FileInputFlow(val fp: FilePointer): InputFlow {
-    constructor(fp: CPointer<FILE>): this(FilePointer(fp))
+class FileInputFlow(val fp: FilePointer, override val location: String? = null): InputFlow {
+    constructor(fp: CPointer<FILE>, location: String? = null): this(FilePointer(fp), location)
 
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 

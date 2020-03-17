@@ -5,7 +5,7 @@ import java.io.File
 import kotlin.math.max
 
 @ExperimentalUnsignedTypes
-class FileDataSource(val backing: File, val maxInstanceCount: Int = -1): DataSource<FileInputFlow> {
+class FileDataSource(val backing: File, val maxInstanceCount: Int = -1, override val location: String? = backing.absolutePath): DataSource<FileInputFlow> {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
     override val dataSize: ULong
         get() = backing.length().toULong()
@@ -17,9 +17,9 @@ class FileDataSource(val backing: File, val maxInstanceCount: Int = -1): DataSou
 
     override val reproducibility: DataSourceReproducibility = DataSourceReproducibility(isStatic = true, isRandomAccess = true)
 
-    override suspend fun openInputFlow(): FileInputFlow? {
+    override suspend fun openNamedInputFlow(location: String?): FileInputFlow? {
         if (canOpenInputFlow()) {
-            val stream = FileInputFlow(backing)
+            val stream = FileInputFlow(backing, location ?: this.location)
             stream.addCloseHandler(this::instanceClosed)
             openInstances.add(stream)
             return stream

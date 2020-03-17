@@ -3,7 +3,7 @@ package org.abimon.kornea.io.common.flow
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 
 @ExperimentalUnsignedTypes
-open class BufferedInputFlow(val backing: InputFlow) : PeekableInputFlow {
+open class BufferedInputFlow(val backing: InputFlow, override val location: String? = backing.location) : PeekableInputFlow {
     companion object {
         const val DEFAULT_BUFFER_SIZE = 8192
         const val MAX_BUFFER_SIZE = Int.MAX_VALUE - 8
