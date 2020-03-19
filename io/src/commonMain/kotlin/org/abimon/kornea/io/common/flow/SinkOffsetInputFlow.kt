@@ -33,7 +33,7 @@ open class SinkOffsetInputFlow private constructor(
     }
 
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? {
-        if (len < 0 || off < 0 || b.size > len - off)
+        if (len < 0 || off < 0 || len > b.size - off)
             throw IndexOutOfBoundsException()
 
         val read = backing.read(b, off, len) ?: return null
