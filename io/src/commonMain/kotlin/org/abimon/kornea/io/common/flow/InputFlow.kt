@@ -72,7 +72,7 @@ suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray {
 }
 
 @ExperimentalUnsignedTypes
-suspend inline fun <F: InputFlow, T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, noinline block: suspend (F) -> T): KorneaResult<T> {
+suspend inline fun <F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, noinline block: suspend (F) -> T): KorneaResult<T> {
     val bookmark = position()
     return if (seek(offset.toLong(), InputFlow.FROM_BEGINNING) == null) {
         dataSource.openInputFlow().map { flow ->

@@ -1,6 +1,7 @@
 package org.abimon.kornea.img
 
 import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.erorrs.common.cast
 import org.abimon.kornea.erorrs.common.doOnFailure
 import org.abimon.kornea.erorrs.common.notEnoughData
 import org.abimon.kornea.img.bc7.BC7PixelData

@@ -36,7 +36,7 @@ suspend fun DataSource<*>.copyToOutputFlow(sink: OutputFlow): KorneaResult<Long>
     openInputFlow().map { flow -> flow.copyToOutputFlow(sink) }
 
 @ExperimentalUnsignedTypes
-suspend inline fun <T : InputFlow, R> DataSource<T>.useInputFlow(block: (T) -> R): KorneaResult<R> =
+suspend inline fun <T : InputFlow, reified R> DataSource<T>.useInputFlow(block: (T) -> R): KorneaResult<R> =
     openInputFlow().map { flow -> flow.use(block) }
 
 inline class DataSourceReproducibility(val flag: Byte) {
