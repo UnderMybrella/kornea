@@ -3,7 +3,7 @@ package org.abimon.kornea.img
 import org.abimon.kornea.erorrs.common.KorneaResult
 import org.abimon.kornea.erorrs.common.cast
 import org.abimon.kornea.erorrs.common.doOnFailure
-import org.abimon.kornea.erorrs.common.notEnoughData
+import org.abimon.kornea.erorrs.common.korneaNotEnoughData
 import org.abimon.kornea.img.bc7.BC7PixelData
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.isBitSet
@@ -52,23 +52,23 @@ data class DirectDrawSurfaceHeader(
         const val DDSCAPS2_VOLUME = 0x200_000
 
         suspend operator fun invoke(flow: InputFlow): KorneaResult<DirectDrawSurfaceHeader> {
-            val size = flow.readInt32LE() ?: return notEnoughData()
-            val flags = flow.readInt32LE() ?: return notEnoughData()
-            val height = flow.readInt32LE() ?: return notEnoughData()
-            val width = flow.readInt32LE() ?: return notEnoughData()
-            val pitchOrLinearSize = flow.readInt32LE() ?: return notEnoughData()
-            val depth = flow.readInt32LE() ?: return notEnoughData()
-            val mipMapCount = flow.readInt32LE() ?: return notEnoughData()
-            val reserved = IntArray(11) { flow.readInt32LE() ?: return notEnoughData() }
+            val size = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val flags = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val height = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val width = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val pitchOrLinearSize = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val depth = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val mipMapCount = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val reserved = IntArray(11) { flow.readInt32LE() ?: return korneaNotEnoughData() }
 
             val pixelFormat = DirectDrawSurfacePixelFormat(flow)
                 .doOnFailure { return it.cast() }
 
-            val caps = flow.readInt32LE() ?: return notEnoughData()
-            val caps2 = flow.readInt32LE() ?: return notEnoughData()
-            val caps3 = flow.readInt32LE() ?: return notEnoughData()
-            val caps4 = flow.readInt32LE() ?: return notEnoughData()
-            val reserved2 = flow.readInt32LE() ?: return notEnoughData()
+            val caps = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val caps2 = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val caps3 = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val caps4 = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val reserved2 = flow.readInt32LE() ?: return korneaNotEnoughData()
 
             return KorneaResult.Success(
                 DirectDrawSurfaceHeader(
@@ -120,14 +120,14 @@ data class DirectDrawSurfacePixelFormat(
         const val UNKNOWN_FORMAT = 0x01
 
         suspend operator fun invoke(flow: InputFlow): KorneaResult<DirectDrawSurfacePixelFormat> {
-            val size = flow.readInt32LE() ?: return notEnoughData()
-            val flags = flow.readInt32LE() ?: return notEnoughData()
-            val fourCC = flow.readInt32LE() ?: return notEnoughData()
-            val rgbBitCount = flow.readInt32LE() ?: return notEnoughData()
-            val redBitMask = flow.readInt32LE() ?: return notEnoughData()
-            val greenBitMask = flow.readInt32LE() ?: return notEnoughData()
-            val blueBitMask = flow.readInt32LE() ?: return notEnoughData()
-            val alphaBitMask = flow.readInt32LE() ?: return notEnoughData()
+            val size = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val flags = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val fourCC = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val rgbBitCount = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val redBitMask = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val greenBitMask = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val blueBitMask = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val alphaBitMask = flow.readInt32LE() ?: return korneaNotEnoughData()
 
             return KorneaResult.Success(
                 DirectDrawSurfacePixelFormat(
@@ -166,11 +166,11 @@ data class DirectDrawSurfaceHeaderDX10(
         const val DDS_ALPHA_MODE_CUSTOM = 0x4
 
         suspend operator fun invoke(flow: InputFlow): KorneaResult<DirectDrawSurfaceHeaderDX10> {
-            val dxgiFormat = flow.readInt32LE() ?: return notEnoughData()
-            val resourceDimension = flow.readInt32LE() ?: return notEnoughData()
-            val miscFlag = flow.readInt32LE() ?: return notEnoughData()
-            val arraySize = flow.readInt32LE() ?: return notEnoughData()
-            val miscFlags2 = flow.readInt32LE() ?: return notEnoughData()
+            val dxgiFormat = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val resourceDimension = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val miscFlag = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val arraySize = flow.readInt32LE() ?: return korneaNotEnoughData()
+            val miscFlags2 = flow.readInt32LE() ?: return korneaNotEnoughData()
 
             return KorneaResult.Success(
                 DirectDrawSurfaceHeaderDX10(
@@ -194,9 +194,9 @@ class DirectDrawSurfaceImage(
 @Suppress("NAME_SHADOWING")
 @ExperimentalUnsignedTypes
 suspend fun InputFlow.readDDSImage(): KorneaResult<DirectDrawSurfaceImage> {
-    var magic = readInt32LE() ?: return notEnoughData()
+    var magic = readInt32LE() ?: return korneaNotEnoughData()
     if (magic == DDS1_MAGIC_NUMBER_LE)
-        magic = readInt32LE() ?: return notEnoughData()
+        magic = readInt32LE() ?: return korneaNotEnoughData()
 
     require(magic == DDS_MAGIC_NUMBER_LE) { "Invalid magic number $magic" }
 

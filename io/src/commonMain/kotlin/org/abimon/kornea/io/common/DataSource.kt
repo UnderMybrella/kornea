@@ -11,8 +11,8 @@ import org.abimon.kornea.io.common.flow.OutputFlow
  */
 interface DataSource<I : InputFlow> : ObservableDataCloseable {
     companion object {
-        const val ERRORS_SOURCE_CLOSED = 0x00
-        const val ERRORS_TOO_MANY_SOURCES_OPEN = 0x01
+        const val ERRORS_SOURCE_CLOSED = 0x1000
+        const val ERRORS_TOO_MANY_SOURCES_OPEN = 0x1001
     }
 
     val dataSize: ULong?
