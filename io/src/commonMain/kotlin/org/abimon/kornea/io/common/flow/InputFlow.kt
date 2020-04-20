@@ -2,6 +2,8 @@
 
 package org.abimon.kornea.io.common.flow
 
+import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.erorrs.common.map
 import org.abimon.kornea.io.common.*
 
 @ExperimentalUnsignedTypes
@@ -70,18 +72,19 @@ suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray {
 }
 
 @ExperimentalUnsignedTypes
-suspend inline fun <F: InputFlow, T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, noinline block: suspend (F) -> T): T? {
+suspend inline fun <F: InputFlow, T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, noinline block: suspend (F) -> T): KorneaResult<T> {
     val bookmark = position()
     return if (seek(offset.toLong(), InputFlow.FROM_BEGINNING) == null) {
-        val flow = dataSource.openInputFlow() ?: return null
-        use(flow) {
-            flow.skip(offset)
-            block(flow)
+        dataSource.openInputFlow().map { flow ->
+            use(flow) {
+                flow.skip(offset)
+                block(flow)
+            }
         }
     } else {
         val result = block(this)
         seek(bookmark.toLong(), InputFlow.FROM_BEGINNING)
-        result
+        KorneaResult.Success(result)
     }
 }
 

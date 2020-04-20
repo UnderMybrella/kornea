@@ -1,5 +1,7 @@
 package org.abimon.kornea.io.common
 
+import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.erorrs.common.map
 import org.abimon.kornea.io.common.flow.WindowedInputFlow
 import kotlin.math.max
 
@@ -28,15 +30,20 @@ open class WindowedDataSource(
     override val reproducibility: DataSourceReproducibility
         get() = parent.reproducibility or DataSourceReproducibility.DETERMINISTIC_MASK
 
-    override suspend fun openNamedInputFlow(location: String?): WindowedInputFlow? {
-        if (canOpenInputFlow()) {
-            val parentFlow = parent.openInputFlow() ?: return null
-            val flow = WindowedInputFlow(parentFlow, windowOffset, windowSize, location ?: this.location)
-            flow.addCloseHandler(this::instanceClosed)
-            openInstances.add(flow)
-            return flow
-        } else {
-            return null
+    override suspend fun openNamedInputFlow(location: String?): KorneaResult<WindowedInputFlow> {
+        when {
+            closed || parent.isClosed -> return KorneaResult.Failure(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            canOpenInputFlow() -> return parent.openInputFlow().map { parentFlow ->
+                val flow = WindowedInputFlow(parentFlow, windowOffset, windowSize, location ?: this.location)
+                flow.addCloseHandler(this::instanceClosed)
+                openInstances.add(flow)
+
+                flow
+            }
+            else -> return KorneaResult.Failure(
+                DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
+                "Too many instances open (${openInstances.size}/${maxInstanceCount})"
+            )
         }
     }
 

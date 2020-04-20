@@ -2,8 +2,10 @@ enableFeaturePreview('GRADLE_METADATA')
 
 rootProject.name = 'kornea'
 
+include ':errors'
 include ':io'
 include ':img'
+include ':modelling'
 include ':bootstrap'
 
 rootProject.children.each { child -> child.name = "kornea-${child.name}"}

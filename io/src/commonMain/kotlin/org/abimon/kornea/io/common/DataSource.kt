@@ -1,5 +1,7 @@
 package org.abimon.kornea.io.common
 
+import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.erorrs.common.map
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.flow.OutputFlow
 
@@ -7,8 +9,11 @@ import org.abimon.kornea.io.common.flow.OutputFlow
 /**
  * An interface that loosely defines a source of data - usually reproducible. This data may come from anywhere
  */
-interface DataSource<I : InputFlow>: ObservableDataCloseable {
-    companion object {}
+interface DataSource<I : InputFlow> : ObservableDataCloseable {
+    companion object {
+        const val ERRORS_SOURCE_CLOSED = 0x00
+        const val ERRORS_TOO_MANY_SOURCES_OPEN = 0x01
+    }
 
     val dataSize: ULong?
 
@@ -21,34 +26,35 @@ interface DataSource<I : InputFlow>: ObservableDataCloseable {
      */
     val reproducibility: DataSourceReproducibility
 
-    suspend fun openInputFlow(): I? = openNamedInputFlow(null)
-    suspend fun openNamedInputFlow(location: String? = null): I?
+    suspend fun openInputFlow(): KorneaResult<I> = openNamedInputFlow(null)
+    suspend fun openNamedInputFlow(location: String? = null): KorneaResult<I>
     suspend fun canOpenInputFlow(): Boolean
 }
 
 @ExperimentalUnsignedTypes
-suspend fun DataSource<*>.copyToOutputFlow(sink: OutputFlow) {
-    openInputFlow()?.copyToOutputFlow(sink)
-}
+suspend fun DataSource<*>.copyToOutputFlow(sink: OutputFlow): KorneaResult<Long> =
+    openInputFlow().map { flow -> flow.copyToOutputFlow(sink) }
 
 @ExperimentalUnsignedTypes
-suspend inline fun <T: InputFlow, R> DataSource<T>.useInputFlow(noinline block: suspend (T) -> R): R? = openInputFlow()?.use(block)
+suspend inline fun <T : InputFlow, R> DataSource<T>.useInputFlow(block: (T) -> R): KorneaResult<R> =
+    openInputFlow().map { flow -> flow.use(block) }
 
 inline class DataSourceReproducibility(val flag: Byte) {
     constructor(flag: Number) : this(flag.toByte())
-    constructor(isStatic: Boolean = false,
-                isDeterministic: Boolean = false,
-                isExpensive: Boolean = false,
-                isUnreliable: Boolean = false,
-                isUnstable: Boolean = false,
-                isRandomAccess: Boolean = false
+    constructor(
+        isStatic: Boolean = false,
+        isDeterministic: Boolean = false,
+        isExpensive: Boolean = false,
+        isUnreliable: Boolean = false,
+        isUnstable: Boolean = false,
+        isRandomAccess: Boolean = false
     ) : this(
-            (if (isStatic) STATIC_MASK else 0)
-                    or (if (isDeterministic) DETERMINISTIC_MASK else 0)
-                    or (if (isExpensive) EXPENSIVE_MASK else 0)
-                    or (if (isUnreliable) UNRELIABLE_MASK else 0)
-                    or (if (isUnstable) UNSTABLE_MASK else 0)
-                    or (if (isRandomAccess) RANDOM_ACCESS_MASK else 0)
+        (if (isStatic) STATIC_MASK else 0)
+                or (if (isDeterministic) DETERMINISTIC_MASK else 0)
+                or (if (isExpensive) EXPENSIVE_MASK else 0)
+                or (if (isUnreliable) UNRELIABLE_MASK else 0)
+                or (if (isUnstable) UNSTABLE_MASK else 0)
+                or (if (isRandomAccess) RANDOM_ACCESS_MASK else 0)
     )
 
     companion object {
@@ -97,22 +103,29 @@ inline class DataSourceReproducibility(val flag: Byte) {
 
         fun static() =
             DataSourceReproducibility(STATIC_MASK)
+
         fun deterministic() =
             DataSourceReproducibility(DETERMINISTIC_MASK)
+
         fun expensive() =
             DataSourceReproducibility(EXPENSIVE_MASK)
+
         fun unreliable() =
             DataSourceReproducibility(UNRELIABLE_MASK)
+
         fun unstable() =
             DataSourceReproducibility(UNSTABLE_MASK)
+
         fun randomAccess() =
             DataSourceReproducibility(RANDOM_ACCESS_MASK)
     }
 
     infix fun or(other: Number): DataSourceReproducibility =
         DataSourceReproducibility((flag.toInt() or other.toInt()).toByte())
+
     infix fun and(other: Number): DataSourceReproducibility =
         DataSourceReproducibility((flag.toInt() and other.toInt()).toByte())
+
     infix fun xor(other: Number): DataSourceReproducibility =
         DataSourceReproducibility((flag.toInt() xor other.toInt()).toByte())
 

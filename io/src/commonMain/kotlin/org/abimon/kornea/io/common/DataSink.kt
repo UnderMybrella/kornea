@@ -1,5 +1,6 @@
 package org.abimon.kornea.io.common
 
+import org.abimon.kornea.erorrs.common.KorneaResult
 import org.abimon.kornea.io.common.flow.OutputFlow
 
 /**
@@ -7,6 +8,10 @@ import org.abimon.kornea.io.common.flow.OutputFlow
  */
 @ExperimentalUnsignedTypes
 interface DataSink<O: OutputFlow>: ObservableDataCloseable {
-    suspend fun openOutputFlow(): O?
+    companion object {
+        const val ERRORS_SINK_CLOSED = 0x00
+    }
+
+    suspend fun openOutputFlow(): KorneaResult<O>
     suspend fun canOpenOutputFlow(): Boolean
 }

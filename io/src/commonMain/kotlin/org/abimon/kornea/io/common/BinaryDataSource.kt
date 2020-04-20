@@ -1,5 +1,8 @@
 package org.abimon.kornea.io.common
 
+import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.io.common.DataSource.Companion.ERRORS_SOURCE_CLOSED
+import org.abimon.kornea.io.common.DataSource.Companion.ERRORS_TOO_MANY_SOURCES_OPEN
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import kotlin.math.max
 
@@ -24,14 +27,19 @@ class BinaryDataSource(
     override val reproducibility: DataSourceReproducibility =
         DataSourceReproducibility(isStatic = true, isRandomAccess = true)
 
-    override suspend fun openNamedInputFlow(location: String?): BinaryInputFlow? {
-        if (canOpenInputFlow()) {
-            val stream = BinaryInputFlow(byteArray, location = location ?: this.location)
-            stream.addCloseHandler(this::instanceClosed)
-            openInstances.add(stream)
-            return stream
-        } else {
-            return null
+    override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
+        when {
+            closed -> return KorneaResult.Failure(ERRORS_SOURCE_CLOSED, "Instance closed")
+            canOpenInputFlow() -> {
+                val stream = BinaryInputFlow(byteArray, location = location ?: this.location)
+                stream.addCloseHandler(this::instanceClosed)
+                openInstances.add(stream)
+                return KorneaResult.Success(stream)
+            }
+            else -> return KorneaResult.Failure(
+                ERRORS_TOO_MANY_SOURCES_OPEN,
+                "Too many instances open (${openInstances.size}/${maxInstanceCount})"
+            )
         }
     }
 

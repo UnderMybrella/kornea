@@ -1,5 +1,8 @@
 package org.abimon.kornea.img
 
+import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.erorrs.common.doOnFailure
+import org.abimon.kornea.erorrs.common.notEnoughData
 import org.abimon.kornea.img.bc7.BC7PixelData
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.isBitSet
@@ -47,43 +50,41 @@ data class DirectDrawSurfaceHeader(
         const val DDSCAPS2_CUBEMAP_NEGATIVEZ = 0x8000
         const val DDSCAPS2_VOLUME = 0x200_000
 
-        suspend fun invoke(flow: InputFlow): DirectDrawSurfaceHeader? {
-            try {
-                return unsafe(flow)
-            } catch (iae: IllegalArgumentException) {
-                return null
-            }
-        }
+        suspend operator fun invoke(flow: InputFlow): KorneaResult<DirectDrawSurfaceHeader> {
+            val size = flow.readInt32LE() ?: return notEnoughData()
+            val flags = flow.readInt32LE() ?: return notEnoughData()
+            val height = flow.readInt32LE() ?: return notEnoughData()
+            val width = flow.readInt32LE() ?: return notEnoughData()
+            val pitchOrLinearSize = flow.readInt32LE() ?: return notEnoughData()
+            val depth = flow.readInt32LE() ?: return notEnoughData()
+            val mipMapCount = flow.readInt32LE() ?: return notEnoughData()
+            val reserved = IntArray(11) { flow.readInt32LE() ?: return notEnoughData() }
 
-        suspend fun unsafe(flow: InputFlow): DirectDrawSurfaceHeader {
-            val size = requireNotNull(flow.readInt32LE())
-            val flags = requireNotNull(flow.readInt32LE())
-            val height = requireNotNull(flow.readInt32LE())
-            val width = requireNotNull(flow.readInt32LE())
-            val pitchOrLinearSize = requireNotNull(flow.readInt32LE())
-            val depth = requireNotNull(flow.readInt32LE())
-            val mipMapCount = requireNotNull(flow.readInt32LE())
-            val reserved = IntArray(11) { requireNotNull(flow.readInt32LE()) }
-            val pixelFormat = DirectDrawSurfacePixelFormat.unsafe(flow)
-            val caps = requireNotNull(flow.readInt32LE())
-            val caps2 = requireNotNull(flow.readInt32LE())
-            val caps3 = requireNotNull(flow.readInt32LE())
-            val caps4 = requireNotNull(flow.readInt32LE())
-            val reserved2 = requireNotNull(flow.readInt32LE())
-            return DirectDrawSurfaceHeader(
-                flags,
-                height,
-                width,
-                pitchOrLinearSize,
-                depth,
-                mipMapCount,
-                reserved,
-                pixelFormat,
-                caps,
-                caps2,
-                caps3,
-                caps4,
-                reserved2
+            val pixelFormat = DirectDrawSurfacePixelFormat(flow)
+                .doOnFailure { return it.cast() }
+
+            val caps = flow.readInt32LE() ?: return notEnoughData()
+            val caps2 = flow.readInt32LE() ?: return notEnoughData()
+            val caps3 = flow.readInt32LE() ?: return notEnoughData()
+            val caps4 = flow.readInt32LE() ?: return notEnoughData()
+            val reserved2 = flow.readInt32LE() ?: return notEnoughData()
+
+            return KorneaResult.Success(
+                DirectDrawSurfaceHeader(
+                    flags,
+                    height,
+                    width,
+                    pitchOrLinearSize,
+                    depth,
+                    mipMapCount,
+                    reserved,
+                    pixelFormat,
+                    caps,
+                    caps2,
+                    caps3,
+                    caps4,
+                    reserved2
+                )
             )
         }
     }
@@ -114,32 +115,29 @@ data class DirectDrawSurfacePixelFormat(
         const val DXT5 = 0x35545844
         const val DX10 = 0x30315844
 
-        suspend fun invoke(flow: InputFlow): DirectDrawSurfacePixelFormat? {
-            try {
-                return unsafe(flow)
-            } catch (iae: IllegalArgumentException) {
-                return null
-            }
-        }
+        const val FORMAT_NOT_IMPLEMENTED = 0x00
+        const val UNKNOWN_FORMAT = 0x01
 
-        suspend fun unsafe(flow: InputFlow): DirectDrawSurfacePixelFormat {
-            val size = requireNotNull(flow.readInt32LE())
-            val flags = requireNotNull(flow.readInt32LE())
-            val fourCC = requireNotNull(flow.readInt32LE())
-            val rgbBitCount = requireNotNull(flow.readInt32LE())
-            val redBitMask = requireNotNull(flow.readInt32LE())
-            val greenBitMask = requireNotNull(flow.readInt32LE())
-            val blueBitMask = requireNotNull(flow.readInt32LE())
-            val alphaBitMask = requireNotNull(flow.readInt32LE())
+        suspend operator fun invoke(flow: InputFlow): KorneaResult<DirectDrawSurfacePixelFormat> {
+            val size = flow.readInt32LE() ?: return notEnoughData()
+            val flags = flow.readInt32LE() ?: return notEnoughData()
+            val fourCC = flow.readInt32LE() ?: return notEnoughData()
+            val rgbBitCount = flow.readInt32LE() ?: return notEnoughData()
+            val redBitMask = flow.readInt32LE() ?: return notEnoughData()
+            val greenBitMask = flow.readInt32LE() ?: return notEnoughData()
+            val blueBitMask = flow.readInt32LE() ?: return notEnoughData()
+            val alphaBitMask = flow.readInt32LE() ?: return notEnoughData()
 
-            return DirectDrawSurfacePixelFormat(
-                flags,
-                fourCC,
-                rgbBitCount,
-                redBitMask,
-                blueBitMask,
-                greenBitMask,
-                alphaBitMask
+            return KorneaResult.Success(
+                DirectDrawSurfacePixelFormat(
+                    flags,
+                    fourCC,
+                    rgbBitCount,
+                    redBitMask,
+                    blueBitMask,
+                    greenBitMask,
+                    alphaBitMask
+                )
             )
         }
     }
@@ -166,22 +164,22 @@ data class DirectDrawSurfaceHeaderDX10(
         const val DDS_ALPHA_MODE_OPAQUE = 0x3
         const val DDS_ALPHA_MODE_CUSTOM = 0x4
 
-        suspend fun invoke(flow: InputFlow): DirectDrawSurfaceHeaderDX10? {
-            try {
-                return unsafe(flow)
-            } catch (iae: IllegalArgumentException) {
-                return null
-            }
-        }
+        suspend operator fun invoke(flow: InputFlow): KorneaResult<DirectDrawSurfaceHeaderDX10> {
+            val dxgiFormat = flow.readInt32LE() ?: return notEnoughData()
+            val resourceDimension = flow.readInt32LE() ?: return notEnoughData()
+            val miscFlag = flow.readInt32LE() ?: return notEnoughData()
+            val arraySize = flow.readInt32LE() ?: return notEnoughData()
+            val miscFlags2 = flow.readInt32LE() ?: return notEnoughData()
 
-        suspend fun unsafe(flow: InputFlow): DirectDrawSurfaceHeaderDX10 {
-            val dxgiFormat = requireNotNull(flow.readInt32LE())
-            val resourceDimension = requireNotNull(flow.readInt32LE())
-            val miscFlag = requireNotNull(flow.readInt32LE())
-            val arraySize = requireNotNull(flow.readInt32LE())
-            val miscFlags2 = requireNotNull(flow.readInt32LE())
-
-            return DirectDrawSurfaceHeaderDX10(dxgiFormat, resourceDimension, miscFlag, arraySize, miscFlags2)
+            return KorneaResult.Success(
+                DirectDrawSurfaceHeaderDX10(
+                    dxgiFormat,
+                    resourceDimension,
+                    miscFlag,
+                    arraySize,
+                    miscFlags2
+                )
+            )
         }
     }
 }
@@ -194,32 +192,40 @@ class DirectDrawSurfaceImage(
 
 @Suppress("NAME_SHADOWING")
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readDDSImage(): DirectDrawSurfaceImage? {
-    var magic = readInt32LE() ?: return null
+suspend fun InputFlow.readDDSImage(): KorneaResult<DirectDrawSurfaceImage> {
+    var magic = readInt32LE() ?: return notEnoughData()
     if (magic == DDS1_MAGIC_NUMBER_LE)
-        magic = readInt32LE() ?: return null
+        magic = readInt32LE() ?: return notEnoughData()
 
     require(magic == DDS_MAGIC_NUMBER_LE) { "Invalid magic number $magic" }
 
-    val header = DirectDrawSurfaceHeader.unsafe(this)
+    val header = DirectDrawSurfaceHeader(this)
+        .doOnFailure { return it.cast() }
     val header10: DirectDrawSurfaceHeaderDX10? =
         if (header.pixelFormat.flags isBitSet DirectDrawSurfacePixelFormat.DDPF_FOURCC && header.pixelFormat.fourCC == DirectDrawSurfacePixelFormat.DX10) {
-            DirectDrawSurfaceHeaderDX10.unsafe(this)
+            DirectDrawSurfaceHeaderDX10(this)
+                .doOnFailure { return it.cast() }
         } else {
             null
         }
 
-    val rgb: IntArray?
+    val rgb: IntArray
 
     if (header.pixelFormat.flags isBitSet DirectDrawSurfacePixelFormat.DDPF_FOURCC) {
         when (header.pixelFormat.fourCC) {
             DirectDrawSurfacePixelFormat.DXT1 -> rgb = DXT1PixelData.read(header.width, header.height, this).rgb
             DirectDrawSurfacePixelFormat.DX10 -> rgb = BC7PixelData.read(header.width, header.height, this).rgb
-            else -> rgb = null
+            else -> return KorneaResult.Failure(
+                DirectDrawSurfacePixelFormat.FORMAT_NOT_IMPLEMENTED,
+                "Format 0x${header.pixelFormat.fourCC.toString(16).padStart(8, '0')} not implemented"
+            )
         }
     } else {
-        rgb = null
+        return KorneaResult.Failure(
+            DirectDrawSurfacePixelFormat.UNKNOWN_FORMAT,
+            "Unknown format flags ${header.pixelFormat.flags}"
+        )
     }
 
-    return rgb?.let { rgb -> DirectDrawSurfaceImage(header, header10, rgb) }
+    return KorneaResult.Success(DirectDrawSurfaceImage(header, header10, rgb))
 }

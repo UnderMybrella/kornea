@@ -5,6 +5,7 @@ import kotlinx.coroutines.await
 import kotlinx.coroutines.promise
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.abimon.kornea.erorrs.common.KorneaResult
 import org.abimon.kornea.io.common.*
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import org.khronos.webgl.ArrayBuffer
@@ -34,16 +35,21 @@ class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1, override 
     override val isClosed: Boolean
         get() = closed
 
-    override suspend fun openNamedInputFlow(location: String?): BinaryInputFlow? {
+    override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
         waitIfNeeded()
 
-        if (canOpenInputFlow()) {
-            val stream = BinaryInputFlow(data!!, location = location ?: this.location)
-            stream.addCloseHandler(this::instanceClosed)
-            openInstances.add(stream)
-            return stream
-        } else {
-            return null
+        when {
+            closed -> return KorneaResult.Failure(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            canOpenInputFlow() -> {
+                val stream = BinaryInputFlow(data!!, location = location ?: this.location)
+                stream.addCloseHandler(this::instanceClosed)
+                openInstances.add(stream)
+                return KorneaResult.Success(stream)
+            }
+            else -> return KorneaResult.Failure(
+                DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
+                "Too many instances open (${openInstances.size}/${maxInstanceCount})"
+            )
         }
     }
     override suspend fun canOpenInputFlow(): Boolean {

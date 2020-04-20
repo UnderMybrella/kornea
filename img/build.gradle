@@ -1,6 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
 
-version = '1.3.5'
+version = '2.0.0'
 
 kotlin {
     /* Targets configuration omitted.
@@ -8,31 +8,32 @@ kotlin {
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
     js()
-    mingwX64() {
-
-    }
-    linuxX64 {
-        compilations.main {
-            cinterops {
-                libpng {
-                    // A shortcut for includeDirs.allHeaders.
-                    includeDirs("${project.projectDir.absolutePath}/src/headers/linux_x64")
-                }
-            }
-        }
-
-        binaries {
-            executable {
-                linkerOpts = ['-L/usr/lib/x86_64-linux-gnu/', '-lpng', '-lz']
-            }
-        }
-    }
+//    mingwX64() {
+//
+//    }
+//    linuxX64 {
+//        compilations.main {
+//            cinterops {
+//                libpng {
+//                    // A shortcut for includeDirs.allHeaders.
+//                    includeDirs("${project.projectDir.absolutePath}/src/headers/linux_x64")
+//                }
+//            }
+//        }
+//
+//        binaries {
+//            executable {
+//                linkerOpts = ['-L/usr/lib/x86_64-linux-gnu/', '-lpng', '-lz']
+//            }
+//        }
+//    }
 
     sourceSets {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation project(':kornea-io')
+                implementation project(':kornea-errors')
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.3'
             }
         }

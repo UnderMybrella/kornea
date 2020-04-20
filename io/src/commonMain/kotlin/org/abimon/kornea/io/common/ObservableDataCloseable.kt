@@ -25,7 +25,7 @@ fun ObservableDataCloseable.addCloseHandler(handler: DataCloseableEventHandler) 
 }
 
 @ExperimentalUnsignedTypes
-public suspend inline fun <T : DataCloseable?, R> T.use(noinline block: suspend (T) -> R): R {
+public suspend inline fun <T : DataCloseable?, R> T.use(block: (T) -> R): R {
     var exception: Throwable? = null
     try {
         return block(this)
