@@ -9,7 +9,6 @@ sealed class KorneaResult<T> {
             Empty()
 
         override fun get(): T = value
-        override fun getOrNull(): T = value
 
         override operator fun component1(): T = value
 
@@ -21,7 +20,7 @@ sealed class KorneaResult<T> {
         override fun <R> cast(): KorneaResult<R> = Empty()
 
         override fun get(): T = throw IllegalStateException("Result is empty")
-        override fun getOrNull(): T? = null
+        override fun component1(): T? = null
 
         override fun toString(): String =
             "Empty()"
@@ -40,21 +39,21 @@ sealed class KorneaResult<T> {
         operator fun component4(): KorneaResult<R>? = causedBy
 
         override fun get(): T = throw IllegalStateException("Result is in a fail state", asIllegalArgumentException())
-        override fun getOrNull(): T? = null
 
         override fun toString(): String =
             "Failure(resultCode=$resultCode, message='$message', causedBy=$causedBy)"
 
         fun asIllegalArgumentException(): IllegalArgumentException =
             IllegalArgumentException(message, (causedBy as? Failure<R, *>)?.asIllegalArgumentException())
+
+        override fun component1(): T? = null
     }
 
     abstract fun <R> cast(): KorneaResult<R>
 
     abstract fun get(): T
-    abstract fun getOrNull(): T?
 
-    open operator fun component1(): T? = getOrNull()
+    abstract operator fun component1(): T?
 }
 
 inline fun <T, R> KorneaResult<T>.map(transform: (T) -> R): KorneaResult<R> =
@@ -63,6 +62,12 @@ inline fun <T, R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<R>): Ko
     if (this is KorneaResult.Success<T>) transform(value) else cast()
 inline fun <T> KorneaResult<T>.filter(predicate: (T) -> Boolean): KorneaResult<T> =
     if (this is KorneaResult.Success<T> && !predicate(value)) KorneaResult.Empty() else this
+
+inline fun <T> KorneaResult<T>.getOrNull(): T? = if (this is KorneaResult.Success<T>) value else null
+inline fun <T> KorneaResult<T>.getOrElse(default: T): T = if (this is KorneaResult.Success<T>) value else default
+inline fun <T> KorneaResult<T>.getOrElseRun(block: () -> T): T = if (this is KorneaResult.Success<T>) value else block()
+
+
 
 public inline fun <T> KorneaResult<T>.doOnFailure(op: (KorneaResult<T>) -> Unit): T {
     if (this is KorneaResult.Success<T>) return value
