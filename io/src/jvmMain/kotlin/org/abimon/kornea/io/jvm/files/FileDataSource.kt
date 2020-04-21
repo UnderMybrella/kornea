@@ -1,6 +1,7 @@
 package org.abimon.kornea.io.jvm.files
 
 import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.erorrs.common.korneaNotFound
 import org.abimon.kornea.io.common.*
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import java.io.File
@@ -22,6 +23,7 @@ class FileDataSource(val backing: File, val maxInstanceCount: Int = -1, override
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<FileInputFlow> {
         when {
             closed -> return KorneaResult.Failure(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            !backing.exists() -> return korneaNotFound("$backing does not exist")
             canOpenInputFlow() -> {
                 val stream = FileInputFlow(backing, location ?: this.location)
                 stream.addCloseHandler(this::instanceClosed)
