@@ -62,6 +62,16 @@ inline fun <T, reified R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult
 
 inline fun <T> KorneaResult<T>.filter(predicate: (T) -> Boolean): KorneaResult<T> =
     if (this is KorneaResult.Success<T> && !predicate(value)) KorneaResult.Empty() else this
+inline fun <T> KorneaResult<T>.filterTo(transform: (T) -> KorneaResult<T>?): KorneaResult<T> =
+    if (this is KorneaResult.Success<T>) transform(value) ?: this else this
+inline fun <reified R> KorneaResult<*>.filterToInstance(): KorneaResult<R> =
+        if (this is KorneaResult.Success && value !is R) KorneaResult.Empty() else this.cast()
+inline fun <reified R> KorneaResult<*>.filterToInstance(onEmpty: () -> KorneaResult<R>): KorneaResult<R> =
+    if (this is KorneaResult.Success && value !is R) onEmpty() else this.cast()
+inline fun <reified R> KorneaResult<*>.filterToInstance(default: KorneaResult<R>): KorneaResult<R> =
+    if (this is KorneaResult.Success && value !is R) default else this.cast()
+inline fun <T, reified R: T> KorneaResult<T>.filterToInstance(transform: (T) -> KorneaResult<R>): KorneaResult<R> =
+    if (this is KorneaResult.Success<T> && value !is R) transform(value) else this.cast()
 
 inline fun <T> KorneaResult<T>.getOrNull(): T? = if (this is KorneaResult.Success<T>) value else null
 inline fun <T> KorneaResult<T>.getOrElse(default: T): T = if (this is KorneaResult.Success<T>) value else default
@@ -80,6 +90,11 @@ public inline fun <T> KorneaResult<T>.doOnFailure(op: (KorneaResult<T>) -> Unit)
         op(this)
         throw IllegalStateException()
     }
+}
+
+inline fun <T> KorneaResult<T>.doOnSuccess(block: (T) -> Unit): KorneaResult<T> {
+    if (this is KorneaResult.Success<T>) block(value)
+    return this
 }
 
 //@ExperimentalContracts
