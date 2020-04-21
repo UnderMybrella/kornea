@@ -55,7 +55,7 @@ inline fun <T, reified R> KorneaResult<T>.cast(): KorneaResult<R> =
     }
 
 inline fun <T, reified R> KorneaResult<T>.map(transform: (T) -> R): KorneaResult<R> =
-    if (this is KorneaResult.Success<T>) KorneaResult.Success(transform(value)) else cast()
+    if (this is KorneaResult.Success) KorneaResult.Success(transform(value)) else cast()
 
 inline fun <T, reified R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<R>): KorneaResult<R> =
     if (this is KorneaResult.Success<T>) transform(value) else cast()
@@ -82,29 +82,29 @@ public inline fun <T> KorneaResult<T>.doOnFailure(op: (KorneaResult<T>) -> Unit)
     }
 }
 
-@ExperimentalContracts
-public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>): T {
-    contract {
-        returns() implies (value is KorneaResult.Success<T>)
-    }
-
-    when (value) {
-        is KorneaResult.Success<T> -> return value.value
-        is KorneaResult.Failure<T, *> -> throw value.asIllegalArgumentException()
-        else -> throw IllegalArgumentException("(empty)")
-    }
-}
-
-@ExperimentalContracts
-public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>, lazyMessage: () -> Any): T {
-    contract {
-        returns() implies (value is KorneaResult.Success<T>)
-    }
-
-    if (value !is KorneaResult.Success<T>) {
-        val message = lazyMessage()
-        throw IllegalArgumentException(message.toString())
-    } else {
-        return value.value
-    }
-}
+//@ExperimentalContracts
+//public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>): T {
+//    contract {
+//        returns() implies (value is KorneaResult.Success<T>)
+//    }
+//
+//    when (value) {
+//        is KorneaResult.Success<T> -> return value.value
+//        is KorneaResult.Failure<T, *> -> throw value.asIllegalArgumentException()
+//        else -> throw IllegalArgumentException("(empty)")
+//    }
+//}
+//
+//@ExperimentalContracts
+//public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>, lazyMessage: () -> Any): T {
+//    contract {
+//        returns() implies (value is KorneaResult.Success<T>)
+//    }
+//
+//    if (value !is KorneaResult.Success<T>) {
+//        val message = lazyMessage()
+//        throw IllegalArgumentException(message.toString())
+//    } else {
+//        return value.value
+//    }
+//}
