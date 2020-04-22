@@ -29,7 +29,7 @@ open class OffsetDataSource(
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<SinkOffsetInputFlow> {
         when {
-            closed || parent.isClosed -> return KorneaResult.Failure(ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed || parent.isClosed -> return KorneaResult.Error(ERRORS_SOURCE_CLOSED, "Instance closed")
             canOpenInputFlow() -> return parent.openInputFlow().map { parentFlow ->
                 val flow = SinkOffsetInputFlow(parentFlow, offset, location ?: this.location)
                 flow.addCloseHandler(this::instanceClosed)
@@ -37,7 +37,7 @@ open class OffsetDataSource(
 
                 flow
             }
-            else -> return KorneaResult.Failure(
+            else -> return KorneaResult.Error(
                 DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )

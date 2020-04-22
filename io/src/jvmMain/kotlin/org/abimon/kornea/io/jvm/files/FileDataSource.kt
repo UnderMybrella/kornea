@@ -3,7 +3,6 @@ package org.abimon.kornea.io.jvm.files
 import org.abimon.kornea.erorrs.common.KorneaResult
 import org.abimon.kornea.erorrs.common.korneaNotFound
 import org.abimon.kornea.io.common.*
-import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import java.io.File
 import kotlin.math.max
 
@@ -22,7 +21,7 @@ class FileDataSource(val backing: File, val maxInstanceCount: Int = -1, override
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<FileInputFlow> {
         when {
-            closed -> return KorneaResult.Failure(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed -> return KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
             !backing.exists() -> return korneaNotFound("$backing does not exist")
             canOpenInputFlow() -> {
                 val stream = FileInputFlow(backing, location ?: this.location)
@@ -30,7 +29,7 @@ class FileDataSource(val backing: File, val maxInstanceCount: Int = -1, override
                 openInstances.add(stream)
                 return KorneaResult.Success(stream)
             }
-            else -> return KorneaResult.Failure(
+            else -> return KorneaResult.Error(
                 DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )

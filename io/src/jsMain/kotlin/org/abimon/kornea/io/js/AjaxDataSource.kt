@@ -39,14 +39,14 @@ class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1, override 
         waitIfNeeded()
 
         when {
-            closed -> return KorneaResult.Failure(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed -> return KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
             canOpenInputFlow() -> {
                 val stream = BinaryInputFlow(data!!, location = location ?: this.location)
                 stream.addCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
                 return KorneaResult.Success(stream)
             }
-            else -> return KorneaResult.Failure(
+            else -> return KorneaResult.Error(
                 DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )

@@ -216,13 +216,13 @@ suspend fun InputFlow.readDDSImage(): KorneaResult<DirectDrawSurfaceImage> {
         when (header.pixelFormat.fourCC) {
             DirectDrawSurfacePixelFormat.DXT1 -> rgb = DXT1PixelData.read(header.width, header.height, this).rgb
             DirectDrawSurfacePixelFormat.DX10 -> rgb = BC7PixelData.read(header.width, header.height, this).rgb
-            else -> return KorneaResult.Failure(
+            else -> return KorneaResult.Error(
                 DirectDrawSurfacePixelFormat.FORMAT_NOT_IMPLEMENTED,
                 "Format 0x${header.pixelFormat.fourCC.toString(16).padStart(8, '0')} not implemented"
             )
         }
     } else {
-        return KorneaResult.Failure(
+        return KorneaResult.Error(
             DirectDrawSurfacePixelFormat.UNKNOWN_FORMAT,
             "Unknown format flags ${header.pixelFormat.flags}"
         )

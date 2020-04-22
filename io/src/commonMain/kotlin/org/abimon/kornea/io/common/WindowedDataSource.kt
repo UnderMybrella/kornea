@@ -32,7 +32,7 @@ open class WindowedDataSource(
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<WindowedInputFlow> {
         when {
-            closed || parent.isClosed -> return KorneaResult.Failure(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed || parent.isClosed -> return KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
             canOpenInputFlow() -> return parent.openInputFlow().map { parentFlow ->
                 val flow = WindowedInputFlow(parentFlow, windowOffset, windowSize, location ?: this.location)
                 flow.addCloseHandler(this::instanceClosed)
@@ -40,7 +40,7 @@ open class WindowedDataSource(
 
                 flow
             }
-            else -> return KorneaResult.Failure(
+            else -> return KorneaResult.Error(
                 DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )

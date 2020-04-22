@@ -28,14 +28,14 @@ class BinaryDataPool(
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
         when {
-            closed -> return KorneaResult.Failure(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed -> return KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
             canOpenInputFlow() -> {
                 val stream = BinaryInputFlow(output.getData(), location = location ?: this.location)
                 stream.addCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
                 return KorneaResult.Success(stream)
             }
-            else -> return KorneaResult.Failure(
+            else -> return KorneaResult.Error(
                 DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )
@@ -70,7 +70,7 @@ class BinaryDataPool(
 
     override suspend fun openOutputFlow(): KorneaResult<BinaryOutputFlow> =
         if (canOpenOutputFlow()) KorneaResult.Success(output)
-        else KorneaResult.Failure(ERRORS_SINK_CLOSED, "Sink closed")
+        else KorneaResult.Error(ERRORS_SINK_CLOSED, "Sink closed")
 
     override suspend fun canOpenOutputFlow(): Boolean = !outputClosed
 

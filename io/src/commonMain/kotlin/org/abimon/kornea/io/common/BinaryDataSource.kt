@@ -29,14 +29,14 @@ class BinaryDataSource(
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
         when {
-            closed -> return KorneaResult.Failure(ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed -> return KorneaResult.Error(ERRORS_SOURCE_CLOSED, "Instance closed")
             canOpenInputFlow() -> {
                 val stream = BinaryInputFlow(byteArray, location = location ?: this.location)
                 stream.addCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
                 return KorneaResult.Success(stream)
             }
-            else -> return KorneaResult.Failure(
+            else -> return KorneaResult.Error(
                 ERRORS_TOO_MANY_SOURCES_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )

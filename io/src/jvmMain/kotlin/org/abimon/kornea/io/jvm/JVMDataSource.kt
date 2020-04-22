@@ -4,8 +4,6 @@ import org.abimon.kornea.erorrs.common.KorneaResult
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 import org.abimon.kornea.io.common.DataSource
 import org.abimon.kornea.io.common.DataSourceReproducibility
-import org.abimon.kornea.io.common.addCloseHandler
-import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import java.io.InputStream
 
 @ExperimentalUnsignedTypes
@@ -29,7 +27,7 @@ class JVMDataSource(val func: () -> InputStream, override val location: String? 
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<JVMInputFlow> =
         if (!closed) KorneaResult.Success(JVMInputFlow(func(), location ?: this.location))
-        else KorneaResult.Failure(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+        else KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
 
     override suspend fun canOpenInputFlow(): Boolean = !closed
 

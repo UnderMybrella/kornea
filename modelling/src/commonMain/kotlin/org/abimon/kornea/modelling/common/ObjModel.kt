@@ -163,7 +163,7 @@ inline class ObjModel(val meshes: Array<Mesh>) {
 
                         when {
                             components.size < 3 ->
-                                return KorneaResult.Failure(
+                                return KorneaResult.Error(
                                     MISSING_NORMALS,
                                     "Invalid face (Only has ${components.size} elements)"
                                 )
@@ -226,7 +226,7 @@ inline class ObjModel(val meshes: Array<Mesh>) {
             }
 
             if (vertices.isEmpty() && uvs.isEmpty() && normals.isEmpty() && meshes.isEmpty())
-                return KorneaResult.Failure(EMPTY_MODEL, "Model was empty")
+                return KorneaResult.Error(EMPTY_MODEL, "Model was empty")
 
             meshes.forEach { mesh ->
                 mesh.faces.forEachIndexed { i, face ->
@@ -256,17 +256,17 @@ inline class ObjModel(val meshes: Array<Mesh>) {
                         if (remappedIndex !== faceIndex) indices[index] = remappedIndex
 
                         if (remappedIndex.vertex !in vertices.indices)
-                            return KorneaResult.Failure(
+                            return KorneaResult.Error(
                                 MISSING_VERTICES,
                                 "Missing Vertex: ${remappedIndex.vertex}"
                             )
                         if (remappedIndex.textureCoordinate != null && remappedIndex.textureCoordinate!! !in uvs.indices)
-                            return KorneaResult.Failure(
+                            return KorneaResult.Error(
                                 MISSING_UVS,
                                 "Missing UV: ${remappedIndex.textureCoordinate}"
                             )
                         if (remappedIndex.normal != null && remappedIndex.normal!! !in normals.indices)
-                            return KorneaResult.Failure(
+                            return KorneaResult.Error(
                                 MISSING_NORMALS,
                                 "Missing Normal: ${remappedIndex.normal}"
                             )
