@@ -98,17 +98,17 @@ inline fun <T> KorneaResult<T>.getOrElseRun(block: () -> T): T = if (this is Kor
 inline fun <T> KorneaResult<T>.orElse(default: KorneaResult<T>): KorneaResult<T> =
     if (this is KorneaResult.Success<T>) this else default
 
-inline fun <T> KorneaResult<T>.switchIfFailure(block: () -> KorneaResult<T>): KorneaResult<T> =
-    if (this is KorneaResult.Success<T>) this else block()
+inline fun <T> KorneaResult<T>.switchIfFailure(block: (KorneaResult<T>) -> KorneaResult<T>): KorneaResult<T> =
+    if (this is KorneaResult.Success<T>) this else block(this)
 
 inline fun <T> KorneaResult<T>.switchIfEmpty(block: () -> KorneaResult<T>): KorneaResult<T> =
     if (this is KorneaResult.Empty<T>) block() else this
 
-inline fun <T> KorneaResult<T>.switchIfError(block: () -> KorneaResult<T>): KorneaResult<T> =
-    if (this is KorneaResult.Error<T, *>) block() else this
+inline fun <T> KorneaResult<T>.switchIfError(block: (KorneaResult.Error<T, *>) -> KorneaResult<T>): KorneaResult<T> =
+    if (this is KorneaResult.Error<T, *>) block(this) else this
 
-inline fun <T> KorneaResult<T>.switchIfThrown(block: () -> KorneaResult<T>): KorneaResult<T> =
-    if (this is KorneaResult.Thrown<T, *, *>) block() else this
+inline fun <T> KorneaResult<T>.switchIfThrown(block: (KorneaResult.Thrown<T, *, *>) -> KorneaResult<T>): KorneaResult<T> =
+    if (this is KorneaResult.Thrown<T, *, *>) block(this) else this
 
 /** Run when this result is any failed state */
 public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult<T>) -> Unit): T {
