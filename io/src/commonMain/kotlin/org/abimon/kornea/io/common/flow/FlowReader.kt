@@ -1,5 +1,6 @@
 package org.abimon.kornea.io.common.flow
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -143,8 +144,8 @@ class FlowReader(val backing: InputFlow) : ObservableDataCloseable by backing {
 
 @ExperimentalUnsignedTypes
 @ExperimentalCoroutinesApi
-suspend inline fun <T> FlowReader.useLines(operation: (ReceiveChannel<String>) -> T): T = use { reader ->
-    operation(GlobalScope.produce {
+suspend inline fun <T> FlowReader.useLines(scope: CoroutineScope, noinline operation: suspend (ReceiveChannel<String>) -> T): T = use { reader ->
+    operation(scope.produce {
         while (isActive) {
             send(reader.readLine() ?: break)
         }
@@ -155,6 +156,6 @@ suspend inline fun <T> FlowReader.useLines(operation: (ReceiveChannel<String>) -
 
 @ExperimentalUnsignedTypes
 @ExperimentalCoroutinesApi
-suspend inline fun FlowReader.useEachLine(operation: (String) -> Unit) = use { reader ->
+suspend inline fun FlowReader.useEachLine(noinline operation: suspend (String) -> Unit) = use { reader ->
     while (!isClosed) { operation(reader.readLine() ?: break) }
 }
