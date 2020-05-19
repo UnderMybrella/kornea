@@ -1,6 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
 
-version = '2.0.4'
+version = '2.0.5'
 
 kotlin {
     /* Targets configuration omitted.

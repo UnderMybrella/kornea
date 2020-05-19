@@ -144,7 +144,8 @@ class FlowReader(val backing: InputFlow) : ObservableDataCloseable by backing {
 
 @ExperimentalUnsignedTypes
 @ExperimentalCoroutinesApi
-suspend inline fun <T> FlowReader.useLines(scope: CoroutineScope, noinline operation: suspend (ReceiveChannel<String>) -> T): T = use { reader ->
+//Removed noinline from operation. If the compiler starts crashing, add it back
+suspend inline fun <T> FlowReader.useLines(scope: CoroutineScope, operation: (ReceiveChannel<String>) -> T): T = use { reader ->
     operation(scope.produce {
         while (isActive) {
             send(reader.readLine() ?: break)
@@ -156,6 +157,7 @@ suspend inline fun <T> FlowReader.useLines(scope: CoroutineScope, noinline opera
 
 @ExperimentalUnsignedTypes
 @ExperimentalCoroutinesApi
-suspend inline fun FlowReader.useEachLine(noinline operation: suspend (String) -> Unit) = use { reader ->
+//Removed noinline from operation. If the compiler starts crashing, add it back
+suspend inline fun FlowReader.useEachLine(operation: (String) -> Unit) = use { reader ->
     while (!isClosed) { operation(reader.readLine() ?: break) }
 }
