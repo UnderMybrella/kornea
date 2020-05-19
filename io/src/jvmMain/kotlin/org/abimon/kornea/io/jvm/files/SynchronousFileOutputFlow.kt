@@ -8,7 +8,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 @ExperimentalUnsignedTypes
-class FileOutputFlow(val backing: File) : CountingOutputFlow {
+class SynchronousFileOutputFlow(val backing: File) : CountingOutputFlow {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     private val stream = FileOutputStream(backing)

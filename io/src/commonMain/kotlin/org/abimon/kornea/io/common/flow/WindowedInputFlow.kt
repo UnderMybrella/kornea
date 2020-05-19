@@ -1,18 +1,27 @@
 package org.abimon.kornea.io.common.flow
 
-import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.io.common.*
 
 @ExperimentalUnsignedTypes
 open class WindowedInputFlow private constructor(
-    val window: InputFlow,
+    open val window: InputFlow,
     override val baseOffset: ULong,
     val windowSize: ULong,
-    override val location: String? = "${window.location}[${baseOffset.toString(16).toUpperCase()}h,${baseOffset.plus(
-        windowSize
-    ).toString(16).toUpperCase()}h]"
-) :
-    OffsetInputFlow {
+    override val location: String?
+) : OffsetInputFlow {
     companion object {
+        suspend operator fun invoke(
+            window: SeekableInputFlow,
+            offset: ULong,
+            windowSize: ULong,
+            location: String? =
+                "${window.location}[${offset.toString(16).toUpperCase()}h,${offset.plus(windowSize).toString(16)
+                    .toUpperCase()}h]"
+        ): WindowedInputFlow {
+            val flow = Seekable(window, offset, windowSize, location)
+            flow.initialSkip()
+            return flow
+        }
         suspend operator fun invoke(
             window: InputFlow,
             offset: ULong,
@@ -27,14 +36,52 @@ open class WindowedInputFlow private constructor(
         }
     }
 
+    class Seekable private constructor(override val window: SeekableInputFlow, baseOffset: ULong, windowSize: ULong, location: String?): WindowedInputFlow(window, baseOffset, windowSize, location), SeekableInputFlow {
+        companion object {
+            suspend operator fun invoke(
+                window: SeekableInputFlow,
+                offset: ULong,
+                windowSize: ULong,
+                location: String? =
+                    "${window.location}[${offset.toString(16).toUpperCase()}h,${offset.plus(windowSize).toString(16)
+                        .toUpperCase()}h]"
+            ): WindowedInputFlow {
+                val flow = Seekable(window, offset, windowSize, location)
+                flow.initialSkip()
+                return flow
+            }
+        }
+        override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
+            when (mode) {
+                EnumSeekMode.FROM_BEGINNING -> {
+                    val n = pos.coerceIn(0 until windowSize.toLong())
+                    this.windowPosition = n.toULong()
+                    window.seek(baseOffset.toLong() + n, mode)
+                }
+                EnumSeekMode.FROM_POSITION -> {
+                    val n = (this.windowPosition.toLong() + pos).coerceIn(0 until windowSize.toLong())
+                    this.windowPosition = n.toULong()
+                    window.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
+                }
+                EnumSeekMode.FROM_END -> {
+                    val n = (this.windowSize.toLong() - pos).coerceIn(0 until windowSize.toLong())
+                    this.windowPosition = n.toULong()
+                    window.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
+                }
+            }
+
+            return position()
+        }
+    }
+
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-    private var position: ULong = 0uL
+    protected var windowPosition: ULong = 0uL
     private var closed: Boolean = false
     override val isClosed: Boolean
         get() = closed
 
-    override suspend fun read(): Int? = if (position < windowSize) {
-        position++
+    override suspend fun read(): Int? = if (windowPosition < windowSize) {
+        windowPosition++
         window.read()
     } else {
         null
@@ -44,60 +91,37 @@ open class WindowedInputFlow private constructor(
         if (len < 0 || off < 0 || len > b.size - off)
             throw IndexOutOfBoundsException()
 
-        val avail = minOf((windowSize - position).toInt(), len)
+        val avail = minOf((windowSize - windowPosition).toInt(), len)
 
         if (avail <= 0)
             return null
 
         window.read(b, off, avail)
-        position += avail.toULong()
+        windowPosition += avail.toULong()
         return avail
     }
 
     override suspend fun skip(n: ULong): ULong? {
-        val avail = minOf(windowSize - position, n)
+        val avail = minOf(windowSize - windowPosition, n)
         if (avail <= 0u)
             return null
 
         window.skip(avail)
-        position += avail
+        windowPosition += avail
         return avail
     }
 
     override suspend fun available(): ULong? {
-        val avail = minOf(windowSize - position, window.available() ?: return null)
+        val avail = minOf(windowSize - windowPosition, window.available() ?: return null)
         if (avail <= 0u)
             return null
 
         return avail
     }
 
-    override suspend fun remaining(): ULong = windowSize - position
+    override suspend fun remaining(): ULong = windowSize - windowPosition
     override suspend fun size(): ULong = windowSize
-    override suspend fun position(): ULong = position
-
-    override suspend fun seek(pos: Long, mode: Int): ULong? {
-        when (mode) {
-            InputFlow.FROM_BEGINNING -> {
-                val n = pos.coerceIn(0 until windowSize.toLong())
-                this.position = n.toULong()
-                window.seek(baseOffset.toLong() + n, mode)
-            }
-            InputFlow.FROM_POSITION -> {
-                val n = (this.position.toLong() + pos).coerceIn(0 until windowSize.toLong())
-                this.position = n.toULong()
-                window.seek(baseOffset.toLong() + n, InputFlow.FROM_BEGINNING)
-            }
-            InputFlow.FROM_END -> {
-                val n = (this.windowSize.toLong() - pos).coerceIn(0 until windowSize.toLong())
-                this.position = n.toULong()
-                window.seek(baseOffset.toLong() + n, InputFlow.FROM_BEGINNING)
-            }
-            else -> return null
-        }
-
-        return position()
-    }
+    override suspend fun position(): ULong = windowPosition
 
     suspend fun initialSkip() {
         window.skip(baseOffset)

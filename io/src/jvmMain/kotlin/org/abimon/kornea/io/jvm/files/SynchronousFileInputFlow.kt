@@ -2,14 +2,15 @@ package org.abimon.kornea.io.jvm.files
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.io.common.*
 import org.abimon.kornea.io.common.flow.InputFlow
+import org.abimon.kornea.io.common.flow.SeekableInputFlow
 import org.abimon.kornea.io.common.flow.readResultIsValid
 import java.io.File
 import java.io.RandomAccessFile
 
 @ExperimentalUnsignedTypes
-class FileInputFlow(val backingFile: File, override val location: String? = backingFile.absolutePath) : InputFlow {
+class SynchronousFileInputFlow(val backingFile: File, override val location: String? = backingFile.absolutePath) : InputFlow, SeekableInputFlow {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     private val channel = RandomAccessFile(backingFile, "r")
@@ -30,19 +31,18 @@ class FileInputFlow(val backingFile: File, override val location: String? = back
     override suspend fun size(): ULong = withContext(Dispatchers.IO) { channel.length().toULong() }
     override suspend fun position(): ULong = withContext(Dispatchers.IO) { channel.filePointer.toULong() }
 
-    override suspend fun seek(pos: Long, mode: Int): ULong? {
+    override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
         when (mode) {
-            InputFlow.FROM_BEGINNING -> withContext(Dispatchers.IO) { channel.seek(pos) }
-            InputFlow.FROM_POSITION -> withContext(Dispatchers.IO) { channel.seek(channel.filePointer + pos) }
-            InputFlow.FROM_END -> withContext(Dispatchers.IO) { channel.seek(channel.length() - pos) }
-            else -> return null
+            EnumSeekMode.FROM_BEGINNING -> withContext(Dispatchers.IO) { channel.seek(pos) }
+            EnumSeekMode.FROM_POSITION -> withContext(Dispatchers.IO) { channel.seek(channel.filePointer + pos) }
+            EnumSeekMode.FROM_END -> withContext(Dispatchers.IO) { channel.seek(channel.length() - pos) }
         }
 
         return position()
     }
 
     override suspend fun close() {
-        super.close()
+        super<SeekableInputFlow>.close()
 
         if (!closed) {
             withContext(Dispatchers.IO) { channel.close() }

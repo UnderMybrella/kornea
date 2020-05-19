@@ -11,7 +11,7 @@ ext {
 }
 
 subprojects {
-    apply plugin: 'java'
+//    apply plugin: 'java'
     apply plugin: 'maven-publish'
 
     group = artifact_group

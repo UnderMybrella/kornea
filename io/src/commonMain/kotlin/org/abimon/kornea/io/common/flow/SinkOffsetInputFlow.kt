@@ -1,19 +1,19 @@
 package org.abimon.kornea.io.common.flow
 
-import org.abimon.kornea.io.common.DataCloseableEventHandler
-
-@ExperimentalUnsignedTypes
-interface OffsetInputFlow : InputFlow {
-    val baseOffset: ULong
-}
+import org.abimon.kornea.io.common.*
 
 @ExperimentalUnsignedTypes
 open class SinkOffsetInputFlow private constructor(
-    val backing: InputFlow, override val baseOffset: ULong,
+    open val backing: InputFlow, override val baseOffset: ULong,
     override val location: String? =
         "${backing.location}+${baseOffset.toString(16)}h"
 ) : OffsetInputFlow {
     companion object {
+        suspend operator fun invoke(backing: SeekableInputFlow, offset: ULong, location: String? = "${backing.location}+${offset.toString(16)}h"): Seekable {
+            val flow = Seekable(backing, offset, location)
+            flow.initialSkip()
+            return flow
+        }
         suspend operator fun invoke(backing: InputFlow, offset: ULong, location: String? = "${backing.location}+${offset.toString(16)}h"): SinkOffsetInputFlow {
             val flow = SinkOffsetInputFlow(backing, offset, location)
             flow.initialSkip()
@@ -21,14 +21,53 @@ open class SinkOffsetInputFlow private constructor(
         }
     }
 
+    class Seekable(override val backing: SeekableInputFlow, override val baseOffset: ULong, override val location: String? = "${backing.location}+${baseOffset.toString(16)}h"): SinkOffsetInputFlow(backing, baseOffset, location), SeekableInputFlow {
+        companion object {
+            suspend operator fun invoke(backing: SeekableInputFlow, offset: ULong, location: String? = "${backing.location}+${offset.toString(16)}h"): Seekable {
+                val flow = Seekable(backing, offset, location)
+                flow.initialSkip()
+                return flow
+            }
+        }
+        override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
+            when (mode) {
+                EnumSeekMode.FROM_BEGINNING -> {
+                    this.sinkOffset = pos.toULong()
+                    backing.seek(baseOffset.toLong() + pos, mode)
+                }
+                EnumSeekMode.FROM_POSITION -> {
+                    val n = this.sinkOffset.toLong() + pos
+                    this.sinkOffset = n.toULong()
+                    backing.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
+                }
+                EnumSeekMode.FROM_END -> {
+                    val size = size()
+                    if (size == null) {
+                        val result = backing.seek(pos, mode)
+                        if (result < baseOffset) {
+                            backing.skip(baseOffset - result)
+                            this.sinkOffset = 0u
+                        }
+                    } else {
+                        val n = (size.toLong() - pos)
+                        this.sinkOffset = n.toULong()
+                        backing.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
+                    }
+                }
+            }
+
+            return position()
+        }
+    }
+
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-    private var position: ULong = 0uL
-    private var closed: Boolean = false
+    protected var sinkOffset: ULong = 0uL
+    protected var closed: Boolean = false
     override val isClosed: Boolean
         get() = closed
 
     override suspend fun read(): Int? {
-        position++
+        sinkOffset++
         return backing.read()
     }
 
@@ -37,51 +76,20 @@ open class SinkOffsetInputFlow private constructor(
             throw IndexOutOfBoundsException()
 
         val read = backing.read(b, off, len) ?: return null
-        position += read.toULong()
+        sinkOffset += read.toULong()
         return read
     }
 
     override suspend fun skip(n: ULong): ULong? {
         val skipped = backing.skip(n) ?: return null
-        position += skipped
+        sinkOffset += skipped
         return skipped
     }
 
     override suspend fun available(): ULong? = backing.available()
     override suspend fun remaining(): ULong? = backing.remaining()
     override suspend fun size(): ULong? = backing.size()?.minus(baseOffset)
-    override suspend fun position(): ULong = position
-
-    override suspend fun seek(pos: Long, mode: Int): ULong? {
-        when (mode) {
-            InputFlow.FROM_BEGINNING -> {
-                this.position = pos.toULong()
-                backing.seek(baseOffset.toLong() + pos, mode)
-            }
-            InputFlow.FROM_POSITION -> {
-                val n = this.position.toLong() + pos
-                this.position = n.toULong()
-                backing.seek(baseOffset.toLong() + n, InputFlow.FROM_BEGINNING)
-            }
-            InputFlow.FROM_END -> {
-                val size = size()
-                if (size == null) {
-                    val result = backing.seek(pos, mode) ?: return null
-                    if (result < baseOffset) {
-                        backing.skip(baseOffset - result)
-                        this.position = 0u
-                    }
-                } else {
-                    val n = (size.toLong() - pos)
-                    this.position = n.toULong()
-                    backing.seek(baseOffset.toLong() + n, InputFlow.FROM_BEGINNING)
-                }
-            }
-            else -> return null
-        }
-
-        return position()
-    }
+    override suspend fun position(): ULong = sinkOffset
 
     suspend fun initialSkip() {
         backing.skip(baseOffset)

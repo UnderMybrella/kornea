@@ -2,7 +2,7 @@ package org.abimon.kornea.io.jvm
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.io.common.*
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.flow.readResultIsValid
 import java.io.InputStream
@@ -34,34 +34,34 @@ open class JVMInputFlow private constructor(val stream: CountingInputStream, ove
     }
 
     override suspend fun position(): ULong = stream.count.toULong()
-    override suspend fun seek(pos: Long, mode: Int): ULong? {
-        when (mode) {
-            InputFlow.FROM_BEGINNING -> {
-                if (stream.markSupported()) {
-                    withContext(Dispatchers.IO) { stream.reset() }
-                    stream.mark(Int.MAX_VALUE)
-                    skip(pos.toULong())
-                    return position()
-                } else if (pos >= stream.count) {
-                    skip(pos.toULong())
-                    return position()
-                } else {
-                    return null
-                }
-            }
-            InputFlow.FROM_END -> return null
-            InputFlow.FROM_POSITION -> {
-                if (pos > 0) {
-                    skip(pos.toULong())
-                    return position()
-                } else {
-                    val currentPosition = position()
-                    return seek(currentPosition.toLong() + pos, InputFlow.FROM_BEGINNING)
-                }
-            }
-            else -> return null
-        }
-    }
+//    override suspend fun seek(pos: Long, mode: Int): ULong? {
+//        when (mode) {
+//            EnumSeekMode.FROM_BEGINNING -> {
+//                if (stream.markSupported()) {
+//                    withContext(Dispatchers.IO) { stream.reset() }
+//                    stream.mark(Int.MAX_VALUE)
+//                    skip(pos.toULong())
+//                    return position()
+//                } else if (pos >= stream.count) {
+//                    skip(pos.toULong())
+//                    return position()
+//                } else {
+//                    return null
+//                }
+//            }
+//            EnumSeekMode.FROM_END -> return null
+//            EnumSeekMode.FROM_POSITION -> {
+//                if (pos > 0) {
+//                    skip(pos.toULong())
+//                    return position()
+//                } else {
+//                    val currentPosition = position()
+//                    return seek(currentPosition.toLong() + pos, EnumSeekMode.FROM_BEGINNING)
+//                }
+//            }
+//            else -> return null
+//        }
+//    }
 
     init {
         if (stream.markSupported()) {

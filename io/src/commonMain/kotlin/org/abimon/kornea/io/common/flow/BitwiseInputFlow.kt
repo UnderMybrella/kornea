@@ -1,6 +1,6 @@
 package org.abimon.kornea.io.common.flow
 
-import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.io.common.*
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
@@ -135,21 +135,6 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow,
     override suspend fun remaining(): ULong? = flow.remaining()
     override suspend fun size(): ULong? = flow.size()
     override suspend fun position(): ULong = flow.position()
-
-    override suspend fun seek(pos: Long, mode: Int): ULong? {
-        when (mode) {
-            InputFlow.FROM_BEGINNING -> if (pos >= flow.position().toLong()) skip(pos.toULong() - flow.position()) else return null
-            InputFlow.FROM_POSITION -> if (pos >= 0) skip(pos) else return null
-            InputFlow.FROM_END ->
-                if ((size()?.toLong()?.minus(pos) ?: 0L) >= position().toLong())
-                    skip(size()?.toLong()?.minus(pos)?.minus(position().toLong()) ?: 0)
-                else
-                    return null
-            else -> return null
-        }
-
-        return position()
-    }
 
     override suspend fun close() {
         super.close()

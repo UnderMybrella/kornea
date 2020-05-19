@@ -7,10 +7,13 @@ import org.abimon.kornea.io.common.DataSource
 import java.io.File
 
 @ExperimentalUnsignedTypes
-class FileDataPool(val file: File, private val sinkBacker: DataSink<FileOutputFlow> = FileDataSink(file), private val sourceBacker: DataSource<FileInputFlow> = FileDataSource(file)) :
-        DataPool<FileInputFlow, FileOutputFlow>,
-        DataSink<FileOutputFlow> by sinkBacker,
-        DataSource<FileInputFlow> by sourceBacker {
+class SynchronousFileDataPool(
+    val file: File,
+    private val sinkBacker: DataSink<SynchronousFileOutputFlow> = SynchronousFileDataSink(file),
+    private val sourceBacker: DataSource<SynchronousFileInputFlow> = SynchronousFileDataSource(file)
+) : DataPool<SynchronousFileInputFlow, SynchronousFileOutputFlow>,
+    DataSink<SynchronousFileOutputFlow> by sinkBacker,
+    DataSource<SynchronousFileInputFlow> by sourceBacker {
     private var closed: Boolean = false
     override val isClosed: Boolean
         get() = closed

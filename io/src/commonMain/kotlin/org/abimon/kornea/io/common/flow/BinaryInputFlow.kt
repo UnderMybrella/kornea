@@ -1,15 +1,12 @@
 package org.abimon.kornea.io.common.flow
 
-import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.io.common.*
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
-class BinaryInputFlow(
-    private val array: ByteArray,
-    private var pos: Int = 0,
-    private var size: Int = array.size,
-    override val location: String? = null
-) : PeekableInputFlow {
+class BinaryInputFlow(private val array: ByteArray, private var pos: Int = 0, private var size: Int = array.size,
+                      override val location: String? = null):
+    InputFlow, PeekableInputFlow, SeekableInputFlow {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     private var closed: Boolean = false
@@ -51,19 +48,18 @@ class BinaryInputFlow(
     override suspend fun size(): ULong = size.toULong()
     override suspend fun position(): ULong = pos.toULong()
 
-    override suspend fun seek(pos: Long, mode: Int): ULong? {
+    override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
         when (mode) {
-            InputFlow.FROM_BEGINNING -> this.pos = pos.toInt()
-            InputFlow.FROM_POSITION -> this.pos += pos.toInt()
-            InputFlow.FROM_END -> this.pos = size - pos.toInt()
-            else -> return null
+            EnumSeekMode.FROM_BEGINNING -> this.pos = pos.toInt()
+            EnumSeekMode.FROM_POSITION -> this.pos += pos.toInt()
+            EnumSeekMode.FROM_END -> this.pos = size - pos.toInt()
         }
 
         return position()
     }
 
     override suspend fun close() {
-        super.close()
+        super<PeekableInputFlow>.close()
         closed = true
     }
 }

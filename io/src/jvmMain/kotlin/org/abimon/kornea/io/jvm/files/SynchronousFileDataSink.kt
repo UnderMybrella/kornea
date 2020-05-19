@@ -5,34 +5,29 @@ import org.abimon.kornea.io.common.*
 import java.io.File
 
 @ExperimentalUnsignedTypes
-class FileDataSink(val backing: File): DataSink<FileOutputFlow> {
+class SynchronousFileDataSink(val backing: File): DataSink<SynchronousFileOutputFlow> {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
-    private val openInstances: MutableList<FileOutputFlow> = ArrayList(1)
+    private val openInstances: MutableList<SynchronousFileOutputFlow> = ArrayList(1)
     private var closed: Boolean = false
     override val isClosed: Boolean
         get() = closed
 
-    override suspend fun openOutputFlow(): KorneaResult<FileOutputFlow> {
-        when {
-            closed -> return KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
-            canOpenOutputFlow() -> {
-                val stream = FileOutputFlow(backing)
-                stream.addCloseHandler(this::instanceClosed)
-                openInstances.add(stream)
-                return KorneaResult.Success(stream)
-            }
-            else -> return KorneaResult.Error(
-                DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
-                "Too many instances open (${openInstances.size}/1)"
-            )
+    override suspend fun openOutputFlow(): SynchronousFileOutputFlow? {
+        if (canOpenOutputFlow()) {
+            val stream = SynchronousFileOutputFlow(backing)
+            stream.addCloseHandler(this::instanceClosed)
+            openInstances.add(stream)
+            return stream
+        } else {
+            return null
         }
     }
 
     override suspend fun canOpenOutputFlow(): Boolean = !closed && (openInstances.size < 1)
 
     private suspend fun instanceClosed(closeable: ObservableDataCloseable) {
-        if (closeable is FileOutputFlow) {
+        if (closeable is SynchronousFileOutputFlow) {
             openInstances.remove(closeable)
         }
     }

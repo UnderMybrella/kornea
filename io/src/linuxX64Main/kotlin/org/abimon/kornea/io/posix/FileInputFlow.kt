@@ -1,15 +1,16 @@
 package org.abimon.kornea.io.posix
 
 import kotlinx.cinterop.CPointer
-import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.io.common.*
 import org.abimon.kornea.io.common.flow.InputFlow
+import org.abimon.kornea.io.common.flow.SeekableInputFlow
 import platform.posix.FILE
 import platform.posix.SEEK_CUR
 import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 
 @ExperimentalUnsignedTypes
-class FileInputFlow(val fp: FilePointer, override val location: String? = null): InputFlow {
+class FileInputFlow(val fp: FilePointer, override val location: String? = null): SeekableInputFlow {
     constructor(fp: CPointer<FILE>, location: String? = null): this(FilePointer(fp), location)
 
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
@@ -40,12 +41,11 @@ class FileInputFlow(val fp: FilePointer, override val location: String? = null):
     override suspend fun size(): ULong = size.toULong()
     override suspend fun position(): ULong = io { fp.pos().toULong() }
 
-    override suspend fun seek(pos: Long, mode: Int): ULong? {
+    override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
         when (mode) {
-            InputFlow.FROM_BEGINNING -> io { fp.seek(pos, SEEK_SET) }
-            InputFlow.FROM_POSITION -> io { fp.seek(pos, SEEK_CUR) }
-            InputFlow.FROM_END -> io { fp.seek(pos, SEEK_END) }
-            else -> return null
+            EnumSeekMode.FROM_BEGINNING -> io { fp.seek(pos, SEEK_SET) }
+            EnumSeekMode.FROM_POSITION -> io { fp.seek(pos, SEEK_CUR) }
+            EnumSeekMode.FROM_END -> io { fp.seek(pos, SEEK_END) }
         }
 
         return position()

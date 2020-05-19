@@ -20,6 +20,10 @@ interface CountingOutputFlow: OutputFlow {
     val streamOffset: Long
 }
 
+interface SeekableOutputFlow: OutputFlow {
+
+}
+
 @ExperimentalUnsignedTypes
 open class SinkCountingOutputFlow(val sink: OutputFlow) : CountingOutputFlow, OutputFlow by sink {
     var _count = 0L

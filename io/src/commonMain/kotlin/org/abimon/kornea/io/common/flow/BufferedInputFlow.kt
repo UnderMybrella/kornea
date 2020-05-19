@@ -1,12 +1,21 @@
 package org.abimon.kornea.io.common.flow
 
 import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.io.common.EnumSeekMode
 
 @ExperimentalUnsignedTypes
-open class BufferedInputFlow(val backing: InputFlow, override val location: String? = backing.location) : PeekableInputFlow {
+open class BufferedInputFlow(open val backing: InputFlow, override val location: String? = backing.location) : PeekableInputFlow {
     companion object {
         const val DEFAULT_BUFFER_SIZE = 8192
         const val MAX_BUFFER_SIZE = Int.MAX_VALUE - 8
+    }
+
+    open class Seekable(override val backing: SeekableInputFlow, override val location: String? = backing.location): BufferedInputFlow(backing, location), SeekableInputFlow {
+        override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
+            val shift = backing.seek(pos, mode)
+            fill()
+            return shift
+        }
     }
 
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
@@ -17,12 +26,12 @@ open class BufferedInputFlow(val backing: InputFlow, override val location: Stri
     override val isClosed: Boolean
         get() = closed
 
-    private suspend fun fill() {
+    protected suspend fun fill() {
         pos = 0
         fillPartial()
     }
 
-    private suspend fun fillPartial() {
+    protected suspend fun fillPartial() {
         count = 0
         val n = backing.read(buffer, pos, buffer.size - pos)
         if (n ?: 0 > 0)
@@ -66,7 +75,7 @@ open class BufferedInputFlow(val backing: InputFlow, override val location: Stri
         return buffer[pos++].toInt() and 0xFF
     }
 
-    private suspend fun read1(b: ByteArray, off: Int, len: Int): Int? {
+    protected suspend fun read1(b: ByteArray, off: Int, len: Int): Int? {
         var avail = count - pos
         if (avail <= 0) {
             if (len >= buffer.size) {

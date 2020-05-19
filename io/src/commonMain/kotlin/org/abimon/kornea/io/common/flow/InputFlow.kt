@@ -9,8 +9,11 @@ import org.abimon.kornea.io.common.*
 @ExperimentalUnsignedTypes
 interface InputFlow : ObservableDataCloseable {
     companion object {
+        @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_BEGINNING", "org.abimon.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
         const val FROM_BEGINNING = 0
+        @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_END", "org.abimon.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
         const val FROM_END = 1
+        @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_POSITION", "org.abimon.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
         const val FROM_POSITION = 2
     }
 
@@ -20,6 +23,8 @@ interface InputFlow : ObservableDataCloseable {
     suspend fun read(b: ByteArray): Int? = read(b, 0, b.size)
     suspend fun read(b: ByteArray, off: Int, len: Int): Int?
     suspend fun skip(n: ULong): ULong?
+    @Suppress("DeprecatedCallableAddReplaceWith")
+    @Deprecated("Use SeekableInputFlow", level = DeprecationLevel.ERROR)
     suspend fun seek(pos: Long, mode: Int): ULong? = null
     suspend fun position(): ULong
 
@@ -31,6 +36,16 @@ interface InputFlow : ObservableDataCloseable {
 @ExperimentalUnsignedTypes
 interface PeekableInputFlow: InputFlow {
     suspend fun peek(forward: Int = 1): Int?
+}
+
+@ExperimentalUnsignedTypes
+interface OffsetInputFlow : InputFlow {
+    val baseOffset: ULong
+}
+
+@ExperimentalUnsignedTypes
+interface SeekableInputFlow: InputFlow {
+    suspend fun seek(pos: Long, mode: EnumSeekMode): ULong
 }
 
 @ExperimentalUnsignedTypes
@@ -74,24 +89,28 @@ suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray {
 @ExperimentalUnsignedTypes
 suspend inline fun <F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, block: (F) -> T): KorneaResult<T> {
     val bookmark = position()
-    return if (seek(offset.toLong(), InputFlow.FROM_BEGINNING) == null) {
-        dataSource.openInputFlow().map { flow ->
-            use(flow) {
-                flow.skip(offset)
-                block(flow)
-            }
+    return if (this !is SeekableInputFlow) {
+        val flow = dataSource.openInputFlow() ?: return null
+        use(flow) {
+            flow.skip(offset)
+            block(flow)
         }
     } else {
-        val result = block(this)
-        seek(bookmark.toLong(), InputFlow.FROM_BEGINNING)
-        KorneaResult.Success(result)
+        try {
+            seek(offset.toLong(), EnumSeekMode.FROM_BEGINNING)
+            val result = block(this)
+            skip(bookmark)
+            result
+        } finally {
+            seek(bookmark.toLong(), EnumSeekMode.FROM_BEGINNING)
+        }
     }
 }
 
 fun readResultIsValid(byte: Int): Boolean = byte != -1
 
 @ExperimentalUnsignedTypes
-public suspend inline fun <T : InputFlow, R> bookmark(t: T, block: () -> R): R {
+public suspend inline fun <T : SeekableInputFlow, R> bookmark(t: T, block: () -> R): R {
 //    contract {
 //        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
 //    }
@@ -100,7 +119,7 @@ public suspend inline fun <T : InputFlow, R> bookmark(t: T, block: () -> R): R {
     try {
         return block()
     } finally {
-        t.seek(position.toLong(), InputFlow.FROM_BEGINNING)
+        t.seek(position.toLong(), EnumSeekMode.FROM_BEGINNING)
     }
 }
 
