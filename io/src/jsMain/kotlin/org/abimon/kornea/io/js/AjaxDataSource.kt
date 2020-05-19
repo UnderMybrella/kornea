@@ -47,7 +47,7 @@ class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1, override 
                 return KorneaResult.Success(stream)
             }
             else -> return KorneaResult.Error(
-                DataSource.ERRORS_TOO_MANY_SOURCES_OPEN,
+                DataSource.ERRORS_TOO_MANY_FLOWS_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )
         }

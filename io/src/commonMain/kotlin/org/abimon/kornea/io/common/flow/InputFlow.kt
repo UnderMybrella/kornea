@@ -87,28 +87,28 @@ suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray {
 }
 
 @ExperimentalUnsignedTypes
-suspend inline fun <F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, block: (F) -> T): KorneaResult<T> {
-    val bookmark = position()
+suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, block: (F) -> T): KorneaResult<T> {
     return if (this !is SeekableInputFlow) {
-        val flow = dataSource.openInputFlow() ?: return null
-        use(flow) {
-            flow.skip(offset)
-            block(flow)
+//        val flow = dataSource.openInputFlow() ?: return null
+        dataSource.openInputFlow().map { flow ->
+            use(flow) {
+                flow.skip(offset)
+                block(flow)
+            }
         }
     } else {
-        try {
+        bookmark(this as SeekableInputFlow) {
             seek(offset.toLong(), EnumSeekMode.FROM_BEGINNING)
             val result = block(this)
-            skip(bookmark)
-            result
-        } finally {
-            seek(bookmark.toLong(), EnumSeekMode.FROM_BEGINNING)
+            KorneaResult.Success(result)
         }
     }
 }
 
 fun readResultIsValid(byte: Int): Boolean = byte != -1
 
+//@ExperimentalUnsignedTypes
+//public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(block: () -> R): R = bookmark(this, block)
 @ExperimentalUnsignedTypes
 public suspend inline fun <T : SeekableInputFlow, R> bookmark(t: T, block: () -> R): R {
 //    contract {

@@ -2,18 +2,22 @@ package org.abimon.kornea.io.jvm.files
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.abimon.kornea.erorrs.common.KorneaResult
 import org.abimon.kornea.io.common.*
+import org.abimon.kornea.io.common.DataSink.Companion.korneaSinkClosed
+import org.abimon.kornea.io.common.DataSink.Companion.korneaTooManySinksOpen
+import org.abimon.kornea.io.common.DataSink.Companion.korneaSinkUnknown
 import java.io.File
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.util.*
 import java.util.concurrent.ExecutorService
 import kotlin.collections.ArrayList
 
 @ExperimentalUnsignedTypes
 @ExperimentalKorneaIO
-class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChannel? = null, append: Boolean = false): DataSink<AsyncFileOutputFlow> {
+class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChannel? = null, append: Boolean = false) :
+    DataSink<AsyncFileOutputFlow> {
     companion object {
         suspend fun open(
             path: Path,
@@ -42,7 +46,13 @@ class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChann
             )
         }, append)
     }
-    constructor(backing: File, backingChannel: AsynchronousFileChannel? = null, append: Boolean = false): this(backing.toPath(), backingChannel, append)
+
+    constructor(
+        backing: File,
+        backingChannel: AsynchronousFileChannel? = null,
+        append: Boolean = false
+    ) : this(backing.toPath(), backingChannel, append)
+
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     private val openInstances: MutableList<AsyncFileOutputFlow> = ArrayList(1)
@@ -53,22 +63,32 @@ class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChann
     private var initialised: Boolean = false
     private val channel: AsynchronousFileChannel by lazy {
         initialised = true
-        backingChannel ?: AsynchronousFileChannel.open(backing, listOfNotNull(StandardOpenOption.CREATE, StandardOpenOption.WRITE, if (append) StandardOpenOption.APPEND else null).toSet(), null)
+        backingChannel ?: AsynchronousFileChannel.open(
+            backing,
+            listOfNotNull(
+                StandardOpenOption.CREATE,
+                StandardOpenOption.WRITE,
+                if (append) StandardOpenOption.APPEND else null
+            ).toSet(),
+            null
+        )
     }
 
     private suspend fun getChannel(): AsynchronousFileChannel =
         if (!initialised) withContext(Dispatchers.IO) { channel } else channel
 
-    override suspend fun openOutputFlow(): AsyncFileOutputFlow? {
-        if (canOpenOutputFlow()) {
-            val stream = AsyncFileOutputFlow(getChannel(), false, backing)
-            stream.addCloseHandler(this::instanceClosed)
-            openInstances.add(stream)
-            return stream
-        } else {
-            return null
+    override suspend fun openOutputFlow(): KorneaResult<AsyncFileOutputFlow> =
+        when {
+            closed -> korneaSinkClosed()
+            openInstances.isNotEmpty() -> korneaTooManySinksOpen(1)
+            canOpenOutputFlow() -> {
+                val stream = AsyncFileOutputFlow(getChannel(), false, backing)
+                stream.addCloseHandler(this::instanceClosed)
+                openInstances.add(stream)
+                KorneaResult.Success(stream)
+            }
+            else -> korneaSinkUnknown()
         }
-    }
 
     override suspend fun canOpenOutputFlow(): Boolean = !closed && (openInstances.size < 1)
 

@@ -20,6 +20,7 @@ interface CountingOutputFlow: OutputFlow {
     val streamOffset: Long
 }
 
+@ExperimentalUnsignedTypes
 interface SeekableOutputFlow: OutputFlow {
 
 }

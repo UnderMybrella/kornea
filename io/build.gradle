@@ -1,6 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
 
-version = '3.1.4'
+version = '3.1.5'
 
 kotlin {
     /* Targets configuration omitted. 
@@ -23,7 +23,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
-                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.3'
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.5-1.4-M1'
                 implementation project(':kornea-errors')
             }
         }
@@ -36,23 +36,23 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation kotlin('stdlib-jdk8')
-                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3'
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5-1.4-M1'
             }
         }
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')
-                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.3'
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.5-1.4-M1'
             }
         }
         mingwX64Main {
             dependencies {
-                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.3'
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.5-1.4-M1'
             }
         }
         linuxX64Main {
             dependencies {
-                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.3'
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.5-1.4-M1'
             }
         }
 

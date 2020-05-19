@@ -2,7 +2,7 @@ package org.abimon.kornea.io.common
 
 import org.abimon.kornea.erorrs.common.KorneaResult
 import org.abimon.kornea.io.common.DataSource.Companion.ERRORS_SOURCE_CLOSED
-import org.abimon.kornea.io.common.DataSource.Companion.ERRORS_TOO_MANY_SOURCES_OPEN
+import org.abimon.kornea.io.common.DataSource.Companion.ERRORS_TOO_MANY_FLOWS_OPEN
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import kotlin.math.max
 
@@ -37,7 +37,7 @@ class BinaryDataSource(
                 return KorneaResult.Success(stream)
             }
             else -> return KorneaResult.Error(
-                ERRORS_TOO_MANY_SOURCES_OPEN,
+                ERRORS_TOO_MANY_FLOWS_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )
         }

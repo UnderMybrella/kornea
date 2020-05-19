@@ -244,7 +244,7 @@ suspend fun InputFlow.readInt24LE(): Int? {
     val b = read() ?: return null
     val c = read() ?: return null
 
-    return (b shl 16) or (b shl 8) or a
+    return (c shl 16) or (b shl 8) or a
 }
 
 @ExperimentalUnsignedTypes

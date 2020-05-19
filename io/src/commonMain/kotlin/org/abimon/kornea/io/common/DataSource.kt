@@ -12,7 +12,22 @@ import org.abimon.kornea.io.common.flow.OutputFlow
 interface DataSource<I : InputFlow> : ObservableDataCloseable {
     companion object {
         const val ERRORS_SOURCE_CLOSED = 0x1000
-        const val ERRORS_TOO_MANY_SOURCES_OPEN = 0x1001
+        const val ERRORS_TOO_MANY_FLOWS_OPEN = 0x1001
+        const val ERRORS_UNKNOWN = 0x1FFF
+
+        @ExperimentalUnsignedTypes
+        inline fun <reified T> korneaSourceClosed(message: String = "Sink closed"): KorneaResult.Error<T, Unit> =
+            KorneaResult.Error(ERRORS_SOURCE_CLOSED, message)
+
+        @ExperimentalUnsignedTypes
+        inline fun <reified T> korneaTooManySourcesOpen(capacity: Int): KorneaResult.Error<T, Unit> = korneaTooManySourcesOpen("Too many flows open (Capacity: $capacity)")
+        @ExperimentalUnsignedTypes
+        inline fun <reified T> korneaTooManySourcesOpen(message: String): KorneaResult.Error<T, Unit> =
+            KorneaResult.Error(ERRORS_TOO_MANY_FLOWS_OPEN, message)
+
+        @ExperimentalUnsignedTypes
+        inline fun <reified T> korneaSourceUnknown(message: String = "An unknown error has occurred"): KorneaResult.Error<T, Unit> =
+            KorneaResult.Error(ERRORS_UNKNOWN, message)
     }
 
     val dataSize: ULong?

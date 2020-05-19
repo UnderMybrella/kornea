@@ -132,7 +132,7 @@ suspend fun InputFlow.loadProperties(): Map<String, String> {
         if (limit <= 0) {
             break
         }
-        c = 0.toChar()
+//        c = '\u0000'
         keyLen = 0
         valueStart = limit
         hasSep = false

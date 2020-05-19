@@ -10,5 +10,5 @@ annotation class NonBlockingOperation
 annotation class BlockableContext
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CONSTRUCTOR, AnnotationTarget.CLASS)
-@Experimental(Experimental.Level.WARNING)
+@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
 annotation class ExperimentalKorneaIO
