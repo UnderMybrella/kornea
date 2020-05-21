@@ -41,9 +41,9 @@ class AsyncFileInputFlow(
 
     private val bufferMutex: Mutex = Mutex()
     private var flowFilePointer: Long = 0L
-    private var buffer: ByteBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
+    private var buffer: ByteBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE).apply { limitSafe(0) } //Force a refill
     private var peekFilePointer: Long = 0L
-    private var peekBuffer: ByteBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
+    private var peekBuffer: ByteBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE).apply { limitSafe(0) }
     private var count: Int = 0
 
     private var closed: Boolean = false
