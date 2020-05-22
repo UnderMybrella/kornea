@@ -6,6 +6,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 import org.abimon.kornea.io.common.flow.CountingOutputFlow
+import org.abimon.kornea.io.jvm.flipSafe
+import org.abimon.kornea.io.jvm.rewindSafe
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -79,7 +81,8 @@ class AsyncFileOutputFlow(
         get() = closed
 
     private suspend fun flushBuffer() {
-        if (buffer.hasRemaining() && !closed) {
+        if (!closed && buffer.position() != 0) {
+            buffer.flipSafe()
             channel.writeAwaitOrNull(buffer, filePointer)?.let { filePointer += it }
             buffer.clear()
         }
