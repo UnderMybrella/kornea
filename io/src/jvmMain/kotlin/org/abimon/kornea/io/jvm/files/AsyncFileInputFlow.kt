@@ -210,7 +210,7 @@ class AsyncFileInputFlow(
     override suspend fun remaining(): ULong = size() - position()
     override suspend fun size(): ULong = withContext(Dispatchers.IO) { channel.size().toULong() }
     override suspend fun position(): ULong =
-        withContext(Dispatchers.IO) { bufferMutex.withLock { flowFilePointer - buffer.position() } }.toULong()
+        withContext(Dispatchers.IO) { bufferMutex.withLock { flowFilePointer - buffer.limit() + buffer.position() } }.toULong()
 
     override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
         bufferMutex.withLock {
