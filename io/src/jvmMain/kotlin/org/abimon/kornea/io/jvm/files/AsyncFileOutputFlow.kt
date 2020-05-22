@@ -91,7 +91,7 @@ class AsyncFileOutputFlow(
     override suspend fun write(byte: Int) {
         if (closed) return
         mutex.withLock {
-            if (buffer.hasRemaining()) flushBuffer()
+            flushBuffer()
             buffer.put(byte.toByte())
         }
     }
