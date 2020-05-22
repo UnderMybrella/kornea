@@ -42,7 +42,7 @@ class AsyncFileDataSource(val backing: Path, backingChannel: AsynchronousFileCha
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<AsyncFileInputFlow> =
         when {
             closed -> korneaSourceClosed()
-            !initialised && Files.exists(backing) -> korneaNotFound("$backing does not exist")
+            !initialised && !Files.exists(backing) -> korneaNotFound("$backing does not exist")
             canOpenInputFlow() -> {
                 val flow = AsyncFileInputFlow(getChannel(), false, backing, location ?: this.location)
                 flow.addCloseHandler(this::instanceClosed)
