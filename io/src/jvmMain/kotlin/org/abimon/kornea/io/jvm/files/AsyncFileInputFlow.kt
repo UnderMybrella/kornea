@@ -194,9 +194,10 @@ class AsyncFileInputFlow(
 
             if (buffer.remaining() < n.toInt()) {
                 val avail = buffer.remaining()
-                buffer.positionSafe(buffer.position() + avail)
+                buffer.positionSafe(buffer.capacity())
+                flowFilePointer += n.toInt() - avail
 
-                return avail.toULong() + (skip(n - avail.toULong()))
+                return n
             } else {
                 buffer.positionSafe(buffer.position() + n.toInt())
 
