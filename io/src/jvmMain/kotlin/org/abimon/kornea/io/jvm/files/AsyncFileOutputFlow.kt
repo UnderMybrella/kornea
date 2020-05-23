@@ -134,7 +134,10 @@ class AsyncFileOutputFlow(
             if (isLocalChannel) {
                 mutex.withLock {
                     flushBuffer()
-                    withContext(Dispatchers.IO) { channel.close() }
+                    withContext(Dispatchers.IO) {
+                        channel.force(true)
+                        channel.close()
+                    }
                 }
             }
             closed = true
