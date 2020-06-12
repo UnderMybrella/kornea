@@ -1,7 +1,10 @@
 package org.abimon.kornea.io.common
 
-import org.abimon.kornea.erorrs.common.KorneaResult
-import org.abimon.kornea.erorrs.common.map
+import org.abimon.kornea.errors.common.KorneaResult
+import org.abimon.kornea.errors.common.map
+import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceClosed
+import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceUnknown
+import org.abimon.kornea.io.common.DataSource.Companion.korneaTooManySourcesOpen
 import org.abimon.kornea.io.common.flow.WindowedInputFlow
 import kotlin.math.max
 
@@ -32,7 +35,8 @@ open class WindowedDataSource(
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<WindowedInputFlow> {
         when {
-            closed || parent.isClosed -> return KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed || parent.isClosed -> return korneaSourceClosed()
+            openInstances.size == maxInstanceCount -> return korneaTooManySourcesOpen(maxInstanceCount)
             canOpenInputFlow() -> return parent.openInputFlow().map { parentFlow ->
                 val flow = WindowedInputFlow(parentFlow, windowOffset, windowSize, location ?: this.location)
                 flow.addCloseHandler(this::instanceClosed)
@@ -40,16 +44,14 @@ open class WindowedDataSource(
 
                 flow
             }
-            else -> return KorneaResult.Error(
-                DataSource.ERRORS_TOO_MANY_FLOWS_OPEN,
-                "Too many instances open (${openInstances.size}/${maxInstanceCount})"
-            )
+            else -> return korneaSourceUnknown()
         }
     }
 
     override suspend fun canOpenInputFlow(): Boolean =
         !closed && parent.canOpenInputFlow() && (maxInstanceCount == -1 || openInstances.size < maxInstanceCount)
 
+    @Suppress("RedundantSuspendModifier")
     private suspend fun instanceClosed(closeable: ObservableDataCloseable) {
         if (closeable is WindowedInputFlow) {
             openInstances.remove(closeable)

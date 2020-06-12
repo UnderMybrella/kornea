@@ -2,7 +2,7 @@ package org.abimon.kornea.io.jvm.files
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.abimon.kornea.io.common.BlockingOperation
+import org.abimon.kornea.annotations.BlockingOperation
 import org.abimon.kornea.io.common.flow.readResultIsValid
 import java.io.File
 import java.nio.ByteBuffer

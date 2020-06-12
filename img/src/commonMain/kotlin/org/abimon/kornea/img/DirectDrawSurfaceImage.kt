@@ -1,9 +1,9 @@
 package org.abimon.kornea.img
 
-import org.abimon.kornea.erorrs.common.KorneaResult
-import org.abimon.kornea.erorrs.common.cast
-import org.abimon.kornea.erorrs.common.doOnFailure
-import org.abimon.kornea.erorrs.common.korneaNotEnoughData
+import org.abimon.kornea.errors.common.KorneaResult
+import org.abimon.kornea.errors.common.cast
+import org.abimon.kornea.errors.common.doOnFailure
+import org.abimon.kornea.errors.common.korneaNotEnoughData
 import org.abimon.kornea.img.bc7.BC7PixelData
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.isBitSet
@@ -70,7 +70,7 @@ data class DirectDrawSurfaceHeader(
             val caps4 = flow.readInt32LE() ?: return korneaNotEnoughData()
             val reserved2 = flow.readInt32LE() ?: return korneaNotEnoughData()
 
-            return KorneaResult.Success(
+            return KorneaResult.success(
                 DirectDrawSurfaceHeader(
                     flags,
                     height,
@@ -129,7 +129,7 @@ data class DirectDrawSurfacePixelFormat(
             val blueBitMask = flow.readInt32LE() ?: return korneaNotEnoughData()
             val alphaBitMask = flow.readInt32LE() ?: return korneaNotEnoughData()
 
-            return KorneaResult.Success(
+            return KorneaResult.success(
                 DirectDrawSurfacePixelFormat(
                     flags,
                     fourCC,
@@ -172,7 +172,7 @@ data class DirectDrawSurfaceHeaderDX10(
             val arraySize = flow.readInt32LE() ?: return korneaNotEnoughData()
             val miscFlags2 = flow.readInt32LE() ?: return korneaNotEnoughData()
 
-            return KorneaResult.Success(
+            return KorneaResult.success(
                 DirectDrawSurfaceHeaderDX10(
                     dxgiFormat,
                     resourceDimension,
@@ -216,17 +216,17 @@ suspend fun InputFlow.readDDSImage(): KorneaResult<DirectDrawSurfaceImage> {
         when (header.pixelFormat.fourCC) {
             DirectDrawSurfacePixelFormat.DXT1 -> rgb = DXT1PixelData.read(header.width, header.height, this).rgb
             DirectDrawSurfacePixelFormat.DX10 -> rgb = BC7PixelData.read(header.width, header.height, this).rgb
-            else -> return KorneaResult.Error(
+            else -> return KorneaResult.errorAsIllegalState(
                 DirectDrawSurfacePixelFormat.FORMAT_NOT_IMPLEMENTED,
                 "Format 0x${header.pixelFormat.fourCC.toString(16).padStart(8, '0')} not implemented"
             )
         }
     } else {
-        return KorneaResult.Error(
+        return KorneaResult.errorAsIllegalState(
             DirectDrawSurfacePixelFormat.UNKNOWN_FORMAT,
             "Unknown format flags ${header.pixelFormat.flags}"
         )
     }
 
-    return KorneaResult.Success(DirectDrawSurfaceImage(header, header10, rgb))
+    return KorneaResult.success(DirectDrawSurfaceImage(header, header10, rgb))
 }

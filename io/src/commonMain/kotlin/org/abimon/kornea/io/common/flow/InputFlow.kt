@@ -2,8 +2,8 @@
 
 package org.abimon.kornea.io.common.flow
 
-import org.abimon.kornea.erorrs.common.KorneaResult
-import org.abimon.kornea.erorrs.common.map
+import org.abimon.kornea.errors.common.KorneaResult
+import org.abimon.kornea.errors.common.map
 import org.abimon.kornea.io.common.*
 
 @ExperimentalUnsignedTypes
@@ -100,7 +100,7 @@ suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset:
         bookmark(this as SeekableInputFlow) {
             seek(offset.toLong(), EnumSeekMode.FROM_BEGINNING)
             val result = block(this)
-            KorneaResult.Success(result)
+            KorneaResult.success(result)
         }
     }
 }

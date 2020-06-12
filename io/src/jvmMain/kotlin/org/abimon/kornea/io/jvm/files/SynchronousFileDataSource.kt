@@ -1,6 +1,6 @@
 package org.abimon.kornea.io.jvm.files
 
-import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.io.common.*
 import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceClosed
 import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceUnknown
@@ -35,7 +35,7 @@ class SynchronousFileDataSource(
                 val stream = SynchronousFileInputFlow(backing, location ?: this.location)
                 stream.addCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
-                KorneaResult.Success(stream)
+                KorneaResult.success(stream)
             }
             else -> korneaSourceUnknown()
         }

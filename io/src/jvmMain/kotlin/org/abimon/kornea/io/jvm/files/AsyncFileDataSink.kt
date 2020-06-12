@@ -2,7 +2,8 @@ package org.abimon.kornea.io.jvm.files
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.annotations.ExperimentalKorneaIO
+import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.io.common.*
 import org.abimon.kornea.io.common.DataSink.Companion.korneaSinkClosed
 import org.abimon.kornea.io.common.DataSink.Companion.korneaTooManySinksOpen
@@ -81,17 +82,19 @@ class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChann
         when {
             closed -> korneaSinkClosed()
             openInstances.isNotEmpty() -> korneaTooManySinksOpen(1)
+
             canOpenOutputFlow() -> {
                 val stream = AsyncFileOutputFlow(getChannel(), false, backing)
                 stream.addCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
-                KorneaResult.Success(stream)
+                KorneaResult.success(stream)
             }
             else -> korneaSinkUnknown()
         }
 
     override suspend fun canOpenOutputFlow(): Boolean = !closed && (openInstances.size < 1)
 
+    @Suppress("RedundantSuspendModifier")
     private suspend fun instanceClosed(closeable: ObservableDataCloseable) {
         if (closeable is AsyncFileOutputFlow) {
             openInstances.remove(closeable)

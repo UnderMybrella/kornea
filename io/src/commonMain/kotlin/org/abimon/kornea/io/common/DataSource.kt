@@ -1,7 +1,7 @@
 package org.abimon.kornea.io.common
 
-import org.abimon.kornea.erorrs.common.KorneaResult
-import org.abimon.kornea.erorrs.common.map
+import org.abimon.kornea.errors.common.KorneaResult
+import org.abimon.kornea.errors.common.map
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.flow.OutputFlow
 
@@ -16,18 +16,18 @@ interface DataSource<I : InputFlow> : ObservableDataCloseable {
         const val ERRORS_UNKNOWN = 0x1FFF
 
         @ExperimentalUnsignedTypes
-        inline fun <reified T> korneaSourceClosed(message: String = "Sink closed"): KorneaResult.Error<T, Unit> =
-            KorneaResult.Error(ERRORS_SOURCE_CLOSED, message)
+        inline fun <reified T> korneaSourceClosed(message: String = "Sink closed"): KorneaResult<T> =
+            KorneaResult.errorAsIllegalState(ERRORS_SOURCE_CLOSED, message)
 
         @ExperimentalUnsignedTypes
-        inline fun <reified T> korneaTooManySourcesOpen(capacity: Int): KorneaResult.Error<T, Unit> = korneaTooManySourcesOpen("Too many flows open (Capacity: $capacity)")
+        inline fun <reified T> korneaTooManySourcesOpen(capacity: Int): KorneaResult<T> = korneaTooManySourcesOpen("Too many flows open (Capacity: $capacity)")
         @ExperimentalUnsignedTypes
-        inline fun <reified T> korneaTooManySourcesOpen(message: String): KorneaResult.Error<T, Unit> =
-            KorneaResult.Error(ERRORS_TOO_MANY_FLOWS_OPEN, message)
+        inline fun <reified T> korneaTooManySourcesOpen(message: String): KorneaResult<T> =
+            KorneaResult.errorAsIllegalState(ERRORS_TOO_MANY_FLOWS_OPEN, message)
 
         @ExperimentalUnsignedTypes
-        inline fun <reified T> korneaSourceUnknown(message: String = "An unknown error has occurred"): KorneaResult.Error<T, Unit> =
-            KorneaResult.Error(ERRORS_UNKNOWN, message)
+        inline fun <reified T> korneaSourceUnknown(message: String = "An unknown error has occurred"): KorneaResult<T> =
+            KorneaResult.errorAsIllegalState(ERRORS_UNKNOWN, message)
     }
 
     val dataSize: ULong?

@@ -2,8 +2,10 @@ package org.abimon.kornea.io.jvm.files
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.abimon.kornea.erorrs.common.KorneaResult
-import org.abimon.kornea.erorrs.common.korneaNotFound
+import org.abimon.kornea.annotations.BlockingOperation
+import org.abimon.kornea.annotations.ExperimentalKorneaIO
+import org.abimon.kornea.errors.common.KorneaResult
+import org.abimon.kornea.errors.common.korneaNotFound
 import org.abimon.kornea.io.common.*
 import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceClosed
 import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceUnknown
@@ -43,11 +45,12 @@ class AsyncFileDataSource(val backing: Path, backingChannel: AsynchronousFileCha
         when {
             closed -> korneaSourceClosed()
             !initialised && !Files.exists(backing) -> korneaNotFound("$backing does not exist")
+
             canOpenInputFlow() -> {
                 val flow = AsyncFileInputFlow(getChannel(), false, backing, location ?: this.location)
                 flow.addCloseHandler(this::instanceClosed)
                 openInstances.add(flow)
-                KorneaResult.Success(flow)
+                KorneaResult.success(flow)
             }
             else -> korneaSourceUnknown()
         }

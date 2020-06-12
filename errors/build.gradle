@@ -1,6 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
 
-version = '2.0.2'
+version = '3.0.0'
 
 kotlin {
     /* Targets configuration omitted. 
@@ -23,6 +23,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
+                implementation project(":kornea-annotations")
             }
         }
         commonTest {
@@ -51,7 +52,10 @@ kotlin {
         }
 
         all {
-            languageSettings.enableLanguageFeature("InlineClasses")
+            languageSettings {
+                enableLanguageFeature("InlineClasses")
+                explicitApi()
+            }
         }
     }
 }

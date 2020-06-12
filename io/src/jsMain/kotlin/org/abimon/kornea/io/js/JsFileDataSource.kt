@@ -5,8 +5,11 @@ import kotlinx.coroutines.await
 import kotlinx.coroutines.promise
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.io.common.*
+import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceClosed
+import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceUnknown
+import org.abimon.kornea.io.common.DataSource.Companion.korneaTooManySourcesOpen
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Int8Array
@@ -39,17 +42,15 @@ class JsFileDataSource(val file: File, val maxInstanceCount: Int = -1, override 
         waitIfNeeded()
 
         when {
-            closed -> return KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed -> return korneaSourceClosed()
+            maxInstanceCount == openInstances.size -> return korneaTooManySourcesOpen(maxInstanceCount)
             canOpenInputFlow() -> {
                 val stream = BinaryInputFlow(data!!, location = location ?: this.location)
                 stream.addCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
-                return KorneaResult.Success(stream)
+                return KorneaResult.success(stream)
             }
-            else -> return KorneaResult.Error(
-                DataSource.ERRORS_TOO_MANY_FLOWS_OPEN,
-                "Too many instances open (${openInstances.size}/${maxInstanceCount})"
-            )
+            else -> return korneaSourceUnknown()
         }
     }
     override suspend fun canOpenInputFlow(): Boolean {

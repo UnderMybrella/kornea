@@ -1,6 +1,6 @@
 package org.abimon.kornea.io.common
 
-import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.io.common.DataSink.Companion.ERRORS_SINK_CLOSED
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import org.abimon.kornea.io.common.flow.BinaryOutputFlow
@@ -28,14 +28,14 @@ class BinaryDataPool(
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
         when {
-            closed -> return KorneaResult.Error(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
+            closed -> return KorneaResult.errorAsIllegalState(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
             canOpenInputFlow() -> {
                 val stream = BinaryInputFlow(output.getData(), location = location ?: this.location)
                 stream.addCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
-                return KorneaResult.Success(stream)
+                return KorneaResult.success(stream)
             }
-            else -> return KorneaResult.Error(
+            else -> return KorneaResult.errorAsIllegalState(
                 DataSource.ERRORS_TOO_MANY_FLOWS_OPEN,
                 "Too many instances open (${openInstances.size}/${maxInstanceCount})"
             )
@@ -69,8 +69,8 @@ class BinaryDataPool(
     }
 
     override suspend fun openOutputFlow(): KorneaResult<BinaryOutputFlow> =
-        if (canOpenOutputFlow()) KorneaResult.Success(output)
-        else KorneaResult.Error(ERRORS_SINK_CLOSED, "Sink closed")
+        if (canOpenOutputFlow()) KorneaResult.success(output)
+        else KorneaResult.errorAsIllegalState(ERRORS_SINK_CLOSED, "Sink closed")
 
     override suspend fun canOpenOutputFlow(): Boolean = !outputClosed
 

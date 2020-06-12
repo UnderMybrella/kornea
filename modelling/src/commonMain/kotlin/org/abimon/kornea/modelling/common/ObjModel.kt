@@ -1,7 +1,6 @@
 package org.abimon.kornea.modelling.common
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.abimon.kornea.erorrs.common.KorneaResult
+import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.io.common.flow.FlowReader
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.flow.useEachLine
@@ -13,7 +12,6 @@ inline class ObjModel(val meshes: Array<Mesh>) {
         const val MISSING_NORMALS = 2
         const val EMPTY_MODEL = 3
 
-        @ExperimentalCoroutinesApi
         @ExperimentalUnsignedTypes
         suspend operator fun invoke(flow: InputFlow, trimVerticesForGroups: Boolean = false): KorneaResult<ObjModel> {
             val reader = FlowReader(flow)
@@ -163,7 +161,7 @@ inline class ObjModel(val meshes: Array<Mesh>) {
 
                         when {
                             components.size < 3 ->
-                                return KorneaResult.Error(
+                                return KorneaResult.errorAsIllegalArgument(
                                     MISSING_NORMALS,
                                     "Invalid face (Only has ${components.size} elements)"
                                 )
@@ -226,7 +224,7 @@ inline class ObjModel(val meshes: Array<Mesh>) {
             }
 
             if (vertices.isEmpty() && uvs.isEmpty() && normals.isEmpty() && meshes.isEmpty())
-                return KorneaResult.Error(EMPTY_MODEL, "Model was empty")
+                return KorneaResult.errorAsIllegalArgument(EMPTY_MODEL, "Model was empty")
 
             meshes.forEach { mesh ->
                 mesh.faces.forEachIndexed { i, face ->
@@ -256,17 +254,17 @@ inline class ObjModel(val meshes: Array<Mesh>) {
                         if (remappedIndex !== faceIndex) indices[index] = remappedIndex
 
                         if (remappedIndex.vertex !in vertices.indices)
-                            return KorneaResult.Error(
+                            return KorneaResult.errorAsIllegalArgument(
                                 MISSING_VERTICES,
                                 "Missing Vertex: ${remappedIndex.vertex}"
                             )
                         if (remappedIndex.textureCoordinate != null && remappedIndex.textureCoordinate!! !in uvs.indices)
-                            return KorneaResult.Error(
+                            return KorneaResult.errorAsIllegalArgument(
                                 MISSING_UVS,
                                 "Missing UV: ${remappedIndex.textureCoordinate}"
                             )
                         if (remappedIndex.normal != null && remappedIndex.normal!! !in normals.indices)
-                            return KorneaResult.Error(
+                            return KorneaResult.errorAsIllegalArgument(
                                 MISSING_NORMALS,
                                 "Missing Normal: ${remappedIndex.normal}"
                             )
@@ -278,11 +276,7 @@ inline class ObjModel(val meshes: Array<Mesh>) {
                 }
             }
 
-            return KorneaResult.Success(
-                ObjModel(
-                    meshes.toTypedArray()
-                )
-            )
+            return KorneaResult.success(ObjModel(meshes.toTypedArray()))
         }
     }
 }
