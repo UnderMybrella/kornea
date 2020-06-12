@@ -47,13 +47,13 @@ public interface KorneaResult<out T> {
         public inline fun <T> errorAsIllegalArgument(
             errorCode: Int,
             errorMessage: String,
-            cause: Failure? = null,
+            cause: KorneaResult<*>? = null,
             generateStacktraceOnCreation: Boolean = WithErrorCode.DEFAULT_GENERATE_STACKTRACE_ON_CREATION,
             includeResultCodeInError: Boolean = WithErrorCode.DEFAULT_INCLUDE_RESULT_CODE_IN_ERROR
         ): KorneaResult<T> = WithErrorCode.asIllegalArgument(
             errorCode,
             errorMessage,
-            cause,
+            cause as? Failure,
             generateStacktraceOnCreation,
             includeResultCodeInError
         ).asType()
@@ -61,13 +61,13 @@ public interface KorneaResult<out T> {
         public inline fun <T> errorAsIllegalState(
             errorCode: Int,
             errorMessage: String,
-            cause: Failure? = null,
+            cause: KorneaResult<*>? = null,
             generateStacktraceOnCreation: Boolean = WithErrorCode.DEFAULT_GENERATE_STACKTRACE_ON_CREATION,
             includeResultCodeInError: Boolean = WithErrorCode.DEFAULT_INCLUDE_RESULT_CODE_IN_ERROR
         ): KorneaResult<T> = WithErrorCode.asIllegalState(
             errorCode,
             errorMessage,
-            cause,
+            cause as? Failure,
             generateStacktraceOnCreation,
             includeResultCodeInError
         ).asType()
@@ -76,24 +76,24 @@ public interface KorneaResult<out T> {
             errorCode: Int,
             errorMessage: String,
             exception: E,
-            cause: Failure? = null
+            cause: KorneaResult<*>? = null
         ): KorneaResult<T> = WithErrorCode.of(
             errorCode,
             errorMessage,
             exception,
-            cause
+            cause as Failure
         ).asType()
 
         public fun <T, E : Throwable> error(
             errorCode: Int,
             errorMessage: String,
             supplier: (WithErrorCode) -> E,
-            cause: Failure? = null
+            cause: KorneaResult<*>? = null
         ): KorneaResult<T> = WithErrorCode.of(
             errorCode,
             errorMessage,
             supplier,
-            cause
+            cause as Failure
         ).asType()
 
         public fun dirtyImplementationString(impl: KorneaResult<*>): String =
@@ -610,7 +610,7 @@ public inline fun <T, reified E : Throwable> KorneaResult<T>.switchIfHasTypedExc
     }
 
 /** Run when this result is any failed state */
-public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult<T>) -> Nothing): T =
+public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult.Failure) -> Nothing): T =
     when (this) {
         is KorneaResult.Success<T> -> get()
         is KorneaResult.Failure -> block(this)
