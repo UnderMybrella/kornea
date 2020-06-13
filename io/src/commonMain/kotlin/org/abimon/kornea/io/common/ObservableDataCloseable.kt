@@ -87,7 +87,7 @@ public suspend inline fun <T : DataCloseable?, R> T.useBlockCrossinline(crossinl
  * NOTE: Currently, if [block] is *not* marked with crossinline, Kotlin may crash with an internal compiler error.
  */
 @ExperimentalUnsignedTypes
-public suspend inline fun <T : DataCloseable?, R> use(t: T, crossinline block: suspend () -> R): R {
+public suspend inline fun <T : DataCloseable?, R> closeAfter(t: T, crossinline block: suspend () -> R): R {
 //    contract {
 //        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
 //    }
@@ -104,7 +104,7 @@ public suspend inline fun <T : DataCloseable?, R> use(t: T, crossinline block: s
 }
 
 @WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("use(t, block)", "org.abimon.kornea.io.common.use"))
-public suspend inline fun <T : DataCloseable?, R> useInline(t: T, block: () -> R): R {
+public suspend inline fun <T : DataCloseable?, R> closeAfterInline(t: T, block: () -> R): R {
 //    contract {
 //        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
 //    }
