@@ -1,5 +1,7 @@
 package org.abimon.kornea.errors.common
 
+import org.abimon.kornea.annotations.AvailableSince
+import org.abimon.kornea.annotations.ChangedSince
 import org.abimon.kornea.annotations.ExperimentalKorneaErrors
 
 public interface KorneaResult<out T> {
@@ -610,14 +612,17 @@ public inline fun <T, reified E : Throwable> KorneaResult<T>.switchIfHasTypedExc
     }
 
 /** Run when this result is any failed state */
-public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult.Failure) -> Nothing): T =
+@ChangedSince(KorneaErrors.VERSION_3_0_2, "doOnFailure now returns the KorneaResult after processing, and block returns a Unit rather than Nothing. Previous functionality can be achieved with getOrBreak")
+public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult.Failure) -> Unit): KorneaResult<T> =
     when (this) {
-        is KorneaResult.Success<T> -> get()
-        is KorneaResult.Failure -> block(this)
+        is KorneaResult.Failure -> {
+            block(this)
+            this
+        }
+
+        is KorneaResult.Success<T> -> this
         else -> throw IllegalStateException(
-            KorneaResult.dirtyImplementationString(
-                this
-            )
+            KorneaResult.dirtyImplementationString(this)
         )
     }
 
@@ -700,6 +705,20 @@ public inline fun <T> KorneaResult<T>.doOnSuccess(block: (T) -> Unit): KorneaRes
                 this
             )
         )
+    }
+
+
+/**
+ * Returns the value stored on a success, or runs [onFailure] when in a fail state.
+ *
+ * Fail states must not continue execution after they are called (ie: must return/shutdown/throw)
+ */
+@AvailableSince(KorneaErrors.VERSION_3_0_2)
+public inline fun <T> KorneaResult<T>.getOrBreak(onFailure: (KorneaResult.Failure) -> Nothing): T =
+    when (this) {
+        is KorneaResult.Success<T> -> get()
+        is KorneaResult.Failure -> onFailure(this)
+        else -> throw IllegalStateException(KorneaResult.dirtyImplementationString(this))
     }
 
 
