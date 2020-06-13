@@ -15,6 +15,7 @@ include ':errors'
 include ':io'
 include ':img'
 include ':modelling'
-include ':bootstrap'
+include ':toolkit'
+//include ':bootstrap'
 
 rootProject.children.each { child -> child.name = "kornea-${child.name}"}
