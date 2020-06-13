@@ -80,7 +80,7 @@ suspend fun InputFlow.readExact(buffer: ByteArray, offset: Int, length: Int): By
 
 @ExperimentalUnsignedTypes
 suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray =
-    use(this) {
+    closeAfter(this) {
         val buffer = BinaryOutputFlow()
         copyTo(buffer, bufferSize)
 
@@ -92,7 +92,7 @@ suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset:
     return if (this !is SeekableInputFlow) {
 //        val flow = dataSource.openInputFlow() ?: return null
         dataSource.openInputFlow().map { flow ->
-            use(flow) {
+            closeAfter(flow) {
                 flow.skip(offset)
                 block(flow)
             }
