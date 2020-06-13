@@ -2,6 +2,7 @@
 
 package org.abimon.kornea.io.common.flow
 
+import org.abimon.kornea.annotations.WrongBytecodeGenerated
 import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.errors.common.map
 import org.abimon.kornea.io.common.*
@@ -78,16 +79,16 @@ suspend fun InputFlow.readExact(buffer: ByteArray, offset: Int, length: Int): By
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray {
+suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray =
     use(this) {
         val buffer = BinaryOutputFlow()
         copyTo(buffer, bufferSize)
-        return buffer.getData()
+
+        buffer.getData()
     }
-}
 
 @ExperimentalUnsignedTypes
-suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, block: (F) -> T): KorneaResult<T> {
+suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, crossinline block: suspend (F) -> T): KorneaResult<T> {
     return if (this !is SeekableInputFlow) {
 //        val flow = dataSource.openInputFlow() ?: return null
         dataSource.openInputFlow().map { flow ->
@@ -110,6 +111,7 @@ fun readResultIsValid(byte: Int): Boolean = byte != -1
 //@ExperimentalUnsignedTypes
 //public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(block: () -> R): R = bookmark(this, block)
 @ExperimentalUnsignedTypes
+@WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("bookmarkCrossinline(t, block)", "org.abimon.kornea.io.common.flow.bookmarkCrossinline"))
 public suspend inline fun <T : SeekableInputFlow, R> bookmark(t: T, block: () -> R): R {
 //    contract {
 //        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
@@ -121,6 +123,33 @@ public suspend inline fun <T : SeekableInputFlow, R> bookmark(t: T, block: () ->
     } finally {
         t.seek(position.toLong(), EnumSeekMode.FROM_BEGINNING)
     }
+}
+
+@ExperimentalUnsignedTypes
+public suspend inline fun <T : SeekableInputFlow, R> bookmarkCrossinline(t: T, crossinline block: suspend () -> R): R {
+//    contract {
+//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//    }
+
+    val position = t.position()
+    try {
+        return block()
+    } finally {
+        t.seek(position.toLong(), EnumSeekMode.FROM_BEGINNING)
+    }
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readChunked(bufferSize: Int = BufferedInputFlow.DEFAULT_BUFFER_SIZE, operation: (buffer: ByteArray, offset: Int, length: Int) -> Unit): Long? {
+    var bytesCopied: Long = 0
+    val buffer = ByteArray(bufferSize)
+    var bytes = read(buffer) ?: return null
+    while (bytes >= 0) {
+        operation(buffer, 0, bytes)
+        bytesCopied += bytes
+        bytes = read(buffer) ?: return bytesCopied
+    }
+    return bytesCopied
 }
 
 @ExperimentalUnsignedTypes
