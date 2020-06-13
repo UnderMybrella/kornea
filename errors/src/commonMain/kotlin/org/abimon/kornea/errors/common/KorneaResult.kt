@@ -613,6 +613,7 @@ public inline fun <T, reified E : Throwable> KorneaResult<T>.switchIfHasTypedExc
 
 /** Run when this result is any failed state */
 @ChangedSince(KorneaErrors.VERSION_3_0_2, "doOnFailure now returns the KorneaResult after processing, and block returns a Unit rather than Nothing. Previous functionality can be achieved with getOrBreak")
+@Deprecated("doOnFailure now returns the KorneaResult after processing, and block returns a Unit rather than Nothing. Previous functionality can be achieved with getOrBreak", level = DeprecationLevel.WARNING)
 public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult.Failure) -> Unit): KorneaResult<T> =
     when (this) {
         is KorneaResult.Failure -> {

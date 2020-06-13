@@ -1,9 +1,6 @@
 package org.abimon.kornea.img
 
-import org.abimon.kornea.errors.common.KorneaResult
-import org.abimon.kornea.errors.common.cast
-import org.abimon.kornea.errors.common.doOnFailure
-import org.abimon.kornea.errors.common.korneaNotEnoughData
+import org.abimon.kornea.errors.common.*
 import org.abimon.kornea.img.bc7.BC7PixelData
 import org.abimon.kornea.io.common.flow.InputFlow
 import org.abimon.kornea.io.common.isBitSet
@@ -62,7 +59,7 @@ data class DirectDrawSurfaceHeader(
             val reserved = IntArray(11) { flow.readInt32LE() ?: return korneaNotEnoughData() }
 
             val pixelFormat = DirectDrawSurfacePixelFormat(flow)
-                .doOnFailure { return it.cast() }
+                .getOrBreak { return it.cast() }
 
             val caps = flow.readInt32LE() ?: return korneaNotEnoughData()
             val caps2 = flow.readInt32LE() ?: return korneaNotEnoughData()
@@ -201,11 +198,11 @@ suspend fun InputFlow.readDDSImage(): KorneaResult<DirectDrawSurfaceImage> {
     require(magic == DDS_MAGIC_NUMBER_LE) { "Invalid magic number $magic" }
 
     val header = DirectDrawSurfaceHeader(this)
-        .doOnFailure { return it.cast() }
+        .getOrBreak { return it.cast() }
     val header10: DirectDrawSurfaceHeaderDX10? =
         if (header.pixelFormat.flags isBitSet DirectDrawSurfacePixelFormat.DDPF_FOURCC && header.pixelFormat.fourCC == DirectDrawSurfacePixelFormat.DX10) {
             DirectDrawSurfaceHeaderDX10(this)
-                .doOnFailure { return it.cast() }
+                .getOrBreak { return it.cast() }
         } else {
             null
         }
