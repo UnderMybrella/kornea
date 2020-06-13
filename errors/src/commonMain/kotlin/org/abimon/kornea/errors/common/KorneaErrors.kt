@@ -3,6 +3,13 @@ package org.abimon.kornea.errors.common
 public object KorneaErrors {
 
     /**
+     * kornea-errors 3.1.0
+     *
+     * - Add [KorneaResult][mapCausedBy] and [KorneaResult][mapRootCausedBy]
+     */
+    public const val VERSION_3_1_0: String = "3.1.0"
+
+    /**
      * kornea-errors 3.0.3
      *
      * - Mark [KorneaResult][doOnFailure] as deprecated, since IntelliJ's custom inspections for Kotlin are borked still
