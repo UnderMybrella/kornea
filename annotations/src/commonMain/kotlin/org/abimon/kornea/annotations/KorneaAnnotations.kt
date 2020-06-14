@@ -5,6 +5,12 @@ package org.abimon.kornea.annotations
 public object KorneaAnnotations {
 
     /**
+     * kornea-annotations 1.3.0
+     * - Add message parameter to [ExperimentalKorneaErrors], [ExperimentalKorneaImg], [ExperimentalKorneaIO], [ExperimentalKorneaModelling], and [ExperimentalKorneaToolkit]
+     */
+    @AvailableSince(VERSION_1_3_0)
+    public const val VERSION_1_3_0: String = "1.3.0"
+    /**
      * kornea-annotations 1.2.0
      *
      * - Created [ChangedSince]
