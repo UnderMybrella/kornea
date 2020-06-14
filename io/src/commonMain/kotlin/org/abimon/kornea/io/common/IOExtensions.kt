@@ -26,18 +26,18 @@ public suspend inline fun <T : DataCloseable, reified R> KorneaResult<T>.useAndF
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_4_1_0)
-public suspend inline fun <T : DataCloseable, reified R> KorneaResult<T>.useAndMapInputFlow(block: (T) -> R): KorneaResult<R> =
+public suspend inline fun <T : InputFlow, reified R> KorneaResult<DataSource<T>>.useAndMapInputFlow(block: (T) -> R): KorneaResult<R> =
     when (this) {
-        is KorneaResult.Success<T> -> mapValue(get().use(block))
+        is KorneaResult.Success<DataSource<T>> -> useAndFlatMap { source -> source.openInputFlow().map(block) }
         is KorneaResult.Failure -> asType()
         else -> throw IllegalStateException(KorneaResult.dirtyImplementationString(this))
     }
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_4_1_0)
-public suspend inline fun <T : InputFlow, reified R> KorneaResult<DataSource<out T>>.useAndFlatMapInputFlow(block: (T) -> KorneaResult<R>): KorneaResult<R> =
+public suspend inline fun <T : InputFlow, reified R> KorneaResult<DataSource<T>>.useAndFlatMapInputFlow(block: (T) -> KorneaResult<R>): KorneaResult<R> =
     when (this) {
-        is KorneaResult.Success<DataSource<out T>> -> useAndFlatMap { source -> source.openInputFlow().flatMap(block) }
+        is KorneaResult.Success<DataSource<T>> -> useAndFlatMap { source -> source.openInputFlow().flatMap(block) }
         is KorneaResult.Failure -> asType()
         else -> throw IllegalStateException(KorneaResult.dirtyImplementationString(this))
     }

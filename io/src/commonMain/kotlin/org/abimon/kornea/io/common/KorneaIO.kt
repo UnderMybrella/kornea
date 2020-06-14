@@ -4,6 +4,14 @@ import org.abimon.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 4.1.2
+     * - Fix [KorneaResult][useAndMapInputFlow] not actually mapping the input flow
+     */
+    @AvailableSince(VERSION_4_1_2)
+    public const val VERSION_4_1_2: String = "4.1.2"
+
+
+    /**
      * kornea-io 4.1.1
      * - Change [CountingInputStream._mark] and [CountingInputStream._count] to be protected, not private
      * - Add null to [JVMDataSource]'s maximumInstanceCount
