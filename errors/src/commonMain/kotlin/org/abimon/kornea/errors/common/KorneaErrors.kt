@@ -1,6 +1,11 @@
 package org.abimon.kornea.errors.common
 
 public object KorneaErrors {
+    /**
+     * kornea-errors 3.1.1
+     * - Add [KorneaResult][doOnSuccessAsync] overloads
+     */
+    public const val VERSION_3_1_1: String = "3.1.1"
 
     /**
      * kornea-errors 3.1.0

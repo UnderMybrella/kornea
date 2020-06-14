@@ -922,6 +922,22 @@ public inline fun <T> KorneaResult<T>.doOnSuccess(block: (T) -> Unit): KorneaRes
         )
     }
 
+@AvailableSince(KorneaErrors.VERSION_3_1_1)
+public suspend inline fun <T> KorneaResult<T>.doOnSuccessAsync(@Suppress("REDUNDANT_INLINE_SUSPEND_FUNCTION_TYPE") block: suspend (T) -> Unit): KorneaResult<T> =
+    when (this) {
+        is KorneaResult.Success<T> -> {
+            block(get())
+
+            this
+        }
+        is KorneaResult.Failure -> this
+        else -> throw IllegalStateException(
+            KorneaResult.dirtyImplementationString(
+                this
+            )
+        )
+    }
+
 
 /**
  * Returns the value stored on a success, or runs [onFailure] when in a fail state.
