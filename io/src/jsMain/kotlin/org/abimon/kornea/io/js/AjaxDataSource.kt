@@ -7,9 +7,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.io.common.*
-import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceClosed
-import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceUnknown
-import org.abimon.kornea.io.common.DataSource.Companion.korneaTooManySourcesOpen
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Int8Array
@@ -17,12 +14,20 @@ import org.w3c.xhr.ARRAYBUFFER
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
 import kotlin.js.Promise
-import kotlin.math.max
 
 @ExperimentalUnsignedTypes
-class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1, override val location: String? = url) : DataSource<BinaryInputFlow> {
-    companion object {
-        fun async(url: String, maxInstanceCount: Int = -1, location: String? = url): Promise<AjaxDataSource> = GlobalScope.promise { AjaxDataSource(url, maxInstanceCount, location) }
+public class AjaxDataSource(
+    public val url: String,
+    override val maximumInstanceCount: Int? = null,
+    override val location: String? = url
+) : LimitedInstanceDataSource.Typed<BinaryInputFlow, AjaxDataSource>(withBareOpener(this::openBareLimitedInputFlow)) {
+
+    public companion object {
+        public fun async(url: String, maxInstanceCount: Int = -1, location: String? = url): Promise<AjaxDataSource> =
+            GlobalScope.promise { AjaxDataSource(url, maxInstanceCount, location) }
+
+        public suspend fun openBareLimitedInputFlow(self: AjaxDataSource, location: String?): BinaryInputFlow =
+            BinaryInputFlow(self.data!!, location = location ?: self.location)
     }
 
     private var data: ByteArray? = null
@@ -30,50 +35,19 @@ class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1, override 
     private val dataPromise: Promise<ArrayBuffer?>
     override val dataSize: ULong?
         get() = data?.size?.toULong()
-    override val reproducibility: DataSourceReproducibility = DataSourceReproducibility(isStatic = true, isRandomAccess = true)
-
-    private val openInstances: MutableList<BinaryInputFlow> = ArrayList(max(maxInstanceCount, 0))
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
+    override val reproducibility: DataSourceReproducibility =
+        DataSourceReproducibility(isStatic = true, isRandomAccess = true)
 
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
         waitIfNeeded()
 
-        when {
-            closed -> return korneaSourceClosed()
-            maxInstanceCount == openInstances.size -> return korneaTooManySourcesOpen(maxInstanceCount)
-            canOpenInputFlow() -> {
-                val stream = BinaryInputFlow(data!!, location = location ?: this.location)
-                stream.addCloseHandler(this::instanceClosed)
-                openInstances.add(stream)
-                return KorneaResult.success(stream)
-            }
-            else -> return korneaSourceUnknown()
-        }
+        return super.openNamedInputFlow(location)
     }
+
     override suspend fun canOpenInputFlow(): Boolean {
         waitIfNeeded()
 
-        return !closed && data != null && (maxInstanceCount == -1 || openInstances.size < maxInstanceCount)
-    }
-
-    @Suppress("RedundantSuspendModifier")
-    private suspend fun instanceClosed(closeable: DataCloseable) {
-        if (closeable is BinaryInputFlow) {
-            openInstances.remove(closeable)
-        }
-    }
-
-    override suspend fun close() {
-        super.close()
-
-        if (!closed) {
-            closed = true
-            openInstances.toTypedArray().closeAll()
-            openInstances.clear()
-        }
+        return data != null && super.canOpenInputFlow()
     }
 
     private suspend fun waitIfNeeded() {
@@ -95,7 +69,8 @@ class AjaxDataSource (val url: String, val maxInstanceCount: Int = -1, override 
             val headRequest = XMLHttpRequest()
             headRequest.open("GET", url)
             headRequest.responseType = XMLHttpRequestResponseType.ARRAYBUFFER
-            headRequest.onreadystatechange = { if (headRequest.readyState == XMLHttpRequest.DONE) resolve(if (headRequest.status.toInt() == 200) headRequest.response as ArrayBuffer else null) }
+            headRequest.onreadystatechange =
+                { if (headRequest.readyState == XMLHttpRequest.DONE) resolve(if (headRequest.status.toInt() == 200) headRequest.response as ArrayBuffer else null) }
             headRequest.send()
         }
     }

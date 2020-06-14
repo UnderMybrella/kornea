@@ -1,80 +1,78 @@
 package org.abimon.kornea.io.common
 
+import kotlinx.atomicfu.AtomicInt
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.sync.Mutex
+import org.abimon.kornea.annotations.ExperimentalKorneaToolkit
 import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.io.common.DataSink.Companion.ERRORS_SINK_CLOSED
+import org.abimon.kornea.io.common.DataSink.Companion.korneaSinkClosed
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import org.abimon.kornea.io.common.flow.BinaryOutputFlow
-import kotlin.math.max
+import org.abimon.kornea.io.common.flow.MultiViewOutputFlow
+import org.kornea.toolkit.common.SharedStateRW
 
+@ExperimentalKorneaToolkit
 @ExperimentalUnsignedTypes
-class BinaryDataPool(
+public class BinaryDataPool (
     override val location: String? = null,
-    val output: BinaryOutputFlow = BinaryOutputFlow(),
-    val maxInstanceCount: Int = -1
-) :
-    DataPool<BinaryInputFlow, BinaryOutputFlow> {
+    override val maximumInstanceCount: Int? = null,
+    private val output: BinaryOutputFlow,
+    private val outputMutex: Mutex,
+    private val outputInstanceCount: SharedStateRW<Int>,
+) : DataPool<BinaryInputFlow, MultiViewOutputFlow<BinaryOutputFlow>>,
+    LimitedInstanceDataSource.Typed<BinaryInputFlow, BinaryDataPool>(withBareOpener(this::openBareLimitedInputFlow)) {
+    public companion object {
+        public suspend operator fun invoke(
+            location: String? = null,
+            maximumInstanceCount: Int? = null
+        ): BinaryDataPool {
+            val output = BinaryOutputFlow()
+            val dataPool = BinaryDataPool(location, maximumInstanceCount, output, Mutex(), SharedStateRW(0))
+            output.registerCloseHandler(dataPool::onOutputClosed)
+            return dataPool
+        }
+
+        public suspend operator fun invoke(
+            location: String? = null,
+            maximumInstanceCount: Int? = null,
+            output: BinaryOutputFlow,
+            outputMutex: Mutex,
+            outputInstanceCount: SharedStateRW<Int>
+        ): BinaryDataPool {
+            val dataPool = BinaryDataPool(location, maximumInstanceCount, output, outputMutex, outputInstanceCount)
+            output.registerCloseHandler(dataPool::onOutputClosed)
+            return dataPool
+        }
+
+        @Suppress("RedundantSuspendModifier")
+        public suspend fun openBareLimitedInputFlow(self: BinaryDataPool, location: String?): BinaryInputFlow =
+            BinaryInputFlow(self.output.getData(), location = location ?: self.location)
+    }
+
     override val dataSize: ULong?
         get() = output.getDataSize()
 
     override val reproducibility: DataSourceReproducibility =
         DataSourceReproducibility(isDeterministic = true, isRandomAccess = true)
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
-    private val openInstances: MutableList<BinaryInputFlow> = ArrayList(max(maxInstanceCount, 0))
-    private var closed: Boolean = false
     private var outputClosed: Boolean = false
     override val isClosed: Boolean
-        get() = closed
+        get() = closed || outputClosed
 
-    override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
-        when {
-            closed -> return KorneaResult.errorAsIllegalState(DataSource.ERRORS_SOURCE_CLOSED, "Instance closed")
-            canOpenInputFlow() -> {
-                val stream = BinaryInputFlow(output.getData(), location = location ?: this.location)
-                stream.addCloseHandler(this::instanceClosed)
-                openInstances.add(stream)
-                return KorneaResult.success(stream)
-            }
-            else -> return KorneaResult.errorAsIllegalState(
-                DataSource.ERRORS_TOO_MANY_FLOWS_OPEN,
-                "Too many instances open (${openInstances.size}/${maxInstanceCount})"
-            )
-        }
-    }
+    override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> =
+        if (outputClosed) korneaSinkClosed() else super.openNamedInputFlow(location)
 
-    override suspend fun canOpenInputFlow(): Boolean =
-        !closed && (maxInstanceCount == -1 || openInstances.size < maxInstanceCount)
-
-    private suspend fun instanceClosed(closeable: ObservableDataCloseable) {
-        if (closeable is BinaryInputFlow) {
-            openInstances.remove(closeable)
-        }
-    }
-
+    @Suppress("RedundantSuspendModifier")
     private suspend fun onOutputClosed(closeable: ObservableDataCloseable) {
         if (closeable is BinaryOutputFlow) {
             outputClosed = true
-            output.close()
         }
     }
 
-    override suspend fun close() {
-        super.close()
-
-        if (!closed) {
-            closed = true
-            openInstances.toTypedArray().closeAll()
-            openInstances.clear()
-        }
-    }
-
-    override suspend fun openOutputFlow(): KorneaResult<BinaryOutputFlow> =
-        if (canOpenOutputFlow()) KorneaResult.success(output)
+    override suspend fun openOutputFlow(): KorneaResult<MultiViewOutputFlow<BinaryOutputFlow>> =
+        if (canOpenOutputFlow()) KorneaResult.success(MultiViewOutputFlow(output, outputMutex, outputInstanceCount))
         else KorneaResult.errorAsIllegalState(ERRORS_SINK_CLOSED, "Sink closed")
 
     override suspend fun canOpenOutputFlow(): Boolean = !outputClosed
-
-    init {
-        output.addCloseHandler(this::onOutputClosed)
-    }
 }

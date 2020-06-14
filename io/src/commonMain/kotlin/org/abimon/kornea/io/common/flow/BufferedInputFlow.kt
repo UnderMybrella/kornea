@@ -1,16 +1,16 @@
 package org.abimon.kornea.io.common.flow
 
-import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.io.common.BaseDataCloseable
 import org.abimon.kornea.io.common.EnumSeekMode
 
 @ExperimentalUnsignedTypes
-open class BufferedInputFlow(open val backing: InputFlow, override val location: String? = backing.location) : PeekableInputFlow {
-    companion object {
-        const val DEFAULT_BUFFER_SIZE = 8192
-        const val MAX_BUFFER_SIZE = Int.MAX_VALUE - 8
+public open class BufferedInputFlow(protected open val backing: InputFlow, override val location: String? = backing.location) : BaseDataCloseable(), PeekableInputFlow {
+    public companion object {
+        public const val DEFAULT_BUFFER_SIZE: Int = 8192
+        public const val MAX_BUFFER_SIZE: Int = Int.MAX_VALUE - 8
     }
 
-    open class Seekable(override val backing: SeekableInputFlow, override val location: String? = backing.location): BufferedInputFlow(backing, location), SeekableInputFlow {
+    public open class Seekable(override val backing: SeekableInputFlow, override val location: String? = backing.location): BufferedInputFlow(backing, location), SeekableInputFlow {
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
             val shift = backing.seek(pos, mode)
             fill()
@@ -18,13 +18,9 @@ open class BufferedInputFlow(open val backing: InputFlow, override val location:
         }
     }
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
     protected var buffer: ByteArray = ByteArray(DEFAULT_BUFFER_SIZE)
     protected var count: Int = 0
     protected var pos: Int = 0
-    protected var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     protected suspend fun fill() {
         pos = 0
@@ -137,12 +133,8 @@ open class BufferedInputFlow(open val backing: InputFlow, override val location:
     override suspend fun remaining(): ULong? = available()
     override suspend fun size(): ULong? = backing.size()
 
-    override suspend fun close() {
-        super.close()
-
-        if (!closed) {
-            closed = true
-            backing.close()
-        }
+    override suspend fun whenClosed() {
+        super.whenClosed()
+        backing.close()
     }
 }

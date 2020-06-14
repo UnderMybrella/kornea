@@ -4,19 +4,19 @@ import org.abimon.kornea.io.common.*
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
-open class BitwiseInputFlow protected constructor(protected val flow: InputFlow, override val location: String? = null) : InputFlow {
-    companion object {
-        fun subflow(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = BitwiseInputFlow(flow, location)
-        operator fun invoke(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = if (flow is BitwiseInputFlow) flow else BitwiseInputFlow(flow, location)
+public open class BitwiseInputFlow protected constructor(protected val flow: InputFlow, override val location: String? = null) : BaseDataCloseable(), InputFlow {
+    public companion object {
+        public fun subflow(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = BitwiseInputFlow(flow, location)
+        public operator fun invoke(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = if (flow is BitwiseInputFlow) flow else BitwiseInputFlow(flow, location)
     }
 
-    constructor(str: String) : this(BinaryInputFlow(str.chunked(2).map { it.toInt(16).toByte() }.toByteArray()))
-    constructor(data: ByteArray) : this(BinaryInputFlow(data))
+    public constructor(str: String) : this(BinaryInputFlow(str.chunked(2).map { it.toInt(16).toByte() }.toByteArray()))
+    public constructor(data: ByteArray) : this(BinaryInputFlow(data))
 
-    var currentInt: Int? = null
-    var currentPos = 0
+    private var currentInt: Int? = null
+    public var currentPos: Int = 0
 
-    suspend fun skipBits(bits: Int) {
+    public suspend fun skipBits(bits: Int) {
         if (bits == 0) return
         require(bits > 0)
 
@@ -35,15 +35,15 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow,
         }
     }
 
-    suspend fun readBoolean(): Boolean? = readBit()?.equals(1)
-    suspend fun readBit(): Int? = decodeData { bit() }
-    suspend fun readByte(): Byte? = readNumber(8)?.toByte()
-    suspend fun readShort(): Short? = readNumber(16)?.toShort()
-    suspend fun readInt(): Int? = readNumber(32)?.toInt()
-    suspend fun readLong(): Long? = readNumber(64)
-    suspend fun readFloat(): Float? = readInt()?.let(Float.Companion::fromBits)
+    public suspend fun readBoolean(): Boolean? = readBit()?.equals(1)
+    public suspend fun readBit(): Int? = decodeData { bit() }
+    public suspend fun readByte(): Byte? = readNumber(8)?.toByte()
+    public suspend fun readShort(): Short? = readNumber(16)?.toShort()
+    public suspend fun readInt(): Int? = readNumber(32)?.toInt()
+    public suspend fun readLong(): Long? = readNumber(64)
+    public suspend fun readFloat(): Float? = readInt()?.let(Float.Companion::fromBits)
 
-    suspend fun readNumber(bits: Int): Long? {
+    public suspend fun readNumber(bits: Int): Long? {
         var result = 0L
 
         //Read first x bits
@@ -69,7 +69,7 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow,
         return result
     }
 
-    open suspend fun <T> decodeData(needed: Int = 1, op: () -> T): T {
+    public suspend inline fun <T> decodeData(needed: Int = 1, op: () -> T): T {
         checkBefore(needed)
         try {
             return op()
@@ -78,27 +78,21 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow,
         }
     }
 
-    fun bit(): Int? = currentInt?.and(0xFF)?.shr(currentPos++)?.and(1)
+    public fun bit(): Int? = currentInt?.and(0xFF)?.shr(currentPos++)?.and(1)
 
-    suspend fun checkBefore(needed: Int = 1) {
+    public suspend fun checkBefore(needed: Int = 1) {
         if (currentInt == null || currentPos > (8 - needed)) { //hardcoded check just to make sure we don't write a 0 byte
             currentInt = flow.read()
             currentPos = 0
         }
     }
 
-    suspend fun checkAfter() {
+    public suspend fun checkAfter() {
         if (currentInt == null || currentPos >= 8) {
             currentInt = flow.read()
             currentPos = 0
         }
     }
-
-    /** InputFlow */
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     override suspend fun read(): Int? = readByte()?.toInt()?.and(0xFF)
     override suspend fun read(b: ByteArray): Int? = read(b, 0, b.size)
@@ -135,9 +129,4 @@ open class BitwiseInputFlow protected constructor(protected val flow: InputFlow,
     override suspend fun remaining(): ULong? = flow.remaining()
     override suspend fun size(): ULong? = flow.size()
     override suspend fun position(): ULong = flow.position()
-
-    override suspend fun close() {
-        super.close()
-        closed = true
-    }
 }

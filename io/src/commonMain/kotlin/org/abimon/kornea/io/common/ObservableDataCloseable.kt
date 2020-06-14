@@ -3,16 +3,19 @@ package org.abimon.kornea.io.common
 import org.abimon.kornea.annotations.WrongBytecodeGenerated
 
 @ExperimentalUnsignedTypes
-typealias DataCloseableEventHandler = suspend (closeable: ObservableDataCloseable) -> Unit
+public typealias DataCloseableEventHandler = suspend (closeable: ObservableDataCloseable) -> Unit
 
-interface DataCloseable {
-    suspend fun close()
+public interface DataCloseable {
+    public suspend fun close()
 }
 
 @ExperimentalUnsignedTypes
-interface ObservableDataCloseable: DataCloseable {
-    val closeHandlers: MutableList<DataCloseableEventHandler>
-    val isClosed: Boolean
+public interface ObservableDataCloseable: DataCloseable {
+    public val isClosed: Boolean
+
+    public val closeHandlers: List<DataCloseableEventHandler>
+
+    public suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean
 
     override suspend fun close() {
         if (!isClosed) {
@@ -22,8 +25,10 @@ interface ObservableDataCloseable: DataCloseable {
 }
 
 @ExperimentalUnsignedTypes
-fun ObservableDataCloseable.addCloseHandler(handler: DataCloseableEventHandler) {
-    closeHandlers.add(handler)
+public suspend fun <D: ObservableDataCloseable> D.withCloseHandler(handler: DataCloseableEventHandler): D {
+    registerCloseHandler(handler)
+
+    return this
 }
 
 @ExperimentalUnsignedTypes
@@ -134,4 +139,5 @@ internal suspend fun DataCloseable?.closeFinally(cause: Throwable?) = when {
         }
 }
 
-suspend fun <T: DataCloseable> Array<T>.closeAll() = forEach { data -> data.close() }
+public suspend fun <T: DataCloseable> Array<T>.closeAll(): Unit = forEach { data -> data.close() }
+public suspend fun <T: DataCloseable> Iterable<T>.closeAll(): Unit = forEach { data -> data.close() }

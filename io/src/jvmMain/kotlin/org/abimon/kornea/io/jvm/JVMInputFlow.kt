@@ -8,14 +8,8 @@ import org.abimon.kornea.io.common.flow.readResultIsValid
 import java.io.InputStream
 
 @ExperimentalUnsignedTypes
-open class JVMInputFlow private constructor(val stream: CountingInputStream, override val location: String? = null): InputFlow {
-    constructor(stream: InputStream, location: String?): this(CountingInputStream(stream), location)
-
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
+public open class JVMInputFlow private constructor(protected val stream: CountingInputStream, override val location: String? = null): BaseDataCloseable(), InputFlow {
+    public constructor(stream: InputStream, location: String?): this(CountingInputStream(stream), location)
 
     override suspend fun read(): Int? = withContext(Dispatchers.IO) { stream.read().takeIf(::readResultIsValid) }
     override suspend fun read(b: ByteArray): Int? = withContext(Dispatchers.IO) { stream.read(b).takeIf(::readResultIsValid) }
@@ -24,13 +18,11 @@ open class JVMInputFlow private constructor(val stream: CountingInputStream, ove
     override suspend fun available(): ULong? = withContext(Dispatchers.IO) { stream.available().toULong() }
     override suspend fun remaining(): ULong? = null
     override suspend fun size(): ULong? = null
-    override suspend fun close() {
-        super.close()
 
-        if (!closed) {
-            stream.close()
-            closed = true
-        }
+    override suspend fun whenClosed() {
+        super.whenClosed()
+
+        withContext(Dispatchers.IO) { stream.close() }
     }
 
     override suspend fun position(): ULong = stream.count.toULong()

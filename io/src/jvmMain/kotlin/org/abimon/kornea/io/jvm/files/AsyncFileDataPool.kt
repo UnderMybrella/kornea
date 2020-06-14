@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.abimon.kornea.annotations.ExperimentalKorneaIO
 import org.abimon.kornea.io.common.*
+import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import java.io.File
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Path
@@ -15,17 +16,18 @@ import kotlin.collections.ArrayList
 
 @ExperimentalKorneaIO
 @ExperimentalUnsignedTypes
-class AsyncFileDataPool(
-    val path: Path,
+public class AsyncFileDataPool(
+    public val path: Path,
     private val channel: AsynchronousFileChannel? = null,
     append: Boolean = false,
     private val sinkBacker: DataSink<AsyncFileOutputFlow> = AsyncFileDataSink(path, channel, append),
     private val sourceBacker: DataSource<AsyncFileInputFlow> = AsyncFileDataSource(path, channel)
 ) : DataPool<AsyncFileInputFlow, AsyncFileOutputFlow>,
     DataSink<AsyncFileOutputFlow> by sinkBacker,
-    DataSource<AsyncFileInputFlow> by sourceBacker {
-    companion object {
-        suspend fun open(
+    DataSource<AsyncFileInputFlow> by sourceBacker,
+    BaseDataCloseable() {
+    public companion object {
+        public suspend fun open(
             path: Path,
             executor: ExecutorService? = null,
             append: Boolean = false,
@@ -53,7 +55,7 @@ class AsyncFileDataPool(
         }, append)
     }
 
-    constructor(
+    public constructor(
         file: File,
         channel: AsynchronousFileChannel? = null,
         append: Boolean = false,
@@ -61,20 +63,25 @@ class AsyncFileDataPool(
         sourceBacker: DataSource<AsyncFileInputFlow> = AsyncFileDataSource(file)
     ) : this(file.toPath(), channel, append, sinkBacker, sourceBacker)
 
-    private var closed: Boolean = false
     override val isClosed: Boolean
-        get() = closed
+        get() = super.isClosed
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
+    override val closeHandlers: List<DataCloseableEventHandler>
+        get() = super.closeHandlers
+
+    override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean =
+        super.registerCloseHandler(handler)
 
     override suspend fun close() {
-        super<DataPool>.close()
+        super.close()
+    }
 
-        if (!closed) {
-            sinkBacker.close()
-            sourceBacker.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-            withContext(Dispatchers.IO) { channel?.close() }
-        }
+        sinkBacker.close()
+        sourceBacker.close()
+
+        withContext(Dispatchers.IO) { channel?.close() }
     }
 }

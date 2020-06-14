@@ -10,16 +10,15 @@ import java.io.File
 import java.io.RandomAccessFile
 
 @ExperimentalUnsignedTypes
-class SynchronousFileInputFlow(val backingFile: File, override val location: String? = backingFile.absolutePath) : InputFlow, SeekableInputFlow {
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-
+public class SynchronousFileInputFlow(
+    public val backingFile: File,
+    override val location: String? = backingFile.absolutePath
+) : BaseDataCloseable(), InputFlow, SeekableInputFlow {
     private val channel = RandomAccessFile(backingFile, "r")
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     override suspend fun read(): Int? = withContext(Dispatchers.IO) { channel.read().takeIf(::readResultIsValid) }
-    override suspend fun read(b: ByteArray, off: Int, len: Int): Int? = withContext(Dispatchers.IO) { channel.read(b, off, len).takeIf(::readResultIsValid) }
+    override suspend fun read(b: ByteArray, off: Int, len: Int): Int? =
+        withContext(Dispatchers.IO) { channel.read(b, off, len).takeIf(::readResultIsValid) }
 
     override suspend fun skip(n: ULong): ULong = withContext(Dispatchers.IO) {
         channel.seek(channel.filePointer + n.toLong())
@@ -41,12 +40,9 @@ class SynchronousFileInputFlow(val backingFile: File, override val location: Str
         return position()
     }
 
-    override suspend fun close() {
-        super<SeekableInputFlow>.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            withContext(Dispatchers.IO) { channel.close() }
-            closed = true
-        }
+        withContext(Dispatchers.IO) { channel.close() }
     }
 }

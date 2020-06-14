@@ -18,26 +18,24 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 @ExperimentalUnsignedTypes
-class AsyncFileInputFlow(
-    val channel: AsynchronousFileChannel,
+public class AsyncFileInputFlow(
+    private val channel: AsynchronousFileChannel,
     private val localChannel: Boolean,
-    val backing: Path,
+    public val backing: Path,
     override val location: String?
-) : PeekableInputFlow, SeekableInputFlow {
-    companion object {
-        const val DEFAULT_BUFFER_SIZE = 8192
+) : BaseDataCloseable(), PeekableInputFlow, SeekableInputFlow {
+    public companion object {
+        public const val DEFAULT_BUFFER_SIZE: Int = 8192
     }
 
-    constructor(backingPath: Path, location: String? = backingPath.toString()) : this(
+    public constructor(backingPath: Path, location: String? = backingPath.toString()) : this(
         AsynchronousFileChannel.open(
             backingPath,
             StandardOpenOption.READ
         ), true, backingPath, location
     )
 
-    constructor(backingFile: File, location: String? = backingFile.toString()) : this(backingFile.toPath(), location)
-
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
+    public constructor(backingFile: File, location: String? = backingFile.toString()) : this(backingFile.toPath(), location)
 
     private val bufferMutex: Mutex = Mutex()
     private var flowFilePointer: Long = 0L
@@ -45,10 +43,6 @@ class AsyncFileInputFlow(
     private var peekFilePointer: Long = 0L
     private var peekBuffer: ByteBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE).apply { limitSafe(0) }
     private var count: Int = 0
-
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     private suspend fun fill(moveFilePointer: Boolean = true, filePointer: Long = flowFilePointer): Int? {
         if (!isClosed) {
@@ -136,7 +130,7 @@ class AsyncFileInputFlow(
         return n
     }
 
-    suspend fun readAt(b: ByteArray, off: Int, len: Int, filePointer: Long): Int? {
+    public suspend fun readAt(b: ByteArray, off: Int, len: Int, filePointer: Long): Int? {
         val bytebuf = ByteBuffer.wrap(b, off, len)
 
         return channel.readAwaitOrNull(bytebuf, filePointer)

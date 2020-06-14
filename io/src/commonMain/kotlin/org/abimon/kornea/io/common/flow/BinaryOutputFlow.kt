@@ -1,33 +1,38 @@
 package org.abimon.kornea.io.common.flow
 
-import org.abimon.kornea.io.common.DataCloseableEventHandler
+import org.abimon.kornea.annotations.ChangedSince
+import org.abimon.kornea.io.common.BaseDataCloseable
+import org.abimon.kornea.io.common.KorneaIO
+import org.kornea.toolkit.common.asImmutableView
 
 @ExperimentalUnsignedTypes
-open class BinaryOutputFlow(val buffer: MutableList<Byte>): CountingOutputFlow {
-    constructor(): this(ArrayList())
-
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
-
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-    override val streamOffset: Long
-        get() = buffer.size.toLong()
-
-    override suspend fun write(byte: Int) {
-        buffer.add(byte.toByte())
+@ChangedSince(KorneaIO.VERSION_4_1_0, "BinaryOutputFlow is now an interface")
+public interface BinaryOutputFlow: CountingOutputFlow {
+    public companion object {
+        public operator fun invoke(): BinaryOutputFlow = ListBacked()
     }
-    override suspend fun write(b: ByteArray) = write(b, 0, b.size)
-    override suspend fun write(b: ByteArray, off: Int, len: Int) {
-        buffer.addAll(b.slice(off until off + len))
-    }
-    override suspend fun flush() {}
-    fun getData(): ByteArray = buffer.toByteArray()
-    fun getDataSize(): ULong = buffer.size.toULong()
 
-    override suspend fun close() {
-        super.close()
+    public open class ListBacked(private val buffer: MutableList<Byte>): BaseDataCloseable(), BinaryOutputFlow {
+        public constructor(): this(ArrayList())
 
-        closed = true
+        override val streamOffset: Long
+            get() = buffer.size.toLong()
+
+        override suspend fun write(byte: Int) {
+            buffer.add(byte.toByte())
+        }
+        override suspend fun write(b: ByteArray): Unit = write(b, 0, b.size)
+        override suspend fun write(b: ByteArray, off: Int, len: Int) {
+            buffer.addAll(b.slice(off until off + len))
+        }
+        override suspend fun flush() {}
+
+        override fun getData(): ByteArray = buffer.toByteArray()
+        override fun getDataSize(): ULong = buffer.size.toULong()
+        override fun getBufferView(): List<Byte> = buffer.asImmutableView()
     }
+
+    public fun getData(): ByteArray
+    public fun getDataSize(): ULong
+    public fun getBufferView(): List<Byte>
 }

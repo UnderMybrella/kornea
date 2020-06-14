@@ -4,15 +4,12 @@ import org.abimon.kornea.io.common.*
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
-class BinaryInputFlow(private val array: ByteArray, private var pos: Int = 0, private var size: Int = array.size,
-                      override val location: String? = null):
-    InputFlow, PeekableInputFlow, SeekableInputFlow {
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
-
+public class BinaryInputFlow(
+    private val array: ByteArray,
+    private var pos: Int = 0,
+    private var size: Int = array.size,
+    override val location: String? = null
+) : BaseDataCloseable(), InputFlow, PeekableInputFlow, SeekableInputFlow {
     override suspend fun peek(forward: Int): Int? =
         if ((pos + forward - 1) < size) array[pos + forward - 1].toInt() and 0xFF else null
 
@@ -56,10 +53,5 @@ class BinaryInputFlow(private val array: ByteArray, private var pos: Int = 0, pr
         }
 
         return position()
-    }
-
-    override suspend fun close() {
-        super<PeekableInputFlow>.close()
-        closed = true
     }
 }

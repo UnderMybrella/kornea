@@ -15,7 +15,7 @@ import org.abimon.kornea.io.common.use
 import kotlin.properties.Delegates
 
 @ExperimentalUnsignedTypes
-class FlowReader(val backing: InputFlow) : ObservableDataCloseable by backing {
+public open class FlowReader(protected val backing: InputFlow) : ObservableDataCloseable by backing {
     private val cb: CharArray = CharArray(8192)
     private var nChars: Int = 0
     private var nextChar: Int = 0
@@ -84,7 +84,7 @@ class FlowReader(val backing: InputFlow) : ObservableDataCloseable by backing {
     }
 
 
-    suspend fun readLine(ignoreLF: Boolean = false): String? {
+    public suspend fun readLine(ignoreLF: Boolean = false): String? {
         val s = StringBuilder()
         var startChar: Int
 
@@ -145,7 +145,7 @@ class FlowReader(val backing: InputFlow) : ObservableDataCloseable by backing {
 @ExperimentalUnsignedTypes
 @ExperimentalCoroutinesApi
 //Removed noinline from operation. If the compiler starts crashing, add it back
-suspend inline fun <T> FlowReader.useLines(scope: CoroutineScope, operation: (ReceiveChannel<String>) -> T): T = use { reader ->
+public suspend inline fun <T> FlowReader.useLines(scope: CoroutineScope, operation: (ReceiveChannel<String>) -> T): T = use { reader ->
     operation(scope.produce {
         while (isActive) {
             send(reader.readLine() ?: break)
@@ -158,6 +158,6 @@ suspend inline fun <T> FlowReader.useLines(scope: CoroutineScope, operation: (Re
 @ExperimentalUnsignedTypes
 @ExperimentalCoroutinesApi
 //Removed noinline from operation. If the compiler starts crashing, add it back
-suspend inline fun FlowReader.useEachLine(operation: (String) -> Unit) = use { reader ->
+public suspend inline fun FlowReader.useEachLine(operation: (String) -> Unit): Unit = use { reader ->
     while (!isClosed) { operation(reader.readLine() ?: break) }
 }

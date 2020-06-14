@@ -8,62 +8,70 @@ import org.abimon.kornea.errors.common.map
 import org.abimon.kornea.io.common.*
 
 @ExperimentalUnsignedTypes
-interface InputFlow : ObservableDataCloseable {
-    companion object {
+public interface InputFlow : ObservableDataCloseable {
+    public companion object {
         @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_BEGINNING", "org.abimon.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
-        const val FROM_BEGINNING = 0
+        public const val FROM_BEGINNING: Int = 0
         @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_END", "org.abimon.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
-        const val FROM_END = 1
+        public const val FROM_END: Int = 1
         @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_POSITION", "org.abimon.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
-        const val FROM_POSITION = 2
+        public const val FROM_POSITION: Int = 2
     }
 
-    val location: String?
+    public val location: String?
 
-    suspend fun read(): Int?
-    suspend fun read(b: ByteArray): Int? = read(b, 0, b.size)
-    suspend fun read(b: ByteArray, off: Int, len: Int): Int?
-    suspend fun skip(n: ULong): ULong?
+    public suspend fun read(): Int?
+    public suspend fun read(b: ByteArray): Int? = read(b, 0, b.size)
+    public suspend fun read(b: ByteArray, off: Int, len: Int): Int?
+    public suspend fun skip(n: ULong): ULong?
     @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated("Use SeekableInputFlow", level = DeprecationLevel.ERROR)
-    suspend fun seek(pos: Long, mode: Int): ULong? = null
-    suspend fun position(): ULong
+    public suspend fun seek(pos: Long, mode: Int): ULong? = null
+    public suspend fun position(): ULong
 
-    suspend fun available(): ULong?
-    suspend fun remaining(): ULong?
-    suspend fun size(): ULong?
+    public suspend fun available(): ULong?
+    public suspend fun remaining(): ULong?
+    public suspend fun size(): ULong?
 }
 
 @ExperimentalUnsignedTypes
-interface PeekableInputFlow: InputFlow {
-    suspend fun peek(forward: Int = 1): Int?
+public interface PeekableInputFlow: InputFlow {
+    public suspend fun peek(forward: Int = 1): Int?
 }
 
 @ExperimentalUnsignedTypes
-interface OffsetInputFlow : InputFlow {
-    val baseOffset: ULong
+public interface InputFlowWithBacking: InputFlow {
+    public suspend fun globalOffset(): ULong
 }
 
 @ExperimentalUnsignedTypes
-interface SeekableInputFlow: InputFlow {
-    suspend fun seek(pos: Long, mode: EnumSeekMode): ULong
+public interface OffsetInputFlow : InputFlow, InputFlowWithBacking {
+    public val baseOffset: ULong
 }
 
 @ExperimentalUnsignedTypes
-suspend inline fun InputFlow.skip(number: Number): ULong? = skip(number.toLong().toULong())
+public interface SeekableInputFlow: InputFlow {
+    public suspend fun seek(pos: Long, mode: EnumSeekMode): ULong
+}
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readBytes(bufferSize: Int = 8192): ByteArray {
+public suspend inline fun InputFlow.skip(number: Number): ULong? = skip(number.toLong().toULong())
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readBytes(bufferSize: Int = 8192): ByteArray {
     val buffer = BinaryOutputFlow()
     copyTo(buffer, bufferSize)
     return buffer.getData()
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readExact(buffer: ByteArray): ByteArray? = readExact(buffer, 0, buffer.size)
+public suspend fun InputFlow.readExact(count: Int): ByteArray? = readExact(ByteArray(count), 0, count)
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readExact(buffer: ByteArray, offset: Int, length: Int): ByteArray? {
+public suspend fun InputFlow.readExact(buffer: ByteArray): ByteArray? = readExact(buffer, 0, buffer.size)
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readExact(buffer: ByteArray, offset: Int, length: Int): ByteArray? {
     var currentOffset: Int = offset
     var remainingLength: Int = length
 
@@ -79,7 +87,7 @@ suspend fun InputFlow.readExact(buffer: ByteArray, offset: Int, length: Int): By
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray =
+public suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray =
     closeAfter(this) {
         val buffer = BinaryOutputFlow()
         copyTo(buffer, bufferSize)
@@ -88,7 +96,7 @@ suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray =
     }
 
 @ExperimentalUnsignedTypes
-suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, crossinline block: suspend (F) -> T): KorneaResult<T> {
+public suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<out F>, crossinline block: suspend (F) -> T): KorneaResult<T> {
     return if (this !is SeekableInputFlow) {
 //        val flow = dataSource.openInputFlow() ?: return null
         dataSource.openInputFlow().map { flow ->
@@ -106,7 +114,7 @@ suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset:
     }
 }
 
-fun readResultIsValid(byte: Int): Boolean = byte != -1
+public inline fun readResultIsValid(byte: Int): Boolean = byte != -1
 
 //@ExperimentalUnsignedTypes
 //public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(block: () -> R): R = bookmark(this, block)
@@ -153,6 +161,6 @@ public suspend fun InputFlow.readChunked(bufferSize: Int = BufferedInputFlow.DEF
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.globalOffset(): ULong = if (this is SinkOffsetInputFlow) baseOffset + backing.globalOffset() else if (this is WindowedInputFlow) baseOffset + window.globalOffset() else 0u
+public suspend fun InputFlow.globalOffset(): ULong = if (this is InputFlowWithBacking) this.globalOffset() else 0u
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.offsetPosition(): ULong = globalOffset() + position()
+public suspend fun InputFlow.offsetPosition(): ULong = globalOffset() + position()

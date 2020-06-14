@@ -1,31 +1,37 @@
 package org.abimon.kornea.io.jvm.files
 
-import org.abimon.kornea.io.common.DataCloseableEventHandler
-import org.abimon.kornea.io.common.DataPool
-import org.abimon.kornea.io.common.DataSink
-import org.abimon.kornea.io.common.DataSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.abimon.kornea.io.common.*
 import java.io.File
 
 @ExperimentalUnsignedTypes
-class SynchronousFileDataPool(
-    val file: File,
+public class SynchronousFileDataPool(
+    public val file: File,
     private val sinkBacker: DataSink<SynchronousFileOutputFlow> = SynchronousFileDataSink(file),
     private val sourceBacker: DataSource<SynchronousFileInputFlow> = SynchronousFileDataSource(file)
 ) : DataPool<SynchronousFileInputFlow, SynchronousFileOutputFlow>,
     DataSink<SynchronousFileOutputFlow> by sinkBacker,
-    DataSource<SynchronousFileInputFlow> by sourceBacker {
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
+    DataSource<SynchronousFileInputFlow> by sourceBacker,
+    BaseDataCloseable() {
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
+    override val isClosed: Boolean
+        get() = super.isClosed
+
+    override val closeHandlers: List<DataCloseableEventHandler>
+        get() = super.closeHandlers
+
+    override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean =
+        super.registerCloseHandler(handler)
 
     override suspend fun close() {
-        super<DataPool>.close()
+        super.close()
+    }
 
-        if (!closed) {
-            sinkBacker.close()
-            sourceBacker.close()
-        }
+    override suspend fun whenClosed() {
+        super.whenClosed()
+
+        sinkBacker.close()
+        sourceBacker.close()
     }
 }

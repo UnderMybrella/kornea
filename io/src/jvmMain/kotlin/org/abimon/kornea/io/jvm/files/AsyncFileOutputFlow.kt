@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.abimon.kornea.io.common.BaseDataCloseable
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 import org.abimon.kornea.io.common.flow.CountingOutputFlow
 import org.abimon.kornea.io.jvm.flipSafe
@@ -19,13 +20,13 @@ import java.util.concurrent.ExecutorService
 import kotlin.collections.ArrayList
 
 @ExperimentalUnsignedTypes
-class AsyncFileOutputFlow(
-    val channel: AsynchronousFileChannel,
+public class AsyncFileOutputFlow(
+    private val channel: AsynchronousFileChannel,
     private val isLocalChannel: Boolean,
-    val backing: Path
-) : CountingOutputFlow {
-    companion object {
-        suspend fun open(
+    public val backing: Path
+) : BaseDataCloseable(), CountingOutputFlow {
+    public companion object {
+        public suspend fun open(
             path: Path,
             executor: ExecutorService? = null,
             append: Boolean = false,
@@ -53,7 +54,7 @@ class AsyncFileOutputFlow(
         }, append, path)
     }
 
-    constructor(path: Path, append: Boolean = false) : this(
+    public constructor(path: Path, append: Boolean = false) : this(
         AsynchronousFileChannel.open(
             path,
             listOfNotNull(
@@ -65,9 +66,7 @@ class AsyncFileOutputFlow(
         ), true, path
     )
 
-    constructor(file: File, append: Boolean = false) : this(file.toPath(), append)
-
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
+    public constructor(file: File, append: Boolean = false) : this(file.toPath(), append)
 
     private var filePointer = 0L
     private val buffer = ByteBuffer.allocate(8192)
@@ -75,10 +74,6 @@ class AsyncFileOutputFlow(
 
     override val streamOffset: Long
         get() = filePointer
-
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     private suspend fun flushBuffer() {
         if (!closed && buffer.position() != 0) {
@@ -96,7 +91,7 @@ class AsyncFileOutputFlow(
         }
     }
 
-    override suspend fun write(b: ByteArray) = write(b, 0, b.size)
+    override suspend fun write(b: ByteArray): Unit = write(b, 0, b.size)
     override suspend fun write(b: ByteArray, off: Int, len: Int) {
         if (closed) {
             return
@@ -125,22 +120,19 @@ class AsyncFileOutputFlow(
         }
     }
 
-    override suspend fun flush() = mutex.withLock { flushBuffer() }
+    override suspend fun flush(): Unit = mutex.withLock { flushBuffer() }
 
-    override suspend fun close() {
-        super.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            if (isLocalChannel) {
-                mutex.withLock {
-                    flushBuffer()
-                    withContext(Dispatchers.IO) {
-                        channel.force(true)
-                        channel.close()
-                    }
+        if (isLocalChannel) {
+            mutex.withLock {
+                flushBuffer()
+                withContext(Dispatchers.IO) {
+                    channel.force(true)
+                    channel.close()
                 }
             }
-            closed = true
         }
     }
 }

@@ -5,30 +5,30 @@ package org.abimon.kornea.io.common.flow
 import org.abimon.kornea.io.common.ObservableDataCloseable
 
 @ExperimentalUnsignedTypes
-typealias OutputFlowEventHandler = suspend (flow: OutputFlow) -> Unit
+public typealias OutputFlowEventHandler = suspend (flow: OutputFlow) -> Unit
 
 @ExperimentalUnsignedTypes
-interface OutputFlow: ObservableDataCloseable {
-    suspend fun write(byte: Int)
-    suspend fun write(b: ByteArray) = write(b, 0, b.size)
-    suspend fun write(b: ByteArray, off: Int, len: Int)
-    suspend fun flush()
+public interface OutputFlow: ObservableDataCloseable {
+    public suspend fun write(byte: Int)
+    public suspend fun write(b: ByteArray): Unit = write(b, 0, b.size)
+    public suspend fun write(b: ByteArray, off: Int, len: Int)
+    public suspend fun flush()
 }
 
 @ExperimentalUnsignedTypes
-interface CountingOutputFlow: OutputFlow {
-    val streamOffset: Long
+public interface CountingOutputFlow: OutputFlow {
+    public val streamOffset: Long
 }
 
 @ExperimentalUnsignedTypes
-interface SeekableOutputFlow: OutputFlow {
+public interface SeekableOutputFlow: OutputFlow {
 
 }
 
 @ExperimentalUnsignedTypes
-open class SinkCountingOutputFlow(val sink: OutputFlow) : CountingOutputFlow, OutputFlow by sink {
-    var _count = 0L
-    val count
+public open class SinkCountingOutputFlow(protected val sink: OutputFlow) : CountingOutputFlow, OutputFlow by sink {
+    private var _count: Long = 0L
+    public val count: Long
         get() = _count
 
     override val streamOffset: Long
@@ -52,4 +52,4 @@ open class SinkCountingOutputFlow(val sink: OutputFlow) : CountingOutputFlow, Ou
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeByte(byte: Number) = write(byte.toInt())
+public suspend fun OutputFlow.writeByte(byte: Number): Unit = write(byte.toInt())

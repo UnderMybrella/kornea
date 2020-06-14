@@ -3,14 +3,14 @@ package org.abimon.kornea.io.common.flow
 import org.abimon.kornea.io.common.*
 
 @ExperimentalUnsignedTypes
-open class WindowedInputFlow private constructor(
-    open val window: InputFlow,
+public open class WindowedInputFlow private constructor(
+    protected open val window: InputFlow,
     override val baseOffset: ULong,
-    val windowSize: ULong,
+    public val windowSize: ULong,
     override val location: String?
-) : OffsetInputFlow {
-    companion object {
-        suspend operator fun invoke(
+) : BaseDataCloseable(), OffsetInputFlow {
+    public companion object {
+        public suspend operator fun invoke(
             window: SeekableInputFlow,
             offset: ULong,
             windowSize: ULong,
@@ -22,7 +22,8 @@ open class WindowedInputFlow private constructor(
             flow.initialSkip()
             return flow
         }
-        suspend operator fun invoke(
+
+        public suspend operator fun invoke(
             window: InputFlow,
             offset: ULong,
             windowSize: ULong,
@@ -36,9 +37,14 @@ open class WindowedInputFlow private constructor(
         }
     }
 
-    class Seekable private constructor(override val window: SeekableInputFlow, baseOffset: ULong, windowSize: ULong, location: String?): WindowedInputFlow(window, baseOffset, windowSize, location), SeekableInputFlow {
-        companion object {
-            suspend operator fun invoke(
+    public open class Seekable private constructor(
+        override val window: SeekableInputFlow,
+        baseOffset: ULong,
+        windowSize: ULong,
+        location: String?
+    ) : WindowedInputFlow(window, baseOffset, windowSize, location), SeekableInputFlow {
+        public companion object {
+            public suspend operator fun invoke(
                 window: SeekableInputFlow,
                 offset: ULong,
                 windowSize: ULong,
@@ -51,6 +57,7 @@ open class WindowedInputFlow private constructor(
                 return flow
             }
         }
+
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
             when (mode) {
                 EnumSeekMode.FROM_BEGINNING -> {
@@ -74,11 +81,7 @@ open class WindowedInputFlow private constructor(
         }
     }
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
     protected var windowPosition: ULong = 0uL
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     override suspend fun read(): Int? = if (windowPosition < windowSize) {
         windowPosition++
@@ -123,16 +126,15 @@ open class WindowedInputFlow private constructor(
     override suspend fun size(): ULong = windowSize
     override suspend fun position(): ULong = windowPosition
 
-    suspend fun initialSkip() {
+    public suspend fun initialSkip() {
         window.skip(baseOffset)
     }
 
-    override suspend fun close() {
-        super.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            window.close()
-            closed = true
-        }
+        window.close()
     }
+
+    override suspend fun globalOffset(): ULong = baseOffset + window.globalOffset()
 }

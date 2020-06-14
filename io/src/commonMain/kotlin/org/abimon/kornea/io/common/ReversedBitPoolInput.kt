@@ -1,15 +1,15 @@
 package org.abimon.kornea.io.common
 
-class ReversedBitPoolInput(val bytes: ByteArray, size: Int = bytes.size) {
-    val minIndex = bytes.size - size
-    var index = bytes.size - 1
-    var bitpool: Int
-    var bitsLeft: Int
+public class ReversedBitPoolInput(public val bytes: ByteArray, size: Int = bytes.size) {
+    public val minIndex: Int = bytes.size - size
+    private var index = bytes.size - 1
+    private var bitpool: Int
+    private var bitsLeft: Int
 
-    val isEmpty: Boolean
+    public val isEmpty: Boolean
         get() = index == minIndex && bitsLeft == 0
 
-    fun read(numBits: Int): Int {
+    public fun read(numBits: Int): Int {
         var outBits = 0
         var bitsProduced = 0
 

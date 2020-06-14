@@ -3,32 +3,51 @@ package org.abimon.kornea.io.common.flow
 import org.abimon.kornea.io.common.*
 
 @ExperimentalUnsignedTypes
-open class SinkOffsetInputFlow private constructor(
-    open val backing: InputFlow, override val baseOffset: ULong,
+public open class SinkOffsetInputFlow private constructor(
+    protected open val backing: InputFlow,
+    override val baseOffset: ULong,
     override val location: String? =
         "${backing.location}+${baseOffset.toString(16)}h"
-) : OffsetInputFlow {
-    companion object {
-        suspend operator fun invoke(backing: SeekableInputFlow, offset: ULong, location: String? = "${backing.location}+${offset.toString(16)}h"): Seekable {
+) : BaseDataCloseable(), OffsetInputFlow {
+    public companion object {
+        public suspend operator fun invoke(
+            backing: SeekableInputFlow,
+            offset: ULong,
+            location: String? = "${backing.location}+${offset.toString(16)}h"
+        ): Seekable {
             val flow = Seekable(backing, offset, location)
             flow.initialSkip()
             return flow
         }
-        suspend operator fun invoke(backing: InputFlow, offset: ULong, location: String? = "${backing.location}+${offset.toString(16)}h"): SinkOffsetInputFlow {
+
+        public suspend operator fun invoke(
+            backing: InputFlow,
+            offset: ULong,
+            location: String? = "${backing.location}+${offset.toString(16)}h"
+        ): SinkOffsetInputFlow {
             val flow = SinkOffsetInputFlow(backing, offset, location)
             flow.initialSkip()
             return flow
         }
     }
 
-    class Seekable(override val backing: SeekableInputFlow, override val baseOffset: ULong, override val location: String? = "${backing.location}+${baseOffset.toString(16)}h"): SinkOffsetInputFlow(backing, baseOffset, location), SeekableInputFlow {
-        companion object {
-            suspend operator fun invoke(backing: SeekableInputFlow, offset: ULong, location: String? = "${backing.location}+${offset.toString(16)}h"): Seekable {
+    public class Seekable(
+        override val backing: SeekableInputFlow,
+        override val baseOffset: ULong,
+        override val location: String? = "${backing.location}+${baseOffset.toString(16)}h"
+    ) : SinkOffsetInputFlow(backing, baseOffset, location), SeekableInputFlow {
+        public companion object {
+            public suspend operator fun invoke(
+                backing: SeekableInputFlow,
+                offset: ULong,
+                location: String? = "${backing.location}+${offset.toString(16)}h"
+            ): Seekable {
                 val flow = Seekable(backing, offset, location)
                 flow.initialSkip()
                 return flow
             }
         }
+
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
             when (mode) {
                 EnumSeekMode.FROM_BEGINNING -> {
@@ -60,11 +79,7 @@ open class SinkOffsetInputFlow private constructor(
         }
     }
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
     protected var sinkOffset: ULong = 0uL
-    protected var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     override suspend fun read(): Int? {
         sinkOffset++
@@ -91,16 +106,15 @@ open class SinkOffsetInputFlow private constructor(
     override suspend fun size(): ULong? = backing.size()?.minus(baseOffset)
     override suspend fun position(): ULong = sinkOffset
 
-    suspend fun initialSkip() {
+    public suspend fun initialSkip() {
         backing.skip(baseOffset)
     }
 
-    override suspend fun close() {
-        super.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            backing.close()
-            closed = true
-        }
+        backing.close()
     }
+
+    override suspend fun globalOffset(): ULong = baseOffset + backing.globalOffset()
 }

@@ -10,10 +10,10 @@ private val BASE64_INVERSE_ALPHABET = IntArray(256) {
 
 private fun Int.toBase64(): Char = BASE64_ALPHABET[this]
 
-object CommonBase64Encoder {
-    val base64 = IntArray(256)
+public object CommonBase64Encoder {
+    private val base64 = IntArray(256)
 
-    fun encode(src: ByteArray): ByteArray {
+    public fun encode(src: ByteArray): ByteArray {
         fun ByteArray.getOrZero(index: Int): Int = if (index >= size) 0 else get(index).toInt()
         // 4n / 3 is expected Base64 payload
         val result = ArrayList<Byte>(4 * src.size / 3)
@@ -34,7 +34,8 @@ object CommonBase64Encoder {
 
         return result.toByteArray()
     }
-    fun decode(src: ByteArray): ByteArray {
+
+    public fun decode(src: ByteArray): ByteArray {
         val dst = ByteArray(src.size * 3 / 4)
         val ret = decode0(src, 0, src.size, dst)
         return dst.sliceArray(0 until ret)

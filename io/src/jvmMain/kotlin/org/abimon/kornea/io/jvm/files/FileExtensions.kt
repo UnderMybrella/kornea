@@ -22,31 +22,31 @@ import kotlin.coroutines.suspendCoroutine
  * Path will start with the name of [to]
  * @see [relativePathFrom]
  */
-infix fun File.relativePathTo(to: File): String = to.name + absolutePath.replace(to.absolutePath, "")
+public infix fun File.relativePathTo(to: File): String = to.name + absolutePath.replace(to.absolutePath, "")
 /**
  * Get the relative path from parent directory [to] to this file
  * Path will ***not*** start with the name of [to]
  * @see [relativePathTo]
  */
-infix fun File.relativePathFrom(to: File): String = absolutePath.replace(to.absolutePath + File.separator, "")
+public infix fun File.relativePathFrom(to: File): String = absolutePath.replace(to.absolutePath + File.separator, "")
 
-fun File.existingDirectory(): Boolean = isDirectory && exists()
+public fun File.existingDirectory(): Boolean = isDirectory && exists()
 
-fun File.ensureFileExists(): File {
+public fun File.ensureFileExists(): File {
     if (!exists()) createNewFile()
     return this
 }
 
-fun File.ensureDirectoryExists(): File {
+public fun File.ensureDirectoryExists(): File {
     if (!exists()) mkdirs()
     return this
 }
 
-val File.absoluteParentFile
+public val File.absoluteParentFile: File?
     get(): File? = absoluteFile.parentFile
 
 /** JDK 7 Compat */
-class ContinuationCompletionHandler<V>: CompletionHandler<V, Continuation<V>> {
+public class ContinuationCompletionHandler<V>: CompletionHandler<V, Continuation<V>> {
     override fun completed(result: V, attachment: Continuation<V>) {
         attachment.resume(result)
     }
@@ -56,7 +56,7 @@ class ContinuationCompletionHandler<V>: CompletionHandler<V, Continuation<V>> {
     }
 }
 
-class NullableContinuationCompletionHandler<V>: CompletionHandler<V, Continuation<V?>> {
+public class NullableContinuationCompletionHandler<V>: CompletionHandler<V, Continuation<V?>> {
     override fun completed(result: V, attachment: Continuation<V?>) {
         attachment.resume(result)
     }
@@ -66,41 +66,41 @@ class NullableContinuationCompletionHandler<V>: CompletionHandler<V, Continuatio
     }
 }
 
-val INT_CONTINUATION_COMPLETION_HANDLER = ContinuationCompletionHandler<Int>()
-val INT_NULLABLE_CONTINUATION_COMPLETION_HANDLER = NullableContinuationCompletionHandler<Int>()
+public val INT_CONTINUATION_COMPLETION_HANDLER: ContinuationCompletionHandler<Int> = ContinuationCompletionHandler()
+public val INT_NULLABLE_CONTINUATION_COMPLETION_HANDLER: NullableContinuationCompletionHandler<Int> = NullableContinuationCompletionHandler()
 
-suspend fun AsynchronousFileChannel.readAwait(dst: ByteBuffer, position: Long) =
+public suspend fun AsynchronousFileChannel.readAwait(dst: ByteBuffer, position: Long): Int =
     suspendCoroutine<Int> { cont -> read(dst, position, cont, INT_CONTINUATION_COMPLETION_HANDLER) }
 
-suspend fun AsynchronousFileChannel.readAwaitOrNull(dst: ByteBuffer, position: Long) =
+public suspend fun AsynchronousFileChannel.readAwaitOrNull(dst: ByteBuffer, position: Long): Int? =
     suspendCoroutine<Int> { cont -> read(dst, position, cont, INT_CONTINUATION_COMPLETION_HANDLER) }
         .takeIf(::readResultIsValid)
 
-suspend fun AsynchronousFileChannel.writeAwait(src: ByteBuffer, position: Long) =
+public suspend fun AsynchronousFileChannel.writeAwait(src: ByteBuffer, position: Long): Int =
     suspendCoroutine<Int> { cont -> write(src, position, cont, INT_CONTINUATION_COMPLETION_HANDLER) }
 
-suspend fun AsynchronousFileChannel.writeAwaitOrNull(src: ByteBuffer, position: Long) =
+public suspend fun AsynchronousFileChannel.writeAwaitOrNull(src: ByteBuffer, position: Long): Int? =
     suspendCoroutine<Int> { cont -> write(src, position, cont, INT_CONTINUATION_COMPLETION_HANDLER) }
         .takeIf(::readResultIsValid)
 
 @ExperimentalUnsignedTypes
 @Deprecated("If you need synchronous file input, explicitly use SynchronousFileInputFlow", level = DeprecationLevel.ERROR)
-typealias FileInputFlow=SynchronousFileInputFlow
+public typealias FileInputFlow=SynchronousFileInputFlow
 @ExperimentalUnsignedTypes
 @Deprecated("If you need synchronous file output, explicitly use SynchronousFileOutputFlow", level = DeprecationLevel.ERROR)
-typealias FileOutputFlow=SynchronousFileOutputFlow
+public typealias FileOutputFlow=SynchronousFileOutputFlow
 @ExperimentalUnsignedTypes
 @Deprecated("If you need synchronous file pools, explicitly use SynchronousFileDataPools", level = DeprecationLevel.ERROR)
-typealias FileDataPool=SynchronousFileDataPool
+public typealias FileDataPool=SynchronousFileDataPool
 @ExperimentalUnsignedTypes
 @Deprecated("If you need synchronous file sinks, explicitly use SynchronousFileDataSource", level = DeprecationLevel.ERROR)
-typealias FileDataSink=SynchronousFileDataSink
+public typealias FileDataSink=SynchronousFileDataSink
 @ExperimentalUnsignedTypes
 @Deprecated("If you need synchronous file sources, explicitly use SynchronousFileDataSource", level = DeprecationLevel.ERROR)
-typealias FileDataSource=SynchronousFileDataSource
+public typealias FileDataSource=SynchronousFileDataSource
 
 @BlockingOperation
-fun openAsynchronousFileChannel(
+public fun openAsynchronousFileChannel(
     path: Path,
     executor: ExecutorService? = null,
     read: Boolean,

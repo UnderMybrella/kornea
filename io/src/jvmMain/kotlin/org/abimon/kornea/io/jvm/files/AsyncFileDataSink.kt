@@ -17,10 +17,10 @@ import kotlin.collections.ArrayList
 
 @ExperimentalUnsignedTypes
 @ExperimentalKorneaIO
-class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChannel? = null, append: Boolean = false) :
-    DataSink<AsyncFileOutputFlow> {
-    companion object {
-        suspend fun open(
+public class AsyncFileDataSink(public val backing: Path, backingChannel: AsynchronousFileChannel? = null, append: Boolean = false) :
+    BaseDataCloseable(), DataSink<AsyncFileOutputFlow> {
+    public companion object {
+        public suspend fun open(
             path: Path,
             executor: ExecutorService? = null,
             append: Boolean = false,
@@ -48,18 +48,13 @@ class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChann
         }, append)
     }
 
-    constructor(
+    public constructor(
         backing: File,
         backingChannel: AsynchronousFileChannel? = null,
         append: Boolean = false
     ) : this(backing.toPath(), backingChannel, append)
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-
     private val openInstances: MutableList<AsyncFileOutputFlow> = ArrayList(1)
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     private var initialised: Boolean = false
     private val channel: AsynchronousFileChannel by lazy {
@@ -85,14 +80,14 @@ class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChann
 
             canOpenOutputFlow() -> {
                 val stream = AsyncFileOutputFlow(getChannel(), false, backing)
-                stream.addCloseHandler(this::instanceClosed)
+                stream.registerCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
                 KorneaResult.success(stream)
             }
             else -> korneaSinkUnknown()
         }
 
-    override suspend fun canOpenOutputFlow(): Boolean = !closed && (openInstances.size < 1)
+    override suspend fun canOpenOutputFlow(): Boolean = !closed && (openInstances.isEmpty())
 
     @Suppress("RedundantSuspendModifier")
     private suspend fun instanceClosed(closeable: ObservableDataCloseable) {
@@ -101,13 +96,10 @@ class AsyncFileDataSink(val backing: Path, backingChannel: AsynchronousFileChann
         }
     }
 
-    override suspend fun close() {
-        super.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            closed = true
-            openInstances.toTypedArray().closeAll()
-            openInstances.clear()
-        }
+        openInstances.closeAll()
+        openInstances.clear()
     }
 }

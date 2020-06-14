@@ -1,21 +1,23 @@
 package org.abimon.kornea.io.common
 
-class BitPoolInput(val bytes: ByteArray, size: Int = bytes.size) {
-    val maxIndex = size
-    var index = 0
-    var bitpool: Int
-    var bitsLeft: Int
+public class BitPoolInput(public val bytes: ByteArray, size: Int = bytes.size) {
+    public val maxIndex: Int = size
+    private var _index: Int = 0
+    public val index: Int
+        get() = _index
+    private var bitpool: Int
+    private var bitsLeft: Int
 
-    val isEmpty: Boolean
-        get() = index == maxIndex && bitsLeft == 0
+    public val isEmpty: Boolean
+        get() = _index == maxIndex && bitsLeft == 0
 
-    fun read(numBits: Int): Int {
+    public fun read(numBits: Int): Int {
         var outBits = 0
         var bitsProduced = 0
 
         while (bitsProduced < numBits) {
             if (bitsLeft == 0) {
-                bitpool = if (index >= maxIndex) 0 else bytes[index++].toInt().and(0xFF)
+                bitpool = if (_index >= maxIndex) 0 else bytes[_index++].toInt().and(0xFF)
                 bitsLeft = 8
             }
 
@@ -31,12 +33,12 @@ class BitPoolInput(val bytes: ByteArray, size: Int = bytes.size) {
         return outBits
     }
 
-    fun peek(numBits: Int): Int {
+    public fun peek(numBits: Int): Int {
         var outBits = 0
         var bitsProduced = 0
 
         var shadowedBitpool = bitpool
-        var shadowedIndex = index
+        var shadowedIndex = _index
         var shadowedBitsLeft = bitsLeft
 
         while (bitsProduced < numBits) {
@@ -58,8 +60,8 @@ class BitPoolInput(val bytes: ByteArray, size: Int = bytes.size) {
     }
 
     init {
-        if (index < maxIndex) {
-            bitpool = bytes[index++].toInt().and(0xFF)
+        if (_index < maxIndex) {
+            bitpool = bytes[_index++].toInt().and(0xFF)
             bitsLeft = 8
         } else {
             bitpool = 0

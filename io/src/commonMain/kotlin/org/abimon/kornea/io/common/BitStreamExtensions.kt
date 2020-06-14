@@ -7,7 +7,7 @@ import org.abimon.kornea.io.common.flow.OutputFlow
 import org.abimon.kornea.io.common.flow.PeekableInputFlow
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekInt64LE(): Long? {
+public suspend fun PeekableInputFlow.peekInt64LE(): Long? {
     val a = peek(1)?.toLong() ?: return null
     val b = peek(2)?.toLong() ?: return null
     val c = peek(3)?.toLong() ?: return null
@@ -22,7 +22,7 @@ suspend fun PeekableInputFlow.peekInt64LE(): Long? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekInt64BE(): Long? {
+public suspend fun PeekableInputFlow.peekInt64BE(): Long? {
     val a = peek(1)?.toLong() ?: return null
     val b = peek(2)?.toLong() ?: return null
     val c = peek(3)?.toLong() ?: return null
@@ -37,7 +37,7 @@ suspend fun PeekableInputFlow.peekInt64BE(): Long? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekUInt64LE(): ULong? {
+public suspend fun PeekableInputFlow.peekUInt64LE(): ULong? {
     val a = peek(1)?.toLong() ?: return null
     val b = peek(2)?.toLong() ?: return null
     val c = peek(3)?.toLong() ?: return null
@@ -52,7 +52,7 @@ suspend fun PeekableInputFlow.peekUInt64LE(): ULong? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekUInt64BE(): ULong? {
+public suspend fun PeekableInputFlow.peekUInt64BE(): ULong? {
     val a = peek(1)?.toLong() ?: return null
     val b = peek(2)?.toLong() ?: return null
     val c = peek(3)?.toLong() ?: return null
@@ -67,7 +67,7 @@ suspend fun PeekableInputFlow.peekUInt64BE(): ULong? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekInt32LE(): Int? {
+public suspend fun PeekableInputFlow.peekInt32LE(): Int? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
     val c = peek(3) ?: return null
@@ -77,7 +77,7 @@ suspend fun PeekableInputFlow.peekInt32LE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekInt32BE(): Int? {
+public suspend fun PeekableInputFlow.peekInt32BE(): Int? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
     val c = peek(3) ?: return null
@@ -87,7 +87,7 @@ suspend fun PeekableInputFlow.peekInt32BE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekUInt32LE(): UInt? {
+public suspend fun PeekableInputFlow.peekUInt32LE(): UInt? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
     val c = peek(3) ?: return null
@@ -97,7 +97,7 @@ suspend fun PeekableInputFlow.peekUInt32LE(): UInt? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekUInt32BE(): UInt? {
+public suspend fun PeekableInputFlow.peekUInt32BE(): UInt? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
     val c = peek(3) ?: return null
@@ -107,7 +107,7 @@ suspend fun PeekableInputFlow.peekUInt32BE(): UInt? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekInt16LE(): Int? {
+public suspend fun PeekableInputFlow.peekInt16LE(): Int? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
 
@@ -115,7 +115,7 @@ suspend fun PeekableInputFlow.peekInt16LE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekInt16BE(): Int? {
+public suspend fun PeekableInputFlow.peekInt16BE(): Int? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
 
@@ -123,7 +123,7 @@ suspend fun PeekableInputFlow.peekInt16BE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekUInt16LE(): Int? {
+public suspend fun PeekableInputFlow.peekUInt16LE(): Int? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
 
@@ -131,7 +131,7 @@ suspend fun PeekableInputFlow.peekUInt16LE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun PeekableInputFlow.peekUInt16BE(): Int? {
+public suspend fun PeekableInputFlow.peekUInt16BE(): Int? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
 
@@ -139,7 +139,7 @@ suspend fun PeekableInputFlow.peekUInt16BE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readInt64LE(): Long? {
+public suspend fun InputFlow.readInt64LE(): Long? {
     val a = read()?.toLong() ?: return null
     val b = read()?.toLong() ?: return null
     val c = read()?.toLong() ?: return null
@@ -154,7 +154,7 @@ suspend fun InputFlow.readInt64LE(): Long? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readInt64BE(): Long? {
+public suspend fun InputFlow.readInt64BE(): Long? {
     val a = read()?.toLong() ?: return null
     val b = read()?.toLong() ?: return null
     val c = read()?.toLong() ?: return null
@@ -169,7 +169,7 @@ suspend fun InputFlow.readInt64BE(): Long? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readUInt64LE(): ULong? {
+public suspend fun InputFlow.readUInt64LE(): ULong? {
     val a = read()?.toLong() ?: return null
     val b = read()?.toLong() ?: return null
     val c = read()?.toLong() ?: return null
@@ -184,7 +184,7 @@ suspend fun InputFlow.readUInt64LE(): ULong? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readUInt64BE(): ULong? {
+public suspend fun InputFlow.readUInt64BE(): ULong? {
     val a = read()?.toLong() ?: return null
     val b = read()?.toLong() ?: return null
     val c = read()?.toLong() ?: return null
@@ -199,7 +199,7 @@ suspend fun InputFlow.readUInt64BE(): ULong? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readInt32LE(): Int? {
+public suspend fun InputFlow.readInt32LE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
     val c = read() ?: return null
@@ -209,7 +209,7 @@ suspend fun InputFlow.readInt32LE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readInt32BE(): Int? {
+public suspend fun InputFlow.readInt32BE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
     val c = read() ?: return null
@@ -219,7 +219,7 @@ suspend fun InputFlow.readInt32BE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readUInt32LE(): UInt? {
+public suspend fun InputFlow.readUInt32LE(): UInt? {
     val a = read() ?: return null
     val b = read() ?: return null
     val c = read() ?: return null
@@ -229,7 +229,7 @@ suspend fun InputFlow.readUInt32LE(): UInt? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readUInt32BE(): UInt? {
+public suspend fun InputFlow.readUInt32BE(): UInt? {
     val a = read() ?: return null
     val b = read() ?: return null
     val c = read() ?: return null
@@ -239,7 +239,7 @@ suspend fun InputFlow.readUInt32BE(): UInt? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readInt24LE(): Int? {
+public suspend fun InputFlow.readInt24LE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
     val c = read() ?: return null
@@ -248,7 +248,7 @@ suspend fun InputFlow.readInt24LE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readInt24BE(): Int? {
+public suspend fun InputFlow.readInt24BE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
     val c = read() ?: return null
@@ -257,7 +257,7 @@ suspend fun InputFlow.readInt24BE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readInt16LE(): Int? {
+public suspend fun InputFlow.readInt16LE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
 
@@ -265,7 +265,7 @@ suspend fun InputFlow.readInt16LE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readInt16BE(): Int? {
+public suspend fun InputFlow.readInt16BE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
 
@@ -273,7 +273,7 @@ suspend fun InputFlow.readInt16BE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readUInt16LE(): Int? {
+public suspend fun InputFlow.readUInt16LE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
 
@@ -281,7 +281,7 @@ suspend fun InputFlow.readUInt16LE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readUInt16BE(): Int? {
+public suspend fun InputFlow.readUInt16BE(): Int? {
     val a = read() ?: return null
     val b = read() ?: return null
 
@@ -289,7 +289,7 @@ suspend fun InputFlow.readUInt16BE(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readVariableInt16(): Int? {
+public suspend fun InputFlow.readVariableInt16(): Int? {
     val byte = read() ?: return null
     if (byte < 0x80)
         return byte
@@ -298,31 +298,31 @@ suspend fun InputFlow.readVariableInt16(): Int? {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readFloatBE(): Float? = this.readInt32BE()?.let { Float.fromBits(it) }
+public suspend fun InputFlow.readFloatBE(): Float? = this.readInt32BE()?.let { Float.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readFloatLE(): Float? = this.readInt32LE()?.let { Float.fromBits(it) }
+public suspend fun InputFlow.readFloatLE(): Float? = this.readInt32LE()?.let { Float.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readFloat32BE(): Float? = this.readInt32BE()?.let { Float.fromBits(it) }
+public suspend fun InputFlow.readFloat32BE(): Float? = this.readInt32BE()?.let { Float.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readFloat32LE(): Float? = this.readInt32LE()?.let { Float.fromBits(it) }
+public suspend fun InputFlow.readFloat32LE(): Float? = this.readInt32LE()?.let { Float.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readDoubleBE(): Double? = this.readInt64BE()?.let { Double.fromBits(it) }
+public suspend fun InputFlow.readDoubleBE(): Double? = this.readInt64BE()?.let { Double.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readDoubleLE(): Double? = this.readInt64LE()?.let { Double.fromBits(it) }
+public suspend fun InputFlow.readDoubleLE(): Double? = this.readInt64LE()?.let { Double.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readFloat64BE(): Double? = this.readInt64BE()?.let { Double.fromBits(it) }
+public suspend fun InputFlow.readFloat64BE(): Double? = this.readInt64BE()?.let { Double.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readFloat64LE(): Double? = this.readInt64LE()?.let { Double.fromBits(it) }
+public suspend fun InputFlow.readFloat64LE(): Double? = this.readInt64LE()?.let { Double.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readInt64LE(index: Int): Long? {
+public fun ByteArray.readInt64LE(index: Int): Long? {
     if (size - 8 < index)
         return null
 
@@ -340,7 +340,7 @@ fun ByteArray.readInt64LE(index: Int): Long? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readInt64BE(index: Int): Long? {
+public fun ByteArray.readInt64BE(index: Int): Long? {
     if (size - 8 < index)
         return null
 
@@ -358,7 +358,7 @@ fun ByteArray.readInt64BE(index: Int): Long? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readUInt64LE(index: Int): ULong? {
+public fun ByteArray.readUInt64LE(index: Int): ULong? {
     if (size - 8 < index)
         return null
 
@@ -376,7 +376,7 @@ fun ByteArray.readUInt64LE(index: Int): ULong? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readUInt64BE(index: Int): ULong? {
+public fun ByteArray.readUInt64BE(index: Int): ULong? {
     if (size - 8 < index)
         return null
 
@@ -394,7 +394,7 @@ fun ByteArray.readUInt64BE(index: Int): ULong? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readInt32LE(index: Int): Int? {
+public fun ByteArray.readInt32LE(index: Int): Int? {
     if (size - 4 < index)
         return null
 
@@ -407,7 +407,7 @@ fun ByteArray.readInt32LE(index: Int): Int? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readInt32BE(index: Int): Int? {
+public fun ByteArray.readInt32BE(index: Int): Int? {
     if (size - 4 < index)
         return null
 
@@ -420,7 +420,7 @@ fun ByteArray.readInt32BE(index: Int): Int? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readUInt32LE(index: Int): UInt? {
+public fun ByteArray.readUInt32LE(index: Int): UInt? {
     if (size - 4 < index)
         return null
 
@@ -433,7 +433,7 @@ fun ByteArray.readUInt32LE(index: Int): UInt? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readUInt32BE(index: Int): UInt? {
+public fun ByteArray.readUInt32BE(index: Int): UInt? {
     if (size - 4 < index)
         return null
 
@@ -446,7 +446,7 @@ fun ByteArray.readUInt32BE(index: Int): UInt? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readInt24BE(index: Int): Int? {
+public fun ByteArray.readInt24BE(index: Int): Int? {
     if (size - 3 < index)
         return null
 
@@ -458,7 +458,7 @@ fun ByteArray.readInt24BE(index: Int): Int? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readInt16LE(index: Int): Int? {
+public fun ByteArray.readInt16LE(index: Int): Int? {
     if (size - 2 < index)
         return null
 
@@ -469,7 +469,7 @@ fun ByteArray.readInt16LE(index: Int): Int? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readInt16BE(index: Int): Int? {
+public fun ByteArray.readInt16BE(index: Int): Int? {
     if (size - 2 < index)
         return null
 
@@ -480,41 +480,41 @@ fun ByteArray.readInt16BE(index: Int): Int? {
 }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readFloatBE(index: Int): Float? = this.readInt32BE(index)?.let { Float.fromBits(it) }
+public fun ByteArray.readFloatBE(index: Int): Float? = this.readInt32BE(index)?.let { Float.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readFloatLE(index: Int): Float? = this.readInt32LE(index)?.let { Float.fromBits(it) }
+public fun ByteArray.readFloatLE(index: Int): Float? = this.readInt32LE(index)?.let { Float.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readFloat32BE(index: Int): Float? = this.readInt32BE(index)?.let { Float.fromBits(it) }
+public fun ByteArray.readFloat32BE(index: Int): Float? = this.readInt32BE(index)?.let { Float.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readFloat32LE(index: Int): Float? = this.readInt32LE(index)?.let { Float.fromBits(it) }
+public fun ByteArray.readFloat32LE(index: Int): Float? = this.readInt32LE(index)?.let { Float.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readDoubleBE(index: Int): Double? = this.readInt64BE(index)?.let { Double.fromBits(it) }
+public fun ByteArray.readDoubleBE(index: Int): Double? = this.readInt64BE(index)?.let { Double.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readDoubleLE(index: Int): Double? = this.readInt64LE(index)?.let { Double.fromBits(it) }
+public fun ByteArray.readDoubleLE(index: Int): Double? = this.readInt64LE(index)?.let { Double.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readFloat64BE(index: Int): Double? = this.readInt64BE(index)?.let { Double.fromBits(it) }
+public fun ByteArray.readFloat64BE(index: Int): Double? = this.readInt64BE(index)?.let { Double.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun ByteArray.readFloat64LE(index: Int): Double? = this.readInt64LE(index)?.let { Double.fromBits(it) }
+public fun ByteArray.readFloat64LE(index: Int): Double? = this.readInt64LE(index)?.let { Double.fromBits(it) }
 
 @ExperimentalUnsignedTypes
-fun <T> InputFlow.read(serialise: (InputFlow) -> T?): T? = serialise(this)
+public fun <T> InputFlow.read(serialise: (InputFlow) -> T?): T? = serialise(this)
 //fun <T> CountingInputFlow.readSource(source: () -> InputFlow, serialise: (() -> InputFlow) -> T?): T? = serialise(source.from(streamOffset))
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeFloatBE(float: Float) = writeInt32BE(float.toRawBits())
+public suspend fun OutputFlow.writeFloatBE(float: Float): Unit = writeInt32BE(float.toRawBits())
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeFloatLE(float: Float) = writeInt32LE(float.toRawBits())
+public suspend fun OutputFlow.writeFloatLE(float: Float): Unit = writeInt32LE(float.toRawBits())
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeInt64LE(num: Number) {
+public suspend fun OutputFlow.writeInt64LE(num: Number) {
     val long = num.toLong()
 
     write(long.toInt() and 0xFF)
@@ -528,7 +528,7 @@ suspend fun OutputFlow.writeInt64LE(num: Number) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeInt64BE(num: Number) {
+public suspend fun OutputFlow.writeInt64BE(num: Number) {
     val long = num.toLong()
 
     write((long shr 56).toInt() and 0xFF)
@@ -542,7 +542,7 @@ suspend fun OutputFlow.writeInt64BE(num: Number) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeInt32LE(num: Number) {
+public suspend fun OutputFlow.writeInt32LE(num: Number) {
     val int = num.toInt()
 
     write(int and 0xFF)
@@ -552,7 +552,7 @@ suspend fun OutputFlow.writeInt32LE(num: Number) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeInt32BE(num: Number) {
+public suspend fun OutputFlow.writeInt32BE(num: Number) {
     val int = num.toInt()
 
     write((int shr 24) and 0xFF)
@@ -562,7 +562,7 @@ suspend fun OutputFlow.writeInt32BE(num: Number) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeUInt32BE(num: Number) {
+public suspend fun OutputFlow.writeUInt32BE(num: Number) {
     val int = num.toInt()
 
     write((int ushr 24) and 0xFF)
@@ -572,7 +572,7 @@ suspend fun OutputFlow.writeUInt32BE(num: Number) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeInt24LE(num: Number) {
+public suspend fun OutputFlow.writeInt24LE(num: Number) {
     val int = num.toShort().toInt()
 
     write(int and 0xFF)
@@ -581,7 +581,7 @@ suspend fun OutputFlow.writeInt24LE(num: Number) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeInt24BE(num: Number) {
+public suspend fun OutputFlow.writeInt24BE(num: Number) {
     val int = num.toShort().toInt()
 
     write((int shr 16) and 0xFF)
@@ -591,7 +591,7 @@ suspend fun OutputFlow.writeInt24BE(num: Number) {
 
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeInt16LE(num: Number) {
+public suspend fun OutputFlow.writeInt16LE(num: Number) {
     val int = num.toShort().toInt()
 
     write(int and 0xFF)
@@ -599,14 +599,14 @@ suspend fun OutputFlow.writeInt16LE(num: Number) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeInt16BE(num: Number) {
+public suspend fun OutputFlow.writeInt16BE(num: Number) {
     val int = num.toShort().toInt()
 
     write((int shr 8) and 0xFF)
     write(int and 0xFF)
 }
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt16(num: Number) {
+public suspend fun OutputFlow.writeVariableInt16(num: Number) {
     val n = num.toInt()
     if (n < 0x80) {
         write(n)
@@ -617,7 +617,7 @@ suspend fun OutputFlow.writeVariableInt16(num: Number) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun OutputFlow.writeVariableInt(num: Number, bytes: Int) {
+public suspend fun OutputFlow.writeVariableInt(num: Number, bytes: Int) {
     var input: Long = num.toLong()
     if (input < 0x80) {
         return write(input.toInt())
@@ -636,7 +636,7 @@ suspend fun OutputFlow.writeVariableInt(num: Number, bytes: Int) {
 }
 
 @ExperimentalUnsignedTypes
-suspend inline fun InputFlow.readIntXLE(x: Int): Number? {
+public suspend inline fun InputFlow.readIntXLE(x: Int): Number? {
     when (x) {
         1 -> return read()
         2 -> return readInt16LE()
@@ -654,7 +654,7 @@ suspend inline fun InputFlow.readIntXLE(x: Int): Number? {
 }
 
 @ExperimentalUnsignedTypes
-suspend inline fun OutputFlow.writeIntXLE(num: Number, x: Int) =
+public suspend inline fun OutputFlow.writeIntXLE(num: Number, x: Int): Unit =
     when (x) {
         1 -> write(num.toInt())
         2 -> writeInt16LE(num)
@@ -669,7 +669,7 @@ suspend inline fun OutputFlow.writeIntXLE(num: Number, x: Int) =
         }
     }
 
-fun makeMask(vararg bits: Int): Int {
+public fun makeMask(vararg bits: Int): Int {
     var mask = 0
     for (bit in bits)
         mask = mask or ((1 shl (bit + 1)) - 1)
@@ -677,7 +677,7 @@ fun makeMask(vararg bits: Int): Int {
     return mask
 }
 
-fun Number.toInt16LE(): IntArray {
+public fun Number.toInt16LE(): IntArray {
     val num = toInt() and 0xFFFF
     return intArrayOf(num shr 8, num and 0xFF)
 }
@@ -698,7 +698,7 @@ fun Number.toInt16LE(): IntArray {
 //}
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.readNumBytes(num: Int): ByteArray {
+public suspend fun InputFlow.readNumBytes(num: Int): ByteArray {
     val data = ByteArray(num)
     read(data)
     return data

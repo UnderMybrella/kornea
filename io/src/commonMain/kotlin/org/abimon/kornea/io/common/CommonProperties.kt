@@ -116,7 +116,7 @@ internal class PropertiesFlow(val backing: InputFlow) {
 }
 
 @ExperimentalUnsignedTypes
-suspend fun InputFlow.loadProperties(): Map<String, String> {
+public suspend fun InputFlow.loadProperties(): Map<String, String> {
     val convtBuf = CharArray(1024)
     var limit: Int
     var keyLen: Int

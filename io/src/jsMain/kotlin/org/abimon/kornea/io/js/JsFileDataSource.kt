@@ -5,23 +5,34 @@ import kotlinx.coroutines.await
 import kotlinx.coroutines.promise
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.abimon.kornea.errors.common.KorneaResult
 import org.abimon.kornea.io.common.*
-import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceClosed
-import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceUnknown
-import org.abimon.kornea.io.common.DataSource.Companion.korneaTooManySourcesOpen
 import org.abimon.kornea.io.common.flow.BinaryInputFlow
 import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Int8Array
 import org.w3c.files.File
 import org.w3c.files.FileReader
 import kotlin.js.Promise
-import kotlin.math.max
 
 @ExperimentalUnsignedTypes
-class JsFileDataSource(val file: File, val maxInstanceCount: Int = -1, override val location: String? = file.name) : DataSource<BinaryInputFlow> {
-    companion object {
-        fun async(file: File, maxInstanceCount: Int = -1, location: String? = file.name): Promise<JsFileDataSource> = GlobalScope.promise { JsFileDataSource(file, maxInstanceCount, location) }
+public class JsFileDataSource(
+    private val file: File,
+    override val maximumInstanceCount: Int? = null,
+    override val location: String? = file.name
+) : LimitedInstanceDataSource.Typed<BinaryInputFlow, JsFileDataSource>(withBareOpener(this::openBareInputFlow)) {
+
+    public companion object {
+        @Suppress("RedundantSuspendModifier")
+        public suspend fun openBareInputFlow(
+            self: JsFileDataSource,
+            location: String?
+        ): BinaryInputFlow = BinaryInputFlow(self.data!!, location = location ?: self.location)
+
+        public fun async(
+            file: File,
+            maxInstanceCount: Int = -1,
+            location: String? = file.name
+        ): Promise<JsFileDataSource> =
+            GlobalScope.promise { JsFileDataSource(file, maxInstanceCount, location) }
     }
 
     private var data: ByteArray? = null
@@ -30,49 +41,13 @@ class JsFileDataSource(val file: File, val maxInstanceCount: Int = -1, override 
     override val dataSize: ULong?
         get() = data?.size?.toULong()
 
-    override val reproducibility: DataSourceReproducibility = DataSourceReproducibility(isStatic = true, isRandomAccess = true)
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
+    override val reproducibility: DataSourceReproducibility =
+        DataSourceReproducibility(isStatic = true, isRandomAccess = true)
 
-    private val openInstances: MutableList<BinaryInputFlow> = ArrayList(max(maxInstanceCount, 0))
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
-
-    override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
-        waitIfNeeded()
-
-        when {
-            closed -> return korneaSourceClosed()
-            maxInstanceCount == openInstances.size -> return korneaTooManySourcesOpen(maxInstanceCount)
-            canOpenInputFlow() -> {
-                val stream = BinaryInputFlow(data!!, location = location ?: this.location)
-                stream.addCloseHandler(this::instanceClosed)
-                openInstances.add(stream)
-                return KorneaResult.success(stream)
-            }
-            else -> return korneaSourceUnknown()
-        }
-    }
     override suspend fun canOpenInputFlow(): Boolean {
         waitIfNeeded()
 
-        return !closed && data != null && (maxInstanceCount == -1 || openInstances.size < maxInstanceCount)
-    }
-
-    private suspend fun instanceClosed(closeable: DataCloseable) {
-        if (closeable is BinaryInputFlow) {
-            openInstances.remove(closeable)
-        }
-    }
-
-    override suspend fun close() {
-        super.close()
-
-        if (!closed) {
-            closed = true
-            openInstances.toTypedArray().closeAll()
-            openInstances.clear()
-        }
+        return data != null && super.canOpenInputFlow()
     }
 
     private suspend fun waitIfNeeded() {

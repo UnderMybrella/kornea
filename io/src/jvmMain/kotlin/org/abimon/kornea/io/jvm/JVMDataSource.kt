@@ -1,20 +1,21 @@
 package org.abimon.kornea.io.jvm
 
-import org.abimon.kornea.errors.common.KorneaResult
-import org.abimon.kornea.io.common.DataCloseableEventHandler
-import org.abimon.kornea.io.common.DataSource
-import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceClosed
-import org.abimon.kornea.io.common.DataSourceReproducibility
+import org.abimon.kornea.io.common.*
 import java.io.InputStream
 
 @ExperimentalUnsignedTypes
-class JVMDataSource(val func: () -> InputStream, override val location: String? = null) : DataSource<JVMInputFlow> {
-    override val dataSize: ULong? = null
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
+public class JVMDataSource(
+    private val func: () -> InputStream,
+    override val maximumInstanceCount: Int?,
+    override val location: String? = null
+) : LimitedInstanceDataSource.Typed<JVMInputFlow, JVMDataSource>(withBareOpener(this::openBareInputFlow)) {
+    public companion object {
+        @Suppress("RedundantSuspendModifier")
+        public suspend fun openBareInputFlow(self: JVMDataSource, location: String?): JVMInputFlow =
+            JVMInputFlow(self.func(), location ?: self.location)
+    }
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
+    override val dataSize: ULong? = null
 
     /**
      * The reproducibility traits of this data source.
@@ -22,19 +23,5 @@ class JVMDataSource(val func: () -> InputStream, override val location: String? 
      * These traits *may* change between invocations, so a fresh instance should be obtained each time
      */
     override val reproducibility: DataSourceReproducibility
-        get() = DataSourceReproducibility(
-            isUnreliable = true
-        )
-
-    override suspend fun openNamedInputFlow(location: String?): KorneaResult<JVMInputFlow> =
-        if (!closed) KorneaResult.success(JVMInputFlow(func(), location ?: this.location))
-        else korneaSourceClosed()
-
-    override suspend fun canOpenInputFlow(): Boolean = !closed
-
-    override suspend fun close() {
-        super.close()
-
-        closed = true
-    }
+        get() = DataSourceReproducibility(isUnreliable = true)
 }

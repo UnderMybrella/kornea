@@ -4,34 +4,43 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.abimon.kornea.annotations.BlockingOperation
 import org.abimon.kornea.annotations.ExperimentalKorneaIO
-import org.abimon.kornea.errors.common.KorneaResult
-import org.abimon.kornea.errors.common.korneaNotFound
 import org.abimon.kornea.io.common.*
-import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceClosed
-import org.abimon.kornea.io.common.DataSource.Companion.korneaSourceUnknown
 import java.io.File
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.math.max
 
 @ExperimentalUnsignedTypes
 @ExperimentalKorneaIO
-class AsyncFileDataSource(val backing: Path, backingChannel: AsynchronousFileChannel? = null, val localChannel: Boolean = backingChannel == null, val maxInstanceCount: Int = -1, override val location: String? = backing.toString()): DataSource<AsyncFileInputFlow> {
-    constructor(backing: File, backingChannel: AsynchronousFileChannel? = null, localChannel: Boolean = backingChannel == null, maxInstanceCount: Int = -1, location: String? = backing.absolutePath): this(backing.toPath(), backingChannel, localChannel, maxInstanceCount, location)
+public class AsyncFileDataSource(
+    public val backing: Path,
+    backingChannel: AsynchronousFileChannel? = null,
+    public val localChannel: Boolean = backingChannel == null,
+    override val maximumInstanceCount: Int? = null,
+    override val location: String? = backing.toString()
+) : LimitedInstanceDataSource.Typed<AsyncFileInputFlow, AsyncFileDataSource>(withBareOpener(this::openBareLimitedInputFlow)) {
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
+    public companion object {
+        public suspend fun openBareLimitedInputFlow(self: AsyncFileDataSource, location: String?): AsyncFileInputFlow =
+            AsyncFileInputFlow(self.getChannel(), false, self.backing, location ?: self.location)
+    }
+
+    public constructor(
+        backing: File,
+        backingChannel: AsynchronousFileChannel? = null,
+        localChannel: Boolean = backingChannel == null,
+        maximumInstanceCount: Int? = null,
+        location: String? = backing.absolutePath
+    ) : this(backing.toPath(), backingChannel, localChannel, maximumInstanceCount, location)
+
     override val dataSize: ULong
         @BlockingOperation
         get() = Files.size(backing).toULong()
 
-    private val openInstances: MutableList<AsyncFileInputFlow> = ArrayList(max(maxInstanceCount, 0))
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
+    override val reproducibility: DataSourceReproducibility =
+        DataSourceReproducibility(isStatic = true, isRandomAccess = true)
 
-    override val reproducibility: DataSourceReproducibility = DataSourceReproducibility(isStatic = true, isRandomAccess = true)
     private var initialised: Boolean = backingChannel != null
     private val channel: AsynchronousFileChannel by lazy {
         initialised = true
@@ -41,37 +50,9 @@ class AsyncFileDataSource(val backing: Path, backingChannel: AsynchronousFileCha
     private suspend fun getChannel(): AsynchronousFileChannel =
         if (!initialised) withContext(Dispatchers.IO) { channel } else channel
 
-    override suspend fun openNamedInputFlow(location: String?): KorneaResult<AsyncFileInputFlow> =
-        when {
-            closed -> korneaSourceClosed()
-            !initialised && !Files.exists(backing) -> korneaNotFound("$backing does not exist")
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-            canOpenInputFlow() -> {
-                val flow = AsyncFileInputFlow(getChannel(), false, backing, location ?: this.location)
-                flow.addCloseHandler(this::instanceClosed)
-                openInstances.add(flow)
-                KorneaResult.success(flow)
-            }
-            else -> korneaSourceUnknown()
-        }
-
-    override suspend fun canOpenInputFlow(): Boolean = !closed && (maxInstanceCount == -1 || openInstances.size < maxInstanceCount)
-
-    private suspend fun instanceClosed(closeable: ObservableDataCloseable) {
-        if (closeable is AsyncFileInputFlow) {
-            openInstances.remove(closeable)
-        }
-    }
-
-    override suspend fun close() {
-        super.close()
-
-        if (!closed) {
-            closed = true
-            openInstances.toTypedArray().closeAll()
-            openInstances.clear()
-
-            if (localChannel) withContext(Dispatchers.IO) { channel.close() }
-        }
+        if (localChannel) withContext(Dispatchers.IO) { channel.close() }
     }
 }

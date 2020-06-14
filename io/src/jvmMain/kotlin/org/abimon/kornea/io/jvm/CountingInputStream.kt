@@ -5,52 +5,55 @@ import java.io.InputStream
 /**
  * Simple little wrapper that just does a count every time a byte is read
  */
-open class CountingInputStream(countedInputStream: InputStream) : DelegatedInputStream(countedInputStream) {
-    var count = 0L
-    var mark = 0L
+public open class CountingInputStream(countedInputStream: InputStream) : DelegatedInputStream(countedInputStream) {
+    private var _count = 0L
+    private var _mark = 0L
 
-    open val streamOffset: Long by run {
+    public val count: Long by ::_count
+    public val mark: Long by ::_mark
+
+    public open val streamOffset: Long by run {
         if (countedInputStream is CountingInputStream) {
             return@run (countedInputStream as CountingInputStream)::streamOffset
         }
 
-        return@run this::count
+        return@run ::_count
     }
 
     override fun read(): Int {
-        count++
+        _count++
         return super.read()
     }
 
     override fun read(b: ByteArray): Int {
         val read = super.read(b)
-        count += read.coerceAtLeast(0)
+        _count += read.coerceAtLeast(0)
         return read
     }
 
     override fun read(b: ByteArray, off: Int, len: Int): Int {
         val read = super.read(b, off, len)
-        count += read.coerceAtLeast(0)
+        _count += read.coerceAtLeast(0)
         return read
     }
 
     override fun skip(n: Long): Long {
         val amount = super.skip(n)
-        count += amount
+        _count += amount
         return amount
     }
 
     override fun reset() {
         super.reset()
-        count = mark
+        _count = _mark
     }
 
     override fun mark(readlimit: Int) {
         super.mark(readlimit)
-        mark = count
+        _mark = _count
     }
 
-    fun seekForward(n: Long): Long {
+    public fun seekForward(n: Long): Long {
         return if (super.delegatedInputStream is CountingInputStream)
             (super.delegatedInputStream as CountingInputStream).seekForward(n)
         else

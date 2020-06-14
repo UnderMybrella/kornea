@@ -1,21 +1,18 @@
 package org.abimon.kornea.io.common.flow
 
+import org.abimon.kornea.io.common.BaseDataCloseable
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 
 @ExperimentalUnsignedTypes
-class BufferedOutputFlow(val backing: OutputFlow): CountingOutputFlow {
+public open class BufferedOutputFlow(protected val backing: OutputFlow): BaseDataCloseable(), CountingOutputFlow {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
-    var _flowCount = 0L
-    val flowCount
+    protected var _flowCount: Long = 0L
+    public val flowCount: Long
         get() = _flowCount
 
     override val streamOffset: Long
         get() = if (backing is CountingOutputFlow) backing.streamOffset + flowCount else flowCount
-
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     /**
      * The internal buffer where data is stored.
@@ -28,7 +25,7 @@ class BufferedOutputFlow(val backing: OutputFlow): CountingOutputFlow {
      * `buf[0]` through `buf[count-1]` contain valid
      * byte data.
      */
-    protected var bufferCount = 0
+    protected var bufferCount: Int = 0
 
     private suspend fun flushBuffer() {
         if (bufferCount > 0 && !closed) {
@@ -77,13 +74,10 @@ class BufferedOutputFlow(val backing: OutputFlow): CountingOutputFlow {
         backing.flush()
     }
 
-    override suspend fun close() {
-        super.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            flush()
-            backing.close()
-            closed = true
-        }
+        flush()
+        backing.close()
     }
 }

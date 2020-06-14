@@ -8,13 +8,9 @@ import org.abimon.kornea.io.common.DataSink.Companion.korneaSinkUnknown
 import java.io.File
 
 @ExperimentalUnsignedTypes
-class SynchronousFileDataSink(val backing: File) : DataSink<SynchronousFileOutputFlow> {
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-
+public class SynchronousFileDataSink(public val backing: File) : BaseDataCloseable(),
+    DataSink<SynchronousFileOutputFlow> {
     private val openInstances: MutableList<SynchronousFileOutputFlow> = ArrayList(1)
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
 
     override suspend fun openOutputFlow(): KorneaResult<SynchronousFileOutputFlow> =
         when {
@@ -23,7 +19,7 @@ class SynchronousFileDataSink(val backing: File) : DataSink<SynchronousFileOutpu
 
             canOpenOutputFlow() -> {
                 val stream = SynchronousFileOutputFlow(backing)
-                stream.addCloseHandler(this::instanceClosed)
+                stream.registerCloseHandler(this::instanceClosed)
                 openInstances.add(stream)
                 KorneaResult.success(stream)
             }
@@ -39,13 +35,10 @@ class SynchronousFileDataSink(val backing: File) : DataSink<SynchronousFileOutpu
         }
     }
 
-    override suspend fun close() {
-        super.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            closed = true
-            openInstances.toTypedArray().closeAll()
-            openInstances.clear()
-        }
+        openInstances.closeAll()
+        openInstances.clear()
     }
 }

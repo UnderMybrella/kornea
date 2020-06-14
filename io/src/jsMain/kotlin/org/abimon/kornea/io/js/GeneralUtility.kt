@@ -4,7 +4,7 @@ import kotlinx.coroutines.await
 import org.w3c.xhr.XMLHttpRequest
 import kotlin.js.Promise
 
-suspend fun urlExists(url: String): Boolean =
+public suspend fun urlExists(url: String): Boolean =
         Promise { resolve: (Boolean) -> Unit, _: (Throwable) -> Unit ->
             val headRequest = XMLHttpRequest()
             headRequest.open("HEAD", url)
@@ -13,7 +13,7 @@ suspend fun urlExists(url: String): Boolean =
         }.await()
 
 @ExperimentalUnsignedTypes
-suspend fun urlSize(url: String): ULong? =
+public suspend fun urlSize(url: String): ULong? =
         Promise { resolve: (ULong?) -> Unit, _: (Throwable) -> Unit ->
             val headRequest = XMLHttpRequest()
             headRequest.open("HEAD", url)
