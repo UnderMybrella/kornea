@@ -4,6 +4,14 @@ import org.abimon.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 4.1.1
+     * - Change [CountingInputStream._mark] and [CountingInputStream._count] to be protected, not private
+     * - Add null to [JVMDataSource]'s maximumInstanceCount
+     */
+    @AvailableSince(VERSION_4_1_1)
+    public const val VERSION_4_1_1: String = "4.1.1"
+
+    /**
      * kornea-io 4.1.0
      *  - Add atomicfu plugin
      *  - Add kornea-toolkit as a dependency

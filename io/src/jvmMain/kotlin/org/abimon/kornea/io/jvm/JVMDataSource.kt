@@ -6,7 +6,7 @@ import java.io.InputStream
 @ExperimentalUnsignedTypes
 public class JVMDataSource(
     private val func: () -> InputStream,
-    override val maximumInstanceCount: Int?,
+    override val maximumInstanceCount: Int? = null,
     override val location: String? = null
 ) : LimitedInstanceDataSource.Typed<JVMInputFlow, JVMDataSource>(withBareOpener(this::openBareInputFlow)) {
     public companion object {

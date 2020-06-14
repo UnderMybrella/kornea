@@ -6,8 +6,8 @@ import java.io.InputStream
  * Simple little wrapper that just does a count every time a byte is read
  */
 public open class CountingInputStream(countedInputStream: InputStream) : DelegatedInputStream(countedInputStream) {
-    private var _count = 0L
-    private var _mark = 0L
+    protected var _count: Long = 0L
+    protected var _mark: Long = 0L
 
     public val count: Long by ::_count
     public val mark: Long by ::_mark
