@@ -21,8 +21,6 @@ public inline fun <T, R> freeze(receiver: T, block: (T) -> R): R {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
 
-    receiver.let(block)
-
     return block(receiver)
 }
 
