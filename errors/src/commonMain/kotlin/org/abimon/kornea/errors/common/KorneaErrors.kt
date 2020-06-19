@@ -1,6 +1,15 @@
 package org.abimon.kornea.errors.common
 
+import org.abimon.kornea.annotations.AvailableSince
+
 public object KorneaErrors {
+    /**
+     * kornea-errors
+     * - Add [flatMapOrSelf] and [foldResults]
+     */
+    @AvailableSince(VERSION_3_3_0)
+    public const val VERSION_3_3_0: String = "3.3.0"
+
     /**
      * kornea-errors 3.2.0
      * - Add [switchIfHasCause] and [doWithCause]
@@ -8,12 +17,14 @@ public object KorneaErrors {
      * - Add [StaticSuccess] and [success]
      * - Add [KorneaResult.Empty.Null] and [KorneaResult.Empty.Undefined]
      */
+    @AvailableSince(VERSION_3_2_0)
     public const val VERSION_3_2_0: String = "3.2.0"
 
     /**
      * kornea-errors 3.1.1
      * - Add [doOnSuccessAsync] overloads
      */
+    @AvailableSince(VERSION_3_1_1)
     public const val VERSION_3_1_1: String = "3.1.1"
 
     /**
@@ -21,6 +32,7 @@ public object KorneaErrors {
      *
      * - Add [mapCausedBy] and [mapRootCausedBy]
      */
+    @AvailableSince(VERSION_3_1_0)
     public const val VERSION_3_1_0: String = "3.1.0"
 
     /**
@@ -28,6 +40,7 @@ public object KorneaErrors {
      *
      * - Mark [doOnFailure] as deprecated, since IntelliJ's custom inspections for Kotlin are borked still
      */
+    @AvailableSince(VERSION_3_0_3)
     public const val VERSION_3_0_3: String = "3.0.3"
 
     /**
@@ -37,5 +50,6 @@ public object KorneaErrors {
      * - Add [getOrBreak] to reflect the same behaviour
      * - Add [KorneaErrors]
      */
+    @AvailableSince(VERSION_3_0_2)
     public const val VERSION_3_0_2: String = "3.0.2"
 }

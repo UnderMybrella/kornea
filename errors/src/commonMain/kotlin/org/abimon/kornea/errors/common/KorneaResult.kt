@@ -128,6 +128,9 @@ public interface KorneaResult<out T> {
             cause as Failure
         ).asType()
 
+        public inline fun <T> foldingMutableListOf(list: MutableList<T> = ArrayList()): KorneaResult<MutableList<T>> =
+            success(list)
+
         public fun dirtyImplementationString(impl: KorneaResult<*>): String =
             "Bad implementation of KorneaResult by `${impl::class}`; you need to implement either Success<T> or Failure! (Value was $impl)"
     }
@@ -340,20 +343,16 @@ public interface KorneaResult<out T> {
             public inline fun illegalArgumentException(
                 errorCode: Int,
                 errorMessage: String,
+                cause: Throwable? = null,
                 includeResultCodeInError: Boolean = DEFAULT_INCLUDE_RESULT_CODE_IN_ERROR
             ): IllegalArgumentException =
-                IllegalArgumentException(
-                    formatErrorMessage(
-                        errorCode,
-                        errorMessage,
-                        includeResultCodeInError
-                    )
-                )
+                IllegalArgumentException(formatErrorMessage(errorCode, errorMessage, includeResultCodeInError), cause)
 
             public inline fun illegalArgument(error: WithErrorDetails): IllegalArgumentException =
                 illegalArgumentException(
                     error.errorCode,
                     error.errorMessage,
+                    ((error as? WithCause)?.cause as? WithException<*>)?.exception,
                     false
                 )
 
@@ -361,26 +360,23 @@ public interface KorneaResult<out T> {
                 illegalArgumentException(
                     error.errorCode,
                     error.errorMessage,
+                    ((error as? WithCause)?.cause as? WithException<*>)?.exception,
                     true
                 )
 
             public inline fun illegalStateException(
                 errorCode: Int,
                 errorMessage: String,
+                cause: Throwable? = null,
                 includeResultCodeInError: Boolean = DEFAULT_INCLUDE_RESULT_CODE_IN_ERROR
             ): IllegalStateException =
-                IllegalStateException(
-                    formatErrorMessage(
-                        errorCode,
-                        errorMessage,
-                        includeResultCodeInError
-                    )
-                )
+                IllegalStateException(formatErrorMessage(errorCode, errorMessage, includeResultCodeInError), cause)
 
             public inline fun illegalState(error: WithErrorDetails): IllegalStateException =
                 illegalStateException(
                     error.errorCode,
                     error.errorMessage,
+                    ((error as? WithCause)?.cause as? WithException<*>)?.exception,
                     false
                 )
 
@@ -388,6 +384,7 @@ public interface KorneaResult<out T> {
                 illegalStateException(
                     error.errorCode,
                     error.errorMessage,
+                    ((error as? WithCause)?.cause as? WithException<*>)?.exception,
                     true
                 )
 
@@ -403,29 +400,16 @@ public interface KorneaResult<out T> {
                         illegalArgumentException(
                             errorCode,
                             errorMessage,
+                            (cause as? WithException<*>)?.exception,
                             includeResultCodeInError
                         )
-                    of(
-                        errorCode,
-                        errorMessage,
-                        e,
-                        cause
-                    )
+
+                    of(errorCode, errorMessage, e, cause)
                 } else {
                     if (includeResultCodeInError) {
-                        of(
-                            errorCode,
-                            errorMessage,
-                            this::illegalArgument,
-                            cause
-                        )
+                        of(errorCode, errorMessage, this::illegalArgument, cause)
                     } else {
-                        of(
-                            errorCode,
-                            errorMessage,
-                            this::illegalArgumentWithResultCode,
-                            cause
-                        )
+                        of(errorCode, errorMessage, this::illegalArgumentWithResultCode, cause)
                     }
                 }
 
@@ -441,29 +425,16 @@ public interface KorneaResult<out T> {
                         illegalStateException(
                             errorCode,
                             errorMessage,
+                            (cause as? WithException<*>)?.exception,
                             includeResultCodeInError
                         )
-                    of(
-                        errorCode,
-                        errorMessage,
-                        e,
-                        cause
-                    )
+
+                    of(errorCode, errorMessage, e, cause)
                 } else {
                     if (includeResultCodeInError) {
-                        of(
-                            errorCode,
-                            errorMessage,
-                            this::illegalState,
-                            cause
-                        )
+                        of(errorCode, errorMessage, this::illegalState, cause)
                     } else {
-                        of(
-                            errorCode,
-                            errorMessage,
-                            this::illegalStateWithResultCode,
-                            cause
-                        )
+                        of(errorCode, errorMessage, this::illegalStateWithResultCode, cause)
                     }
                 }
 
@@ -473,13 +444,7 @@ public interface KorneaResult<out T> {
                 exception: E,
                 cause: Failure? = null
             ): Failure =
-                Base(
-                    errorCode,
-                    errorMessage,
-                    cause,
-                    exception,
-                    null
-                )
+                Base(errorCode, errorMessage, cause, exception, null)
 
             public fun <E : Throwable> of(
                 errorCode: Int,
@@ -487,13 +452,7 @@ public interface KorneaResult<out T> {
                 supplier: (WithErrorDetails) -> E,
                 cause: Failure? = null
             ): Failure =
-                Base(
-                    errorCode,
-                    errorMessage,
-                    cause,
-                    null,
-                    supplier
-                )
+                Base(errorCode, errorMessage, cause, null, supplier)
         }
 
         private class Base<out E : Throwable>(
@@ -649,6 +608,18 @@ public inline fun <T, reified R> KorneaResult<T>.map(transform: (T) -> R): Korne
 public inline fun <T, reified R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<R>): KorneaResult<R> =
     when (this) {
         is KorneaResult.Success<T> -> transform(get())
+        is KorneaResult.Failure -> asType()
+        else -> KorneaResult.badImplementation(this)
+    }
+
+@AvailableSince(KorneaErrors.VERSION_3_3_0)
+public inline fun <T> KorneaResult<T>.flatMapOrSelf(transform: (T) -> KorneaResult<T>?): KorneaResult<T> =
+    when (this) {
+        is KorneaResult.Success<T> -> when (val result = transform(get())) {
+            null -> this
+            else -> result
+        }
+
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
@@ -1042,6 +1013,11 @@ public inline fun <T> KorneaResult<T>.getOrBreak(onFailure: (KorneaResult.Failur
         else -> throw IllegalStateException(KorneaResult.dirtyImplementationString(this))
     }
 
+@AvailableSince(KorneaErrors.VERSION_3_3_0)
+public inline fun <T, E> List<T>.foldResults(block: (element: T) -> KorneaResult<E>): KorneaResult<List<E>> =
+    fold(KorneaResult.foldingMutableListOf()) { acc, element ->
+        acc.flatMapOrSelf { list -> block(element).map { list.add(it); list } }
+    }
 
 //@ExperimentalContracts
 //public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>): T {
