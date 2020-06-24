@@ -5,6 +5,7 @@ package org.abimon.kornea.errors.common
 import org.abimon.kornea.annotations.AvailableSince
 import org.abimon.kornea.annotations.ChangedSince
 import org.abimon.kornea.annotations.ExperimentalKorneaErrors
+import kotlin.reflect.KClass
 
 public interface KorneaResult<out T> {
     @Suppress("NOTHING_TO_INLINE")
@@ -598,14 +599,14 @@ public inline fun <T, reified R> KorneaResult<T>.cast(): KorneaResult<R> =
         else -> KorneaResult.badImplementation(this)
     }
 
-public inline fun <T, reified R> KorneaResult<T>.map(transform: (T) -> R): KorneaResult<R> =
+public inline fun <T, R> KorneaResult<T>.map(transform: (T) -> R): KorneaResult<R> =
     when (this) {
         is KorneaResult.Success<T> -> this mapValue transform(get())
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
 
-public inline fun <T, reified R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<R>): KorneaResult<R> =
+public inline fun <T, R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<R>): KorneaResult<R> =
     when (this) {
         is KorneaResult.Success<T> -> transform(get())
         is KorneaResult.Failure -> asType()
@@ -655,7 +656,7 @@ public inline fun <T> KorneaResult<T?>.filterNotNull(): KorneaResult<T> =
 
 @Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_1_0)
-public inline fun <reified R> KorneaResult<*>.filterNotNull(onEmpty: () -> KorneaResult<R>): KorneaResult<R> =
+public inline fun <R> KorneaResult<*>.filterNotNull(onEmpty: () -> KorneaResult<R>): KorneaResult<R> =
     when (this) {
         is KorneaResult.Success -> if (get() != null) this as KorneaResult<R> else onEmpty()
         is KorneaResult.Failure -> asType()
@@ -664,7 +665,7 @@ public inline fun <reified R> KorneaResult<*>.filterNotNull(onEmpty: () -> Korne
 
 @Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_1_0)
-public inline fun <reified R> KorneaResult<*>.filterNotNull(default: KorneaResult<R>): KorneaResult<R> =
+public inline fun <R> KorneaResult<*>.filterNotNull(default: KorneaResult<R>): KorneaResult<R> =
     when (this) {
         is KorneaResult.Success -> if (get() != null) this as KorneaResult<R> else default
         is KorneaResult.Failure -> asType()
@@ -707,6 +708,20 @@ public inline fun <reified R> KorneaResult<*>.filterToInstance(): KorneaResult<R
     }
 
 @Suppress("UNCHECKED_CAST")
+@AvailableSince(KorneaErrors.VERSION_3_4_0)
+public inline fun <R : Any> KorneaResult<*>.filterToInstance(klass: KClass<R>): KorneaResult<R> =
+    when (this) {
+        is KorneaResult.Success -> when {
+            klass.isInstance(get()) -> this as KorneaResult<R>
+            this is KorneaResult.Success.FailedPredicateObserver -> onFilterToInstanceFailed()
+            else -> KorneaResult.typeCastEmpty()
+        }
+
+        is KorneaResult.Failure -> asType()
+        else -> KorneaResult.badImplementation(this)
+    }
+
+@Suppress("UNCHECKED_CAST")
 public inline fun <reified R> KorneaResult<*>.filterToInstance(onEmpty: () -> KorneaResult<R>): KorneaResult<R> =
     when (this) {
         is KorneaResult.Success -> if (get() is R) this as KorneaResult<R> else onEmpty()
@@ -715,9 +730,33 @@ public inline fun <reified R> KorneaResult<*>.filterToInstance(onEmpty: () -> Ko
     }
 
 @Suppress("UNCHECKED_CAST")
+@AvailableSince(KorneaErrors.VERSION_3_4_0)
+public inline fun <R : Any> KorneaResult<*>.filterToInstance(
+    klass: KClass<R>,
+    onEmpty: () -> KorneaResult<R>
+): KorneaResult<R> =
+    when (this) {
+        is KorneaResult.Success -> if (klass.isInstance(get())) this as KorneaResult<R> else onEmpty()
+        is KorneaResult.Failure -> asType()
+        else -> KorneaResult.badImplementation(this)
+    }
+
+@Suppress("UNCHECKED_CAST")
 public inline fun <reified R> KorneaResult<*>.filterToInstance(default: KorneaResult<R>): KorneaResult<R> =
     when (this) {
         is KorneaResult.Success -> if (get() is R) this as KorneaResult<R> else default
+        is KorneaResult.Failure -> asType()
+        else -> KorneaResult.badImplementation(this)
+    }
+
+@Suppress("UNCHECKED_CAST")
+@AvailableSince(KorneaErrors.VERSION_3_4_0)
+public inline fun <R : Any> KorneaResult<*>.filterToInstance(
+    default: KorneaResult<R>,
+    klass: KClass<R>
+): KorneaResult<R> =
+    when (this) {
+        is KorneaResult.Success -> if (klass.isInstance(get())) this as KorneaResult<R> else default
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
@@ -733,8 +772,25 @@ public inline fun <T, reified R : T> KorneaResult<T>.filterToInstance(transform:
         else -> KorneaResult.badImplementation(this)
     }
 
+@Suppress("UNCHECKED_CAST")
+@AvailableSince(KorneaErrors.VERSION_3_4_0)
+public inline fun <T : Any, R : T> KorneaResult<T>.filterToInstance(
+    klass: KClass<R>,
+    transform: (T) -> KorneaResult<R>
+): KorneaResult<R> = when (this) {
+    is KorneaResult.Success -> {
+        val result = get()
+        if (klass.isInstance(result)) this as KorneaResult<R>
+        else transform(result)
+    }
+    is KorneaResult.Failure -> asType()
+    else -> KorneaResult.badImplementation(this)
+}
+
 public inline fun <T> KorneaResult<T>.getOrNull(): T? = if (this is KorneaResult.Success<T>) get() else null
 public inline fun <T> KorneaResult<T>.getOrElse(default: T): T = if (this is KorneaResult.Success<T>) get() else default
+@AvailableSince(KorneaErrors.VERSION_3_4_0)
+public inline fun <T> KorneaResult<T>.getOrEmptyDefault(default: T): T = if (this is KorneaResult.Empty) default else get()
 public inline fun <T> KorneaResult<T>.getOrElseRun(block: () -> T): T =
     if (this is KorneaResult.Success<T>) get() else block()
 
@@ -810,6 +866,19 @@ public inline fun <T> KorneaResult<T>.switchIfHasException(block: (KorneaResult.
 public inline fun <T, reified E : Throwable> KorneaResult<T>.switchIfHasTypedException(block: (KorneaResult.WithException<E>) -> KorneaResult<T>): KorneaResult<T> =
     when (this) {
         is KorneaResult.WithException<*> -> if (exception is E) block(this as KorneaResult.WithException<E>) else this
+        is KorneaResult.Success<T> -> this
+        is KorneaResult.Failure -> this
+        else -> throw IllegalStateException(
+            KorneaResult.dirtyImplementationString(
+                this
+            )
+        )
+    }
+
+@Suppress("UNCHECKED_CAST")
+public inline fun <T, E : Throwable> KorneaResult<T>.switchIfHasTypedException(klass: KClass<E>, block: (KorneaResult.WithException<E>) -> KorneaResult<T>): KorneaResult<T> =
+    when (this) {
+        is KorneaResult.WithException<*> -> if (klass.isInstance(exception)) block(this as KorneaResult.WithException<E>) else this
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
         else -> throw IllegalStateException(

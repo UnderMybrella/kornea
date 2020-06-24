@@ -6,6 +6,15 @@ import org.abimon.kornea.annotations.AvailableSince
 public object KorneaToolkit {
     /**
      * kornea-toolkit
+     * - Add kornea-errors as dependency
+     * - Add [filterToInstance] overloads
+     * - Add [SharedState], [SharedStateRWMutability], [SharedStateRWInt], [SharedStateRWLong], [SharedStateRWBoolean], [SharedStateRWString]
+     * - Add [KorneaMutability]
+     */
+    public const val VERSION_1_3_0: String = "1.3.0"
+
+    /**
+     * kornea-toolkit
      *
      * - Add kornea-annotations as dependency
      * - Add [KorneaTypeChecker] and [KorneaInlineClassBasedTypeChecker]
