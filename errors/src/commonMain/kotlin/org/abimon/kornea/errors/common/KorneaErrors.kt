@@ -5,6 +5,13 @@ import org.abimon.kornea.annotations.AvailableSince
 public object KorneaErrors {
     /**
      * kornea-errors
+     * - Add [KorneaResult.Failure.Base]
+     */
+    @AvailableSince(VERSION_3_4_1)
+    public const val VERSION_3_4_1: String = "3.4.1"
+
+    /**
+     * kornea-errors
      * - Add [getOrEmptyDefault]
      * - Add class based versions of [filterToInstance]
      * - Remove reified modifier from a lot of methods, since they don't need it

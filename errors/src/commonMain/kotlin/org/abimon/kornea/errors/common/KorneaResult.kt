@@ -59,6 +59,10 @@ public interface KorneaResult<out T> {
         public inline fun <T> successOrEmptyStable(value: T?): KorneaResult<T> =
             if (value == null) Empty.ofNull() else Success.of(value)
 
+        @AvailableSince(KorneaErrors.VERSION_3_4_1)
+        public inline fun <T> failure(): KorneaResult<T> =
+            Failure.of<T>()
+
         public inline fun <T> empty(): KorneaResult<T> =
             Empty.of<T>()
 
@@ -170,7 +174,18 @@ public interface KorneaResult<out T> {
         override operator fun component1(): T = get()
     }
 
-    public interface Failure : KorneaResult<Nothing>
+    public interface Failure : KorneaResult<Nothing> {
+        public companion object {
+            @AvailableSince(KorneaErrors.VERSION_3_4_1)
+            public fun of(): Failure = Base
+            @AvailableSince(KorneaErrors.VERSION_3_4_1)
+            public fun <T> of(): KorneaResult<T> = Base.asType()
+        }
+
+        private object Base: Failure {
+            override fun get(): Nothing = throw IllegalStateException("(Unknown failure)")
+        }
+    }
 
     public interface Empty : Failure {
         public interface FailedPredicate : Empty
