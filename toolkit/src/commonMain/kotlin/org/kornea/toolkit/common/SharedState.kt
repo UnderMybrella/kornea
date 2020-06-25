@@ -19,7 +19,7 @@ public interface SharedState<I, M> {
         @AvailableSince(KorneaToolkit.VERSION_1_3_0)
         public inline fun <T> of(starting: MutableList<T>): SharedState<ImmutableListView<T>, MutableList<T>> = SharedStateRWMutability(KorneaMutableList(starting))
         @AvailableSince(KorneaToolkit.VERSION_1_3_0)
-        public inline fun <T> of(starting: StringBuilder): SharedState<String, StringBuilder> = SharedStateRWMutability(KorneaStringBuilder(starting))
+        public inline fun of(starting: StringBuilder): SharedState<String, StringBuilder> = SharedStateRWMutability(KorneaStringBuilder(starting))
 
         @AvailableSince(KorneaToolkit.VERSION_1_3_0)
         public inline fun <T> of(starting: T): SharedState<T, T> = SharedStateRW(starting)

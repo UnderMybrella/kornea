@@ -25,13 +25,13 @@ public class SharedStateRWMutability<T: KorneaMutability<M, I>, M, I>(private va
 }
 
 @AvailableSince(KorneaToolkit.VERSION_1_3_0)
-public inline class KorneaMutableList<T>(public val list: MutableList<T>): KorneaMutability<MutableList<T>, ImmutableListView<T>> {
+public inline class KorneaMutableList<T>(private val list: MutableList<T>): KorneaMutability<MutableList<T>, ImmutableListView<T>> {
     override suspend fun asMutable(): MutableList<T> = list
     override suspend fun asImmutable(): ImmutableListView<T> = ImmutableListView(list)
 }
 
 @AvailableSince(KorneaToolkit.VERSION_1_3_0)
-public inline class KorneaStringBuilder(public val builder: StringBuilder): KorneaMutability<StringBuilder, String> {
+public inline class KorneaStringBuilder(private val builder: StringBuilder): KorneaMutability<StringBuilder, String> {
     override suspend fun asMutable(): StringBuilder = builder
     override suspend fun asImmutable(): String = builder.toString()
 }
