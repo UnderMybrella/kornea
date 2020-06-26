@@ -17,7 +17,7 @@ plugins {
 }
 
 ext {
-    artifact_group = 'org.abimon'
+    artifact_group = 'dev.brella'
 }
 
 kotlin {}

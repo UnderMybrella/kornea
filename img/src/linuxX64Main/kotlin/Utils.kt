@@ -1,6 +1,6 @@
 import kotlinx.cinterop.*
-import org.abimon.kornea.io.common.flow.BinaryOutputFlow
-import org.abimon.kornea.io.common.use
+import dev.brella.kornea.io.common.flow.BinaryOutputFlow
+import dev.brella.kornea.io.common.use
 import platform.posix.FILE
 
 val <T : CPointed> CPointer<T>.pointerVar: CPointerVar<T>
