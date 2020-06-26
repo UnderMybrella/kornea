@@ -4,7 +4,7 @@ import org.abimon.kornea.io.common.BaseDataCloseable
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 
 @ExperimentalUnsignedTypes
-public open class BufferedOutputFlow(protected val backing: OutputFlow): BaseDataCloseable(), CountingOutputFlow {
+public open class BufferedOutputFlow(protected val backing: OutputFlow): BaseDataCloseable(), CountingOutputFlow, PrintOutputFlow {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     protected var _flowCount: Long = 0L

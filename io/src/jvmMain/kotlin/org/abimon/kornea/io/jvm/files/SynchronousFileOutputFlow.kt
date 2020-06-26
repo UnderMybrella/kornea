@@ -5,11 +5,12 @@ import kotlinx.coroutines.withContext
 import org.abimon.kornea.io.common.BaseDataCloseable
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 import org.abimon.kornea.io.common.flow.CountingOutputFlow
+import org.abimon.kornea.io.common.flow.PrintOutputFlow
 import java.io.File
 import java.io.FileOutputStream
 
 @ExperimentalUnsignedTypes
-public class SynchronousFileOutputFlow(public val backing: File) : BaseDataCloseable(), CountingOutputFlow {
+public class SynchronousFileOutputFlow(public val backing: File) : BaseDataCloseable(), CountingOutputFlow, PrintOutputFlow {
     private val stream = FileOutputStream(backing)
     private val channel = stream.channel
     override val streamOffset: Long

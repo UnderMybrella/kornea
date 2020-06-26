@@ -12,7 +12,7 @@ public interface BinaryOutputFlow: CountingOutputFlow {
         public operator fun invoke(): BinaryOutputFlow = ListBacked()
     }
 
-    public open class ListBacked(private val buffer: MutableList<Byte>): BaseDataCloseable(), BinaryOutputFlow {
+    public open class ListBacked(private val buffer: MutableList<Byte>): BaseDataCloseable(), BinaryOutputFlow, PrintOutputFlow {
         public constructor(): this(ArrayList())
 
         override val streamOffset: Long

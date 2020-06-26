@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import org.abimon.kornea.io.common.BaseDataCloseable
 import org.abimon.kornea.io.common.DataCloseableEventHandler
 import org.abimon.kornea.io.common.flow.CountingOutputFlow
+import org.abimon.kornea.io.common.flow.PrintOutputFlow
 import org.abimon.kornea.io.jvm.flipSafe
 import org.abimon.kornea.io.jvm.rewindSafe
 import java.io.File
@@ -24,7 +25,7 @@ public class AsyncFileOutputFlow(
     private val channel: AsynchronousFileChannel,
     private val isLocalChannel: Boolean,
     public val backing: Path
-) : BaseDataCloseable(), CountingOutputFlow {
+) : BaseDataCloseable(), CountingOutputFlow, PrintOutputFlow {
     public companion object {
         public suspend fun open(
             path: Path,

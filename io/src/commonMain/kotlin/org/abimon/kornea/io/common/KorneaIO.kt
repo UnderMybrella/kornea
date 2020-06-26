@@ -4,8 +4,15 @@ import org.abimon.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 4.2.0
+     * - Add [AppendableAwait], [PrintFlow][org.abimon.kornea.io.common.flow.PrintFlow], and [PrintOutputFlow][org.abimon.kornea.io.common.flow.PrintOutputFlow PrintOutputFlow]
+     */
+    @AvailableSince(VERSION_4_2_0)
+    public const val VERSION_4_2_0: String = "4.2.0"
+
+    /**
      * kornea-io 4.1.2
-     * - Fix [KorneaResult][useAndMapInputFlow] not actually mapping the input flow
+     * - Fix [useAndMapInputFlow] not actually mapping the input flow
      */
     @AvailableSince(VERSION_4_1_2)
     public const val VERSION_4_1_2: String = "4.1.2"
