@@ -1,9 +1,8 @@
 package dev.brella.kornea.img
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import dev.brella.kornea.io.common.flow.OutputFlow
-import dev.brella.kornea.io.jvm.JVMOutputFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.io.ByteArrayOutputStream
@@ -18,6 +17,6 @@ fun RgbMatrix.createPngImage(): BufferedImage {
 @ExperimentalUnsignedTypes
 actual suspend fun OutputFlow.writePngImage(img: RgbMatrix) {
     val baos = ByteArrayOutputStream()
-    withContext(Dispatchers.IO) { ImageIO.write(img.createPngImage(), "PNG", baos) }
+    runInterruptible(Dispatchers.IO) { ImageIO.write(img.createPngImage(), "PNG", baos) }
     write(baos.toByteArray())
 }

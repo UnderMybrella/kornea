@@ -1,19 +1,21 @@
 package dev.brella.kornea.io.jvm.files
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import dev.brella.kornea.annotations.ExperimentalKorneaIO
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.DataSink
 import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkClosed
-import dev.brella.kornea.io.common.DataSink.Companion.korneaTooManySinksOpen
 import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkUnknown
+import dev.brella.kornea.io.common.DataSink.Companion.korneaTooManySinksOpen
+import dev.brella.kornea.io.common.ObservableDataCloseable
+import dev.brella.kornea.io.common.closeAll
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
 import java.io.File
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.ExecutorService
-import kotlin.collections.ArrayList
 
 @ExperimentalUnsignedTypes
 @ExperimentalKorneaIO
@@ -32,7 +34,7 @@ public class AsyncFileDataSink(public val backing: Path, backingChannel: Asynchr
             sync: Boolean = false,
             dsync: Boolean = false
         ): AsyncFileDataSink =
-            AsyncFileDataSink(path, withContext(Dispatchers.IO) {
+            AsyncFileDataSink(path, runInterruptible(Dispatchers.IO) {
                 openAsynchronousFileChannel(
                     path, executor,
                     read = false,
@@ -72,7 +74,7 @@ public class AsyncFileDataSink(public val backing: Path, backingChannel: Asynchr
     }
 
     private suspend fun getChannel(): AsynchronousFileChannel =
-        if (!initialised) withContext(Dispatchers.IO) { channel } else channel
+        if (!initialised) runInterruptible(Dispatchers.IO) { channel } else channel
 
     override suspend fun openOutputFlow(): KorneaResult<AsyncFileOutputFlow> =
         when {

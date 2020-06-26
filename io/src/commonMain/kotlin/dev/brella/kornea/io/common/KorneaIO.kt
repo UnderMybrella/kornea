@@ -4,6 +4,14 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 1.1.0-alpha
+     * - Add [dev.brella.kornea.io.common.flow.FannedOutputFlow] and [dev.brella.kornea.io.common.flow.SequentialOutputFlow]
+     * - Change IO methods to use runInterruptible rather than withContext
+     */
+    @AvailableSince(VERSION_1_1_0_ALPHA)
+    public const val VERSION_1_1_0_ALPHA: String = "1.1.0-alpha"
+
+    /**
      * kornea-io 1.0.0-alpha
      * -
      */

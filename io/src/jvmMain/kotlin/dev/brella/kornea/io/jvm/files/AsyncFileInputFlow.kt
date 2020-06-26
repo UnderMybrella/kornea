@@ -1,16 +1,16 @@
 package dev.brella.kornea.io.jvm.files
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import dev.brella.kornea.io.common.*
-import dev.brella.kornea.io.common.flow.InputFlow
+import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.flow.PeekableInputFlow
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
 import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.limitSafe
 import dev.brella.kornea.io.jvm.positionSafe
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousFileChannel
@@ -70,7 +70,6 @@ public class AsyncFileInputFlow(
         }
     }
 
-    //    override suspend fun read(): Int? = withContext(Dispatchers.IO) { channel.read().takeIf(::readResultIsValid) }
     override suspend fun read(): Int? {
         bufferMutex.withLock {
             if (!buffer.hasRemaining()) {
@@ -202,9 +201,9 @@ public class AsyncFileInputFlow(
 
     override suspend fun available(): ULong = remaining()
     override suspend fun remaining(): ULong = size() - position()
-    override suspend fun size(): ULong = withContext(Dispatchers.IO) { channel.size().toULong() }
+    override suspend fun size(): ULong = runInterruptible(Dispatchers.IO) { channel.size().toULong() }
     override suspend fun position(): ULong =
-        withContext(Dispatchers.IO) { bufferMutex.withLock { flowFilePointer - buffer.limit() + buffer.position() } }.toULong()
+        bufferMutex.withLock { runInterruptible(Dispatchers.IO) { flowFilePointer - buffer.limit() + buffer.position() } }.toULong()
 
     override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
         bufferMutex.withLock {
@@ -244,7 +243,7 @@ public class AsyncFileInputFlow(
 
         if (!closed) {
             if (localChannel) {
-                withContext(Dispatchers.IO) { channel.close() }
+                runInterruptible(Dispatchers.IO) { channel.close() }
             }
             closed = true
         }

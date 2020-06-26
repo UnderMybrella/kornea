@@ -1,24 +1,19 @@
 package dev.brella.kornea.io.jvm.files
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import dev.brella.kornea.io.common.BaseDataCloseable
-import dev.brella.kornea.io.common.DataCloseableEventHandler
 import dev.brella.kornea.io.common.flow.CountingOutputFlow
 import dev.brella.kornea.io.common.flow.PrintOutputFlow
 import dev.brella.kornea.io.jvm.flipSafe
-import dev.brella.kornea.io.jvm.rewindSafe
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
-import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.util.*
 import java.util.concurrent.ExecutorService
-import kotlin.collections.ArrayList
 
 @ExperimentalUnsignedTypes
 public class AsyncFileOutputFlow(
@@ -39,7 +34,7 @@ public class AsyncFileOutputFlow(
             sync: Boolean = false,
             dsync: Boolean = false
         ): AsyncFileOutputFlow =
-            AsyncFileOutputFlow(withContext(Dispatchers.IO) {
+            AsyncFileOutputFlow(runInterruptible(Dispatchers.IO) {
                 openAsynchronousFileChannel(
                     path, executor,
                     read = false,
@@ -130,7 +125,7 @@ public class AsyncFileOutputFlow(
         if (isLocalChannel) {
             mutex.withLock {
                 flushBuffer()
-                withContext(Dispatchers.IO) {
+                runInterruptible(Dispatchers.IO) {
                     channel.force(true)
                     channel.close()
                 }

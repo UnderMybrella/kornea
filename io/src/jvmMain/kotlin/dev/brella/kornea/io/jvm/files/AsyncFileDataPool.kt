@@ -1,18 +1,13 @@
 package dev.brella.kornea.io.jvm.files
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import dev.brella.kornea.annotations.ExperimentalKorneaIO
 import dev.brella.kornea.io.common.*
-import dev.brella.kornea.io.common.flow.BinaryInputFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
 import java.io.File
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption
-import java.util.*
-import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
-import kotlin.collections.ArrayList
 
 @ExperimentalKorneaIO
 @ExperimentalUnsignedTypes
@@ -46,7 +41,7 @@ public class AsyncFileDataPool(
             sync: Boolean = false,
             dsync: Boolean = false
         ): AsyncFileDataPool =
-            AsyncFileDataPool(path, withContext(Dispatchers.IO) {
+            AsyncFileDataPool(path, runInterruptible(Dispatchers.IO) {
                 openAsynchronousFileChannel(
                     path, executor,
                     read = true,
@@ -94,6 +89,6 @@ public class AsyncFileDataPool(
         sinkBacker.close()
         sourceBacker.close()
 
-        withContext(Dispatchers.IO) { channel?.close() }
+        runInterruptible(Dispatchers.IO) { channel?.close() }
     }
 }

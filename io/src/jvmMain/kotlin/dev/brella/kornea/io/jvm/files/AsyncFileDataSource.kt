@@ -1,10 +1,11 @@
 package dev.brella.kornea.io.jvm.files
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import dev.brella.kornea.annotations.BlockingOperation
 import dev.brella.kornea.annotations.ExperimentalKorneaIO
-import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.DataSourceReproducibility
+import dev.brella.kornea.io.common.LimitedInstanceDataSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
 import java.io.File
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Files
@@ -53,11 +54,11 @@ public class AsyncFileDataSource(
     }
 
     private suspend fun getChannel(): AsynchronousFileChannel =
-        if (!initialised) withContext(Dispatchers.IO) { channel } else channel
+        if (!initialised) runInterruptible(Dispatchers.IO) { channel } else channel
 
     override suspend fun whenClosed() {
         super.whenClosed()
 
-        if (localChannel) withContext(Dispatchers.IO) { channel.close() }
+        if (localChannel) runInterruptible(Dispatchers.IO) { channel.close() }
     }
 }

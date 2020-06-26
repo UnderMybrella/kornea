@@ -1,11 +1,10 @@
 package dev.brella.kornea.io.jvm.files
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import dev.brella.kornea.io.common.BaseDataCloseable
-import dev.brella.kornea.io.common.DataCloseableEventHandler
 import dev.brella.kornea.io.common.flow.CountingOutputFlow
 import dev.brella.kornea.io.common.flow.PrintOutputFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
 import java.io.File
 import java.io.FileOutputStream
 
@@ -16,16 +15,15 @@ public class SynchronousFileOutputFlow(public val backing: File) : BaseDataClose
     override val streamOffset: Long
         get() = channel.position()
 
-    override suspend fun write(byte: Int): Unit = withContext(Dispatchers.IO) { stream.write(byte) }
-    override suspend fun write(b: ByteArray): Unit = write(b, 0, b.size)
+    override suspend fun write(byte: Int): Unit = runInterruptible(Dispatchers.IO) { stream.write(byte) }
     override suspend fun write(b: ByteArray, off: Int, len: Int): Unit =
-        withContext(Dispatchers.IO) { stream.write(b, off, len) }
+        runInterruptible(Dispatchers.IO) { stream.write(b, off, len) }
 
-    override suspend fun flush(): Unit = withContext(Dispatchers.IO) { stream.flush() }
+    override suspend fun flush(): Unit = runInterruptible(Dispatchers.IO) { stream.flush() }
 
     override suspend fun whenClosed() {
         super.whenClosed()
 
-        withContext(Dispatchers.IO) { stream.close() }
+        runInterruptible(Dispatchers.IO) { stream.close() }
     }
 }
