@@ -5,6 +5,13 @@ import dev.brella.kornea.annotations.AvailableSince
 @AvailableSince(KorneaToolkit.VERSION_1_2_0_INDEV)
 public object KorneaToolkit {
     /**
+     * kornea-toolkit 1.1.0-alpha
+     * - Begin basic work on [transaction] operations
+     */
+    @AvailableSince(VERSION_1_1_0_ALPHA)
+    public const val VERSION_1_1_0_ALPHA: String = "1.1.0-alpha"
+
+    /**
      * kornea-toolkit 1.0.0-alpha
      * - Move to dev.brella as the package + group
      * - [SemanticVersion] is now an inline class
