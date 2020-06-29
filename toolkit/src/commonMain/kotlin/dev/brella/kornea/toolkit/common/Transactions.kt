@@ -57,11 +57,11 @@ public inline fun <T> transaction(recipient: Transactable<T>, action: (T) -> Kor
     action(recipient.makeCopy()).doOnSuccess { recipient.acceptCopy(it) }
 
 @AvailableSince(KorneaToolkit.VERSION_1_1_0_ALPHA)
-public inline fun <T, R> transaction(recipient: KMutableProperty0<T>, action: (T) -> KorneaResult<Pair<T, R>>): KorneaResult<R> =
+public inline fun <T, R> transactionWithResult(recipient: KMutableProperty0<T>, action: (T) -> KorneaResult<Pair<T, R>>): KorneaResult<R> =
     action(recipient.get()).map { (copy, result) -> recipient.set(copy); result }
 
 @AvailableSince(KorneaToolkit.VERSION_1_1_0_ALPHA)
-public inline fun <T, R> transaction(recipient: Transactable<T>, action: (T) -> KorneaResult<Pair<T, R>>): KorneaResult<R> =
+public inline fun <T, R> transactionWithResult(recipient: Transactable<T>, action: (T) -> KorneaResult<Pair<T, R>>): KorneaResult<R> =
     action(recipient.makeCopy()).map { (copy, result) -> recipient.acceptCopy(copy); result }
 
 @AvailableSince(KorneaToolkit.VERSION_1_1_0_ALPHA)
