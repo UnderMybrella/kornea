@@ -7,13 +7,12 @@ import dev.brella.kornea.io.common.DataSource.Companion.korneaSourceClosed
 import dev.brella.kornea.io.common.DataSource.Companion.korneaSourceUnknown
 import dev.brella.kornea.io.common.DataSource.Companion.korneaTooManySourcesOpen
 import dev.brella.kornea.io.common.flow.InputFlow
-import dev.brella.kornea.toolkit.common.ImmutableListView
 import dev.brella.kornea.toolkit.common.KorneaTypeChecker
 import dev.brella.kornea.toolkit.common.inline
 import kotlin.reflect.KClass
 
 @ExperimentalUnsignedTypes
-@AvailableSince(KorneaIO.VERSION_4_1_0)
+@AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
 public abstract class LimitedInstanceDataSource<I : InputFlow, S : Any>(public val opener: LimitedInstanceOpenerHolder<I, S>) :
     BaseDataCloseable(), DataSource<I>, KorneaTypeChecker<I> {
 

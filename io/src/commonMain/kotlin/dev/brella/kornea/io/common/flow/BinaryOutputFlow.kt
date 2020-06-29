@@ -3,13 +3,10 @@ package dev.brella.kornea.io.common.flow
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.toolkit.common.BinaryListView
 import dev.brella.kornea.toolkit.common.BinaryView
-import dev.brella.kornea.toolkit.common.asImmutableView
-import dev.brella.kornea.toolkit.common.map
 
 @ExperimentalUnsignedTypes
-@ChangedSince(KorneaIO.VERSION_4_1_0, "BinaryOutputFlow is now an interface")
+@ChangedSince(KorneaIO.VERSION_4_1_0_INDEV, "BinaryOutputFlow is now an interface")
 @ChangedSince(KorneaIO.VERSION_1_0_0_ALPHA, "Removed getBufferView and implement BinaryView")
 public interface BinaryOutputFlow : CountingOutputFlow, BinaryView {
     public companion object {

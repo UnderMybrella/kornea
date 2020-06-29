@@ -8,14 +8,14 @@ import dev.brella.kornea.annotations.AvailableSince
 /**
  * An object to which char sequences and values can be appended in a suspending manner
  */
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public interface AppendableAwait {
     /**
      * Appends the specified character [value] to this Appendable and returns this instance.
      *
      * @param value the character to append.
      */
-    @AvailableSince(KorneaIO.VERSION_4_2_0)
+    @AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
     public suspend fun appendAwait(value: Char): AppendableAwait
 
     /**
@@ -23,7 +23,7 @@ public interface AppendableAwait {
      *
      * @param value the character sequence to append. If [value] is `null`, then the four characters `"null"` are appended to this Appendable.
      */
-    @AvailableSince(KorneaIO.VERSION_4_2_0)
+    @AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
     public suspend fun appendAwait(value: CharSequence?): AppendableAwait
 
     /**
@@ -36,7 +36,7 @@ public interface AppendableAwait {
      *
      * @throws IndexOutOfBoundsException or [IllegalArgumentException] when [startIndex] or [endIndex] is out of range of the [value] character sequence indices or when `startIndex > endIndex`.
      */
-    @AvailableSince(KorneaIO.VERSION_4_2_0)
+    @AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
     public suspend fun appendAwait(value: CharSequence?, startIndex: Int, endIndex: Int): AppendableAwait
 }
 
@@ -51,7 +51,7 @@ public interface AppendableAwait {
  *
  * @throws IndexOutOfBoundsException or [IllegalArgumentException] when [startIndex] or [endIndex] is out of range of the [value] character sequence indices or when `startIndex > endIndex`.
  */
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public suspend fun <A : AppendableAwait> A.appendRangeAwait(value: CharSequence?, startIndex: Int, endIndex: Int): A {
     return appendAwait(value, startIndex, endIndex) as A
 }
@@ -59,7 +59,7 @@ public suspend fun <A : AppendableAwait> A.appendRangeAwait(value: CharSequence?
 /**
  * Appends all arguments to the given [Appendable].
  */
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public suspend fun <A : AppendableAwait> A.appendAwait(vararg value: CharSequence?): A {
     for (item in value)
         appendAwait(item)
@@ -67,19 +67,19 @@ public suspend fun <A : AppendableAwait> A.appendAwait(vararg value: CharSequenc
 }
 
 /** Appends a line feed character (`\n`) to this Appendable. */
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public suspend inline fun <A : AppendableAwait> A.appendLineAwait(): A = appendAwait('\n') as A
 
 /** Appends value to the given Appendable and a line feed character (`\n`) after it. */
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public suspend inline fun <A : AppendableAwait> A.appendLineAwait(value: CharSequence?): A = (appendAwait(value) as A).appendLineAwait()
 
 /** Appends value to the given Appendable and a line feed character (`\n`) after it. */
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public suspend inline fun <A : AppendableAwait> A.appendLineAwait(value: Char): A = (appendAwait(value) as A).appendLineAwait()
 
 
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public suspend fun <T, A : AppendableAwait> A.appendElementAwait(element: T, transform: ((T) -> CharSequence)?) {
     when {
         transform != null -> appendAwait(transform(element))

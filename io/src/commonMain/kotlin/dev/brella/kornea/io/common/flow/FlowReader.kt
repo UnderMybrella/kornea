@@ -1,21 +1,18 @@
 package dev.brella.kornea.io.common.flow
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.isActive
 import dev.brella.kornea.io.common.ObservableDataCloseable
 import dev.brella.kornea.io.common.readInt16BE
 import dev.brella.kornea.io.common.use
+import kotlinx.coroutines.*
 import kotlin.properties.Delegates
 
 @ExperimentalUnsignedTypes
-public open class FlowReader(protected val backing: InputFlow) : ObservableDataCloseable by backing {
+public open class FlowReader(protected val backing: InputFlow, protected val timeout: Long = 1_000) : ObservableDataCloseable by backing {
     private val cb: CharArray = CharArray(8192)
     private var nChars: Int = 0
     private var nextChar: Int = 0
@@ -43,8 +40,15 @@ public open class FlowReader(protected val backing: InputFlow) : ObservableDataC
         if (length == 0)
             return 0
 
+        var foundLF = false
+
         for (i in offset until offset + length) {
-            cbuf[i] = readUtf8Character() ?: if (i == offset) return null else return i - offset
+            if (foundLF) {
+                cbuf[i] = withTimeoutOrNull(timeout) { readUtf8Character() } ?: return if (i == offset) null else i - offset
+            } else {
+                cbuf[i] = readUtf8Character() ?: return if (i == offset) null else i - offset
+                foundLF = cbuf[i] == '\n'
+            }
         }
 
         return length
@@ -82,7 +86,6 @@ public open class FlowReader(protected val backing: InputFlow) : ObservableDataC
             else -> return a.toChar()
         }
     }
-
 
     public suspend fun readLine(ignoreLF: Boolean = false): String? {
         val s = StringBuilder()

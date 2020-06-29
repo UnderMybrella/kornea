@@ -5,55 +5,46 @@ import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.BinaryDataPool
 import dev.brella.kornea.io.common.DataCloseableEventHandler
 import dev.brella.kornea.io.common.DataPool
+import dev.brella.kornea.io.jvm.JVMInputFlow
+import dev.brella.kornea.io.jvm.clearSafe
+import dev.brella.kornea.io.jvm.flipSafe
+import dev.brella.kornea.toolkit.common.oneTimeMutableInline
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.receiveOrNull
+import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.sync.withLock
+import java.io.File
+import java.nio.ByteBuffer
+import java.util.concurrent.CopyOnWriteArrayList
 
 @ExperimentalUnsignedTypes
-public actual class StandardInputFlow(private val bridgeOut: OutputFlow, private val bridgeIn: InputFlow, override val location: String? = "stdin") : BaseDataCloseable(), InputFlow by bridgeIn {
+public actual class StandardInputFlow(location: String? = "stdin") : InputFlow, ConflatingBufferedInputFlow(location) {
     public companion object {
-        @ExperimentalKorneaToolkit
-        public suspend operator fun invoke(location: String? = "stdin"): StandardInputFlow = invoke(
-            BinaryDataPool(), location
-        )
+        //NOTE: The reason we use a collector rather than just reading stdin is because stdin blocks and cannot be interrupted
+        //TODO: Check whether that's true of other inputstreams?
 
-        public suspend operator fun invoke(
-            pool: DataPool<*, OutputFlow>,
-            location: String? = "stdin"
-        ): StandardInputFlow {
-            val outFlow = pool.openOutputFlow().get()
-            val inFlow = pool.openInputFlow().get()
+        public val stdinChannels: MutableList<Channel<ByteArray>> = CopyOnWriteArrayList()
+        public val stdinCollector: Job = GlobalScope.launch(Dispatchers.IO) {
+            val stdin = System.`in`
+            val buffer = ByteArray(8192)
+            var read = 0
 
-            return StandardInputFlow(outFlow, inFlow, location)
+            while (isActive) {
+                read = stdin.read(buffer)
+
+                stdinChannels.forEach { channel -> channel.offer(buffer.copyOf(read)) }
+            }
         }
-    }
-
-    private val collector: Job = GlobalScope.launch {
-        val stdin = System.`in`
-        val buffer = ByteArray(8192)
-        var read: Int
-
-        while (isActive) {
-            yield()
-            read = runInterruptible(Dispatchers.IO) { stdin.read(buffer) }
-            bridgeOut.write(buffer, 0, read)
-        }
-    }
-
-    override val closeHandlers: List<DataCloseableEventHandler>
-        get() = super.closeHandlers
-    override val isClosed: Boolean
-        get() = super.isClosed
-
-    override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean {
-        return super.registerCloseHandler(handler)
-    }
-
-    override suspend fun close() {
-        super<BaseDataCloseable>.close()
     }
 
     override suspend fun whenClosed() {
         super.whenClosed()
 
-        collector.cancel()
+        stdinChannels.remove(channel)
+    }
+
+    init {
+        stdinChannels.add(channel)
     }
 }

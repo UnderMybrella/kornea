@@ -13,7 +13,7 @@ import java.io.InputStream
 import java.nio.ByteBuffer
 
 @ExperimentalCoroutinesApi
-@AvailableSince(KorneaIO.VERSION_4_1_0)
+@AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
 @ExperimentalUnsignedTypes
 public class FlowInputStream private constructor(
     private val flow: InputFlow,

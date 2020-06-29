@@ -11,7 +11,7 @@ import java.io.BufferedOutputStream
 import java.io.OutputStream
 
 @ExperimentalCoroutinesApi
-@AvailableSince(KorneaIO.VERSION_4_1_0)
+@AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
 @ExperimentalUnsignedTypes
 public class FlowOutputStream private constructor(private val flow: OutputFlow, private val closeFlow: Boolean, private val bufferSize: Int = 8192, channelLimit: Int = bufferSize) : OutputStream() {
     public companion object {

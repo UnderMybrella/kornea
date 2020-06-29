@@ -6,7 +6,7 @@ import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
 
 @ExperimentalUnsignedTypes
-@ChangedSince(KorneaIO.VERSION_4_2_0)
+@ChangedSince(KorneaIO.VERSION_4_2_0_INDEV)
 public abstract class BufferedInputFlow(override val location: String?) : BaseDataCloseable(), PeekableInputFlow {
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
@@ -22,12 +22,12 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
             }
         }
 
-        override suspend fun fillImpl(): Int? = backing.read(buffer, pos, buffer.size - pos)
+//        override suspend fun fillImpl(): Int? = readImpl(buffer, pos, buffer.size - pos)
         override suspend fun readImpl(b: ByteArray, off: Int, len: Int): Int? = backing.read(b, off, len)
 
-        override suspend fun available(): ULong? = (count - pos).toULong() + (backing.available() ?: 0uL)
+        override suspend fun available(): ULong = (count - pos).toULong() + (backing.available() ?: 0uL)
         override suspend fun position(): ULong = backing.position() + (pos - count).toULong()
-        override suspend fun remaining(): ULong? = available()
+        override suspend fun remaining(): ULong = available()
         override suspend fun size(): ULong? = backing.size()
 
         override suspend fun whenClosed() {
@@ -39,6 +39,7 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
     protected var buffer: ByteArray = ByteArray(DEFAULT_BUFFER_SIZE)
     protected var count: Int = 0
     protected var pos: Int = 0
+    protected var absPos: Long = 0L
 
     protected suspend fun fill() {
         pos = 0
@@ -48,11 +49,13 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
     protected suspend fun fillPartial() {
         count = 0
         val n = fillImpl()
-        if (n ?: 0 > 0)
+        if (n ?: 0 > 0) {
             count = n!! + pos
+            absPos += n
+        }
     }
 
-    protected abstract suspend fun fillImpl(): Int?
+    protected open suspend fun fillImpl(): Int? = readImpl(buffer, pos, buffer.size - pos)
     protected abstract suspend fun readImpl(b: ByteArray, off: Int, len: Int): Int?
 
     override suspend fun peek(forward: Int): Int? {
@@ -148,4 +151,7 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
             return n
         }
     }
+
+    override suspend fun available(): ULong = (count - pos).toULong()
+    override suspend fun position(): ULong = (absPos - count + pos).toULong()
 }

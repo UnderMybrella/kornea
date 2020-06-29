@@ -6,7 +6,7 @@ import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.io.common.AppendableAwait
 import dev.brella.kornea.io.common.KorneaIO
 
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public interface PrintFlow : AppendableAwait {
     override suspend fun appendAwait(value: Char): PrintFlow = print(value)
     override suspend fun appendAwait(value: CharSequence?): PrintFlow = print(value)
@@ -17,7 +17,7 @@ public interface PrintFlow : AppendableAwait {
      *
      * @param value the character to append.
      */
-    @AvailableSince(KorneaIO.VERSION_4_2_0)
+    @AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
     public suspend fun print(value: Char): PrintFlow
 
     /**
@@ -25,7 +25,7 @@ public interface PrintFlow : AppendableAwait {
      *
      * @param value the character sequence to append. If [value] is `null`, then the four characters `"null"` are appended to this PrintFlow.
      */
-    @AvailableSince(KorneaIO.VERSION_4_2_0)
+    @AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
     public suspend fun print(value: CharSequence?): PrintFlow
 
     /**
@@ -38,12 +38,12 @@ public interface PrintFlow : AppendableAwait {
      *
      * @throws IndexOutOfBoundsException or [IllegalArgumentException] when [startIndex] or [endIndex] is out of range of the [value] character sequence indices or when `startIndex > endIndex`.
      */
-    @AvailableSince(KorneaIO.VERSION_4_2_0)
-    public suspend fun print(value: CharSequence?, startIndex: Int, endIndex: Int): PrintFlow
+    @AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
+    public suspend fun print(value: CharSequence?, startIndex: Int, endIndex: Int): PrintFlow = print(value?.subSequence(startIndex, endIndex))
 }
 
 @ExperimentalUnsignedTypes
-@AvailableSince(KorneaIO.VERSION_4_2_0)
+@AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
 public interface PrintOutputFlow: PrintFlow, OutputFlow {
     override suspend fun print(value: Char): PrintOutputFlow {
         write(value.toInt())
