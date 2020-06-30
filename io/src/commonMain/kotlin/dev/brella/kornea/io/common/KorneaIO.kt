@@ -4,6 +4,12 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 1.3.0-alpha
+     * - Add [FannedPrintFlow][dev.brella.kornea.io.common.flow.FannedPrintFlow] and [SequentialPrintFlow][dev.brella.kornea.io.common.flow.SequentialPrintFlow]
+     */
+    public const val VERSION_1_3_0_ALPHA: String = "1.3.0-alpha"
+
+    /**
      * kornea-io 1.2.0-alpha
      * - Add [StdoutPrintFlow][dev.brella.kornea.io.common.flow.StdoutPrintFlow]
      * - Change [StandardInputFlow][dev.brella.kornea.io.common.flow.StandardInputFlow] implementations, in particular for the JVM.
