@@ -11,17 +11,28 @@ public interface KorneaMutability<M, I> {
 
 @ExperimentalKorneaToolkit("ReadWriteSemaphores are quite fragile, beware")
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
-public class SharedStateRWMutability<T: KorneaMutability<M, I>, M, I>(private var state: T, private val semaphore: ReadWriteSemaphore): SharedState<I, M> {
+public class SharedStateRWMutability<T: KorneaMutability<M, I>, M, I>(private val state: T, private val semaphore: ReadWriteSemaphore): SharedState<I, M> {
     public constructor(state: T, permitLimit: Int = 8): this(state, ReadWriteSemaphore(permitLimit))
 
-    public override suspend fun <R> accessState(block: suspend (I) -> R): R =
-        semaphore.withReadPermit { block(state.asImmutable()) }
-
-    public override suspend fun mutateState(block: suspend (M) -> M): SharedStateRWMutability<T, M, I> {
-        semaphore.withWritePermit { block(state.asMutable()) }
-
-        return this
+    override suspend fun beginRead(): I {
+        semaphore.acquireReadPermit()
+        return state.asImmutable()
     }
+    override suspend fun beginWrite(): M {
+        semaphore.acquireWritePermit()
+        return state.asMutable()
+    }
+
+    override suspend fun finishRead() {
+        semaphore.releaseReadPermit()
+    }
+
+    override suspend fun finishWrite(state: M) {
+//        this.state = state
+        semaphore.releaseWritePermit()
+    }
+
+    override suspend fun read(): I = semaphore.withReadPermit { state.asImmutable() }
 }
 
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
