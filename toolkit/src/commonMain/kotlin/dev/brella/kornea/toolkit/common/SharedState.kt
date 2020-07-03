@@ -50,11 +50,13 @@ public suspend inline fun <R, I> SharedState<I, *>.accessState(block: (I) -> R):
 }
 
 @ChangedSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
-public suspend inline fun <M> SharedState<*, M>.mutateState(block: (M) -> M) {
+public suspend inline fun <I, M> SharedState<I, M>.mutateState(block: (M) -> M): SharedState<I, M> {
     var state = beginWrite()
 
     try {
         state = block(state)
+
+        return this
     } finally {
         finishWrite(state)
     }
