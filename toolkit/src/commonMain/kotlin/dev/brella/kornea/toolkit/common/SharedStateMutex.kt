@@ -7,12 +7,23 @@ import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
 public class SharedStateMutex<T>(private var state: T, private val mutex: Mutex): SharedState<T, T> {
     public constructor(state: T): this(state, Mutex())
 
-    public override suspend fun <R> accessState(block: suspend (T) -> R): R =
-        mutex.withLock { block(state) }
-
-    public override suspend fun mutateState(block: suspend (T) -> T): SharedStateMutex<T> {
-        mutex.withLock { block(state) }
-
-        return this
+    override suspend fun beginRead(): T {
+        mutex.lock()
+        return state
     }
+    override suspend fun beginWrite(): T {
+        mutex.lock()
+        return state
+    }
+
+    override suspend fun finishRead() {
+        mutex.unlock()
+    }
+
+    override suspend fun finishWrite(state: T) {
+        this.state = state
+        mutex.unlock()
+    }
+
+    override suspend fun read(): T = mutex.withLock { state }
 }
