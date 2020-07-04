@@ -1,7 +1,7 @@
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
 apply plugin: 'kotlinx-atomicfu'
 
-version = '1.3.1-alpha'
+version = '1.3.2-alpha'
 
 kotlin {
     /* Targets configuration omitted. 
