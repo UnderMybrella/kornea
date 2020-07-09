@@ -4,11 +4,12 @@ import dev.brella.kornea.annotations.AvailableSince
 
 @AvailableSince(KorneaToolkit.VERSION_1_2_0_INDEV)
 public object KorneaToolkit {
+    public const val VERSION_2_1_0_ALPHA: String = "2.1.0-alpha"
     /**
      * kornea-toolkit 1.2.0-alpha
      * - Change [SharedState] operations to be inline, and refactor the class structure around that
      */
-    public const val VERSION_1_2_0_ALPHA: String = "1.2.0-alpha"
+    public const val VERSION_2_0_0_ALPHA: String = "2.0.0-alpha"
     /**
      * kornea-toolkit 1.1.0-alpha
      * - Begin basic work on [transaction] operations

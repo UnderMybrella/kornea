@@ -9,6 +9,10 @@ import kotlin.contracts.contract
 public inline fun <T> T?.switchIfNull(other: T): T = this ?: other
 public inline fun <T> T?.switchIfNull(other: () -> T): T = this ?: other()
 
+//public inline fun <A, B, R> A.let(b: B, operation: B.(A) -> R): R = b.operation(this)
+//public inline fun <A, B> A.let(b: B?, operation: B.(A) -> A): A = b?.operation(this) ?: this
+public inline fun <A, B> A?.withOrElse(operation: A.(B) -> B, param: B): B = this?.operation(param) ?: param
+
 public inline fun <T> T.takeIf(predicate: Boolean): T? {
     return if (predicate) this else null
 }

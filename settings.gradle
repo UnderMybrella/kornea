@@ -12,6 +12,7 @@ rootProject.name = 'kornea'
 
 include ':annotations'
 include ':apollo'
+include ':benchmarks'
 include ':errors'
 include ':io'
 include ':img'

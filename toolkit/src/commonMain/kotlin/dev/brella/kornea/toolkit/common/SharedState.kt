@@ -26,21 +26,21 @@ public interface SharedState<I, M> {
         public inline fun <T> of(starting: T): SharedState<T, T> = SharedStateRW(starting)
     }
 
-    @AvailableSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
+    @AvailableSince(KorneaToolkit.VERSION_2_0_0_ALPHA)
     public suspend fun read(): I
 
-    @AvailableSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
+    @AvailableSince(KorneaToolkit.VERSION_2_0_0_ALPHA)
     public suspend fun beginRead(): I
-    @AvailableSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
+    @AvailableSince(KorneaToolkit.VERSION_2_0_0_ALPHA)
     public suspend fun beginWrite(): M
 
-    @AvailableSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
+    @AvailableSince(KorneaToolkit.VERSION_2_0_0_ALPHA)
     public suspend fun finishRead()
-    @AvailableSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
+    @AvailableSince(KorneaToolkit.VERSION_2_0_0_ALPHA)
     public suspend fun finishWrite(state: M)
 }
 
-@ChangedSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
+@ChangedSince(KorneaToolkit.VERSION_2_0_0_ALPHA)
 public suspend inline fun <R, I> SharedState<I, *>.accessState(block: (I) -> R): R {
     try {
         return block(beginRead())
@@ -49,7 +49,7 @@ public suspend inline fun <R, I> SharedState<I, *>.accessState(block: (I) -> R):
     }
 }
 
-@ChangedSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
+@ChangedSince(KorneaToolkit.VERSION_2_0_0_ALPHA)
 public suspend inline fun <I, M> SharedState<I, M>.mutateState(block: (M) -> M): SharedState<I, M> {
     var state = beginWrite()
 
@@ -62,7 +62,7 @@ public suspend inline fun <I, M> SharedState<I, M>.mutateState(block: (M) -> M):
     }
 }
 
-@AvailableSince(KorneaToolkit.VERSION_1_2_0_ALPHA)
+@AvailableSince(KorneaToolkit.VERSION_2_0_0_ALPHA)
 public suspend inline fun <M, R> SharedState<*, M>.mutateStateWithResult(block: (M) -> Pair<M, R>): R {
     var state = beginWrite()
 
