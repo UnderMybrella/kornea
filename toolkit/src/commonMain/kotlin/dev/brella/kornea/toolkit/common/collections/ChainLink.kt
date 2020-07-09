@@ -5,7 +5,7 @@ import dev.brella.kornea.toolkit.common.KorneaToolkit
 import kotlin.js.JsName
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public interface ChainLink : Iterable<ChainLink> {
+public interface ChainLink {
     public interface ViaProperty : ChainLink {
         @JsName("nextAttr")
         public val next: ChainLink?
@@ -15,7 +15,7 @@ public interface ChainLink : Iterable<ChainLink> {
 
     public fun next(): ChainLink?
 
-    override fun iterator(): Iterator<ChainLink> = ChainIterator(this)
+//    override fun iterator(): Iterator<ChainLink> = ChainIterator(this)
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
@@ -77,8 +77,6 @@ public interface DoubleChainLink : ChainLink, ReverseChainLink {
 
     override fun previous(): DoubleChainLink?
     override fun next(): DoubleChainLink?
-
-    override fun iterator(): ListIterator<ChainLink> = DoubleChainIterator(this, null)
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
@@ -160,6 +158,10 @@ public interface MutableDoubleChainNode<T> : DoubleChainNode<T>, MutableDoubleCh
 
 //public inline fun <C: ChainLink> C.next(self: C = this): C? = next() as C
 //public inline fun <C: ReverseChainLink> C.previous(self: C = this): C? = previous() as C
+
+public operator fun <C: ChainLink> C.iterator(): Iterator<C> = ChainIterator(this)
+public operator fun <C: DoubleChainLink> C.iterator(): ListIterator<C> = DoubleChainIterator(this, null)
+public operator fun <C: MutableDoubleChainLink<C>> C.iterator(): MutableListIterator<C> = MutableDoubleChainIterator(this, null)
 
 public inline val <C : ChainLink> C.next: C?
     get() = next() as? C

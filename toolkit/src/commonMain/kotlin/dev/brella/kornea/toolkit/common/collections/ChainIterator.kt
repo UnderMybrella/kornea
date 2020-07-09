@@ -21,7 +21,7 @@ public open class ChainIterator<C: ChainLink>(startingLink: C): Iterator<C> {
      */
     override fun next(): C {
         try {
-            return link ?: throw IndexOutOfBoundsException("Chain link is null")
+            return link ?: throw NoSuchElementException()
         } finally {
             link = link?.next
         }
@@ -42,9 +42,53 @@ public open class MutableChainIterator<C: MutableChainLink<C>>(link: C, protecte
     }
 
     override fun remove() {
-        underlyingCollection.remove(previous ?: throw IndexOutOfBoundsException("No previous element"))
+        underlyingCollection.remove(previous ?: throw NoSuchElementException())
     }
 }
+
+@AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
+public open class ReverseChainIterator<C: ReverseChainLink>(startingLink: C): Iterator<C> {
+    public open class Between<C: ChainLink>(head: C, protected val max: C?): ChainIterator<C>(head) {
+        public override fun hasNext(): Boolean = super.hasNext() && link != max
+    }
+
+    protected var link: C? = startingLink
+
+    /**
+     * Returns `true` if the iteration has more elements.
+     */
+    override fun hasNext(): Boolean = link != null
+
+    /**
+     * Returns the next element in the iteration.
+     */
+    override fun next(): C {
+        try {
+            return link ?: throw NoSuchElementException()
+        } finally {
+            link = link?.previous
+        }
+    }
+}
+
+@AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
+public open class MutableReverseChainIterator<C: MutableReverseChainLink<C>>(link: C, protected val underlyingCollection: MutableCollection<C>): ReverseChainIterator<C>(link), MutableIterator<C> {
+//    public open class Between<C: ChainLink>(head: C, protected val max: C?): ChainIterator<C>(head) {
+//        public override fun hasNext(): Boolean = super.hasNext() && link != max
+//    }
+
+    protected var previous: C? = null
+
+    override fun next(): C {
+        previous = link
+        return super.next()
+    }
+
+    override fun remove() {
+        underlyingCollection.remove(previous ?: throw NoSuchElementException())
+    }
+}
+
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
 public open class DoubleChainIterator<C: DoubleChainLink>(startingLink: C, underlyingCollection: List<C>?) : ListIterator<C> {
@@ -72,7 +116,7 @@ public open class DoubleChainIterator<C: DoubleChainLink>(startingLink: C, under
 
     override fun next(): C {
         try {
-            return link ?: throw IndexOutOfBoundsException("Chain link is null")
+            return link ?: throw NoSuchElementException()
         } finally {
             index++
             link = link?.next
@@ -101,21 +145,21 @@ public open class DoubleChainIterator<C: DoubleChainLink>(startingLink: C, under
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class MutableDoubleChainIterator<C: MutableDoubleChainLink<C>>(link: C, protected val underlyingCollection: MutableList<C>) : DoubleChainIterator<C>(link, underlyingCollection), MutableListIterator<C> {
+public open class MutableDoubleChainIterator<C: MutableDoubleChainLink<C>>(link: C, protected val underlyingCollection: MutableList<C>?) : DoubleChainIterator<C>(link, underlyingCollection), MutableListIterator<C> {
     public open class Between<C: MutableDoubleChainLink<C>>(head: C, protected val min: C?, protected val max: C?, underlyingCollection: MutableList<C>): MutableDoubleChainIterator<C>(head, underlyingCollection) {
         public override fun hasNext(): Boolean = super.hasNext() && link != max
         override fun hasPrevious(): Boolean = super.hasPrevious() && link?.previous != min
     }
 
     override fun add(element: C) {
-        underlyingCollection.add(index, element)
+        underlyingCollection?.add(index, element) ?: (link?.prepend(element) ?: throw NoSuchElementException())
     }
 
     override fun remove() {
-        underlyingCollection.removeAt(previousIndex())
+        underlyingCollection?.removeAt(previousIndex()) ?: (link?.previous?.remove() ?: throw NoSuchElementException())
     }
 
     override fun set(element: C) {
-        underlyingCollection[index] = element
+        underlyingCollection?.set(index, element) ?: (link?.replaceWith(element) ?: throw NoSuchElementException())
     }
 }
