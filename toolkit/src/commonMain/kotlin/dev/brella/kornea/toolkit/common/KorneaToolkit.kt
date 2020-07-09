@@ -4,6 +4,12 @@ import dev.brella.kornea.annotations.AvailableSince
 
 @AvailableSince(KorneaToolkit.VERSION_1_2_0_INDEV)
 public object KorneaToolkit {
+    /**
+     * kornea-toolkit 2.2.0-alpha
+     * * Change ChainLink's to take a generic parameter, and use properties
+     */
+    public const val VERSION_2_2_0_ALPHA: String = "2.2.0-alpha"
+
     public const val VERSION_2_1_0_ALPHA: String = "2.1.0-alpha"
     /**
      * kornea-toolkit 1.2.0-alpha

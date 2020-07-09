@@ -5,17 +5,22 @@ import dev.brella.kornea.toolkit.common.KorneaToolkit
 import dev.brella.kornea.toolkit.common.asNull
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class CommonDoublyLinkedList<T>(
-    initialHead: MutableDoubleChainNode<T>? = null,
-    initialTail: MutableDoubleChainNode<T>? = initialHead?.tail()
+public open class CommonDoublyLinkedList<T, C : MutableDoubleChainNode<T, C>>(
+    initialHead: C?,
+    initialTail: C? = initialHead?.tail(),
+    protected open var newInstance: (T, C?, C?) -> C
 ) : AbstractMutableList<T>() {
-    protected open var head: MutableDoubleChainNode<T>? = initialHead
-    protected open var tail: MutableDoubleChainNode<T>? = initialTail
+    public companion object {
+        public operator fun <T> invoke(): CommonDoublyLinkedList<T, MutableDoubleChainNode.Base<T>> = CommonDoublyLinkedList(null, null, MutableDoubleChainNode.Companion::invoke)
+    }
+
+    protected open var head: C? = initialHead
+    protected open var tail: C? = initialTail
         get() = field ?: head
     protected open var _size: Int = 0
     override val size: Int by ::_size
 
-    private inline fun node(index: Int): MutableDoubleChainNode<T> =
+    private inline fun node(index: Int): C =
         if (index > _size shr 1) tail!! stepBackwards size - index - 1
         else head!! stepForwards index
 
@@ -30,9 +35,9 @@ public open class CommonDoublyLinkedList<T>(
      */
     override fun add(element: T): Boolean {
         if (head === null) {
-            head = MutableDoubleChainNode(element, null, null)
+            head = newInstance(element, null, null)
         } else {
-            tail = tail!!.append(MutableDoubleChainNode(element, null, null))
+            tail = tail!!.append(newInstance(element, null, null))
         }
         _size++
 
@@ -46,16 +51,16 @@ public open class CommonDoublyLinkedList<T>(
         when {
             index < 0 || index > size -> throw IndexOutOfBoundsException("Index: $index, size: $size")
             index == 0 -> {
-                head = MutableDoubleChainNode(element, null, head)
+                head = newInstance(element, null, head)
                 _size++
             }
             index == size -> {
-                tail = MutableDoubleChainNode(element, tail, null)
+                tail = newInstance(element, tail, null)
                 _size++
             }
             else -> {
                 val n = node(index)
-                n.prepend(MutableDoubleChainNode(element, null, null))
+                n.prepend(newInstance(element, null, null))
                 _size++
             }
         }
@@ -71,13 +76,13 @@ public open class CommonDoublyLinkedList<T>(
             index < 0 || index >= size -> throw IndexOutOfBoundsException("Index: $index, size: $size")
             index == 0 -> {
                 val result = head!!.node
-                head = head!!.next()
+                head = head!!.next
                 _size--
                 return result
             }
             index == size - 1 -> {
                 val result = tail!!.node
-                head = tail!!.previous()
+                head = tail!!.previous
                 _size--
                 return result
             }
@@ -100,17 +105,17 @@ public open class CommonDoublyLinkedList<T>(
             index < 0 || index >= size -> throw IndexOutOfBoundsException("Index: $index, size: $size")
             index == 0 -> {
                 val repl = head!!.node
-                head = head!!.replaceWith(MutableDoubleChainNode(element, null, null))
+                head = head!!.replaceWith(newInstance(element, null, null))
                 return repl
             }
             index == size - 1 -> {
                 val repl = tail!!.node
-                tail = tail!!.replaceWith(MutableDoubleChainNode(element, null, null))
+                tail = tail!!.replaceWith(newInstance(element, null, null))
                 return repl
             }
             else -> {
                 val n = node(index)
-                n.replaceWith(MutableDoubleChainNode(element, null, null))
+                n.replaceWith(newInstance(element, null, null))
                 return n.node
             }
         }
@@ -122,21 +127,21 @@ public open class CommonDoublyLinkedList<T>(
             elements.isEmpty() -> return false
             index == 0 -> {
                 head = chain(elements.fold(asNull()) { previous, element ->
-                    MutableDoubleChainNode(
+                    newInstance(
                         element,
                         previous,
                         null
-                    ).apply { previous?.next(this) }
+                    ).apply { previous?.next = this }
                 }, head)
                 _size += elements.size
             }
             index == size -> {
                 head = elements.fold(tail) { previous, element ->
-                    MutableDoubleChainNode(
+                    newInstance(
                         element,
                         previous,
                         null
-                    ).apply { previous?.next(this) }
+                    ).apply { previous?.next = this }
                 }
                 _size += elements.size
             }
@@ -145,12 +150,12 @@ public open class CommonDoublyLinkedList<T>(
 
                 chain(
                     n,
-                    elements.fold(n.previous()) { previous, element ->
-                        MutableDoubleChainNode(
+                    elements.fold(n.previous) { previous, element ->
+                        newInstance(
                             element,
                             previous,
                             null
-                        ).apply { previous?.next(this) }
+                        ).apply { previous?.next = this }
                     })
                 _size += size
             }
@@ -162,14 +167,20 @@ public open class CommonDoublyLinkedList<T>(
     override fun addAll(elements: Collection<T>): Boolean {
         if (elements.isEmpty()) return false
         if (head === null)
-            head = elements.fold(asNull()) { previous, element ->
-                MutableDoubleChainNode(element, previous, null)
-                    .apply { previous?.next(this) }
-            }
+            head = elements.fold(asNull<C>()) { previous, element ->
+                newInstance(
+                    element,
+                    previous,
+                    null
+                ).apply { previous?.next = this }
+            }!!
         else
-            tail!!.append(elements.fold(asNull<MutableDoubleChainNode<T>>()) { previous, element ->
-                MutableDoubleChainNode(element, previous, null)
-                    .apply { previous?.next(this) }
+            tail!!.append(elements.fold(asNull<C>()) { previous, element ->
+                newInstance(
+                    element,
+                    previous,
+                    null
+                ).apply { previous?.next = this }
             }!!)
         _size += elements.size
 
@@ -189,7 +200,7 @@ public open class CommonDoublyLinkedList<T>(
         var n = head
         while (n != null) {
             if (remaining.remove(n.node) && remaining.isEmpty()) return true
-            n = n.next()
+            n = n.next
         }
 
         return false
@@ -200,7 +211,7 @@ public open class CommonDoublyLinkedList<T>(
         var i = 0
         while (n != null) {
             if (n.node == element) return i
-            n = n.next()
+            n = n.next
             i++
         }
 
@@ -219,7 +230,7 @@ public open class CommonDoublyLinkedList<T>(
         var index = -1
         while (n != null) {
             if (n.node == element) return i
-            n = n.previous()
+            n = n.previous
             i--
         }
 
@@ -231,14 +242,14 @@ public open class CommonDoublyLinkedList<T>(
 //        else if (index >= size) throw IndexOutOfBoundsException("Index: $index, size: $size")
 
         var prior = head ?: return false
-        var next = prior.next()
+        var next = prior.next
         while (next != null) {
             if (next.node == element) {
                 if (next === tail) {
                     tail = prior
-                    tail?.next(null)
+                    tail?.next = null
                 } else {
-                    prior.next(next.next())
+                    prior.next = next.next
                 }
                 _size--
 
@@ -256,14 +267,14 @@ public open class CommonDoublyLinkedList<T>(
         val remaining = elements.toMutableList()
 
         var prior = head ?: return false
-        var n = prior.next()
+        var n = prior.next
         while (n != null) {
             if (remaining.remove(n.node)) {
                 if (n === tail) {
                     tail = prior
-                    tail?.next(null)
+                    tail?.next = null
                 } else {
-                    prior.next(n.next())
+                    prior.next = n.next
                 }
                 _size--
 
@@ -279,16 +290,16 @@ public open class CommonDoublyLinkedList<T>(
 
     override fun retainAll(elements: Collection<T>): Boolean {
         var prior = head ?: return false
-        var n = prior.next()
+        var n = prior.next
         val startingSize = size
 
         while (n != null) {
             if (n.node !in elements) {
                 if (n === tail) {
                     tail = prior
-                    tail?.next(null)
+                    tail?.next = null
                 } else {
-                    prior.next(n.next())
+                    prior.next = n.next
                 }
                 _size--
             }
@@ -305,6 +316,6 @@ public open class CommonDoublyLinkedList<T>(
         val distance = toIndex - fromIndex
         val subTail =
             if (distance < size - toIndex - 1) subHead stepForwards distance else tail!! stepBackwards size - toIndex - 1
-        return CommonDoublyLinkedList(subHead, subTail)
+        return CommonDoublyLinkedList(subHead, subTail, newInstance)
     }
 }

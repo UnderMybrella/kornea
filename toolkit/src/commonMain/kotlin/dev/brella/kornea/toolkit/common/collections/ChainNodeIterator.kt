@@ -4,8 +4,8 @@ import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.toolkit.common.KorneaToolkit
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class ChainNodeIterator<T, C : ChainNode<T>>(startingLink: C?) : Iterator<T> {
-    public open class Between<T, C : ChainNode<T>>(head: C, protected val max: C?) : ChainNodeIterator<T, C>(head) {
+public open class ChainNodeIterator<T, C : ChainNode<T, C>>(startingLink: C?) : Iterator<T> {
+    public open class Between<T, C : ChainNode<T, C>>(head: C, protected val max: C?) : ChainNodeIterator<T, C>(head) {
         public override fun hasNext(): Boolean = super.hasNext() && link != max
     }
 
@@ -29,7 +29,7 @@ public open class ChainNodeIterator<T, C : ChainNode<T>>(startingLink: C?) : Ite
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class MutableChainNodeIterator<T, C : MutableChainNode<T>>(
+public open class MutableChainNodeIterator<T, C : MutableChainNode<T, C>>(
     link: C?,
     protected val underlyingCollection: MutableCollection<T>
 ) : ChainNodeIterator<T, C>(link), MutableIterator<T> {
@@ -50,9 +50,9 @@ public open class MutableChainNodeIterator<T, C : MutableChainNode<T>>(
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class DoubleChainNodeIterator<T, C : DoubleChainNode<T>>(startingLink: C?, underlyingCollection: List<T>?) :
+public open class DoubleChainNodeIterator<T, C : DoubleChainNode<T, C>>(startingLink: C?, underlyingCollection: List<T>?) :
     ListIterator<T> {
-    public open class Between<T, C : DoubleChainNode<T>>(
+    public open class Between<T, C : DoubleChainNode<T, C>>(
         head: C?,
         protected val min: C?,
         protected val max: C?,
@@ -110,11 +110,11 @@ public open class DoubleChainNodeIterator<T, C : DoubleChainNode<T>>(startingLin
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class MutableDoubleChainNodeIterator<T, C : MutableDoubleChainNode<T>>(
+public open class MutableDoubleChainNodeIterator<T, C : MutableDoubleChainNode<T, C>>(
     link: C?,
     protected val underlyingCollection: MutableList<T>
 ) : DoubleChainNodeIterator<T, C>(link, underlyingCollection), MutableListIterator<T> {
-    public open class Between<T, C : MutableDoubleChainNode<T>>(
+    public open class Between<T, C : MutableDoubleChainNode<T, C>>(
         head: C?,
         protected val min: C?,
         protected val max: C?,

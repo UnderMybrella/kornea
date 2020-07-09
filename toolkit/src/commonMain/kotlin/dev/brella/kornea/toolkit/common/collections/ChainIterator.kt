@@ -4,8 +4,8 @@ import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.toolkit.common.KorneaToolkit
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class ChainIterator<C: ChainLink>(startingLink: C): Iterator<C> {
-    public open class Between<C: ChainLink>(head: C, protected val max: C?): ChainIterator<C>(head) {
+public open class ChainIterator<C: ChainLink<C>>(startingLink: C): Iterator<C> {
+    public open class Between<C: ChainLink<C>>(head: C, protected val max: C?): ChainIterator<C>(head) {
         public override fun hasNext(): Boolean = super.hasNext() && link != max
     }
 
@@ -47,8 +47,8 @@ public open class MutableChainIterator<C: MutableChainLink<C>>(link: C, protecte
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class ReverseChainIterator<C: ReverseChainLink>(startingLink: C): Iterator<C> {
-    public open class Between<C: ChainLink>(head: C, protected val max: C?): ChainIterator<C>(head) {
+public open class ReverseChainIterator<C: ReverseChainLink<C>>(startingLink: C): Iterator<C> {
+    public open class Between<C: ChainLink<C>>(head: C, protected val max: C?): ChainIterator<C>(head) {
         public override fun hasNext(): Boolean = super.hasNext() && link != max
     }
 
@@ -91,8 +91,8 @@ public open class MutableReverseChainIterator<C: MutableReverseChainLink<C>>(lin
 
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class DoubleChainIterator<C: DoubleChainLink>(startingLink: C, underlyingCollection: List<C>?) : ListIterator<C> {
-    public open class Between<C: DoubleChainLink>(head: C, protected val min: C?, protected val max: C?, underlyingCollection: List<C>?): DoubleChainIterator<C>(head, underlyingCollection) {
+public open class DoubleChainIterator<C: DoubleChainLink<C>>(startingLink: C, underlyingCollection: List<C>?) : ListIterator<C> {
+    public open class Between<C: DoubleChainLink<C>>(head: C, protected val min: C?, protected val max: C?, underlyingCollection: List<C>?): DoubleChainIterator<C>(head, underlyingCollection) {
         public override fun hasNext(): Boolean = super.hasNext() && link != max
         override fun hasPrevious(): Boolean = super.hasPrevious() && link?.previous != min
     }

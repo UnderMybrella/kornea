@@ -5,12 +5,18 @@ import dev.brella.kornea.toolkit.common.KorneaToolkit
 import dev.brella.kornea.toolkit.common.asNull
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public open class CommonLinkedList<T>(
-    initialHead: MutableChainNode<T>? = null,
-    initialTail: MutableChainNode<T>? = initialHead?.tail()
+public open class CommonLinkedList<T, C : MutableChainNode<T, C>>(
+    initialHead: C?,
+    initialTail: C? = initialHead?.tail(),
+    protected open val newInstance: (T, C?) -> C
 ) : AbstractMutableList<T>() {
-    protected open var head: MutableChainNode<T>? = initialHead
-    protected open var tail: MutableChainNode<T>? = initialTail
+    public companion object {
+        public operator fun <T> invoke(): CommonLinkedList<T, MutableChainNode.Base<T>> =
+            CommonLinkedList(null, null, MutableChainNode.Companion::invoke)
+    }
+
+    protected open var head: C? = initialHead
+    protected open var tail: C? = initialTail
         get() = field ?: head
     protected open var _size: Int = 0
     override val size: Int by ::_size
@@ -26,9 +32,9 @@ public open class CommonLinkedList<T>(
      */
     override fun add(element: T): Boolean {
         if (head === null) {
-            head = MutableChainNode(element, null)
+            head = newInstance(element, null)
         } else {
-            tail = tail!!.append(MutableChainNode(element, null))
+            tail = tail!!.append(newInstance(element, null))
         }
         _size++
 
@@ -42,17 +48,17 @@ public open class CommonLinkedList<T>(
         when {
             index < 0 || index > size -> throw IndexOutOfBoundsException("Index: $index, size: $size")
             index == 0 -> {
-                head = MutableChainNode(element, head)
+                head = newInstance(element, head)
                 _size++
             }
             else -> {
                 val n = head!! stepForwards index - 1
 
                 if (n === tail) {
-                    tail = MutableChainNode(element, null)
-                    n.next(tail)
+                    tail = newInstance(element, null)
+                    n.next = (tail)
                 } else {
-                    n.append(MutableChainNode(element, null))
+                    n.append(newInstance(element, null))
                 }
                 _size++
             }
@@ -69,20 +75,20 @@ public open class CommonLinkedList<T>(
 
         if (index == 0) {
             val result = head!!.node
-            head = head!!.next()
+            head = head!!.next
             _size--
             return result
         } else {
             val n = head!! stepForwards index - 1
 
-            val next = n.next()
+            val next = n.next
                 ?: throw IllegalStateException("Node at index ${index - 1} has no next element (0 < ${index - 1} < $size)")
 
             if (next === tail) {
                 tail = n
-                n.next(null)
+                n.next = null
             } else {
-                n.next = next.next()
+                n.next = next.next
             }
             _size--
 
@@ -100,15 +106,15 @@ public open class CommonLinkedList<T>(
 
         if (index == 0) {
             val repl = head!!.node
-            head = MutableChainNode(element, head!!.next())
+            head = newInstance(element, head!!.next)
             return repl
         } else {
             val prior = head!! stepForwards index - 1
 
-            val repl = prior.next()
+            val repl = prior.next
                 ?: throw IllegalStateException("Node at index ${index - 1} has no next element (0 < ${index - 1} < $size)")
 
-            prior.next(MutableChainNode(element, repl.next()))
+            prior.next = (newInstance(element, repl.next))
 
             return repl.node
         }
@@ -119,16 +125,16 @@ public open class CommonLinkedList<T>(
         if (elements.isEmpty()) return false
 
         if (index == 0) {
-            head = elements.reversed().fold(head) { next, element -> MutableChainNode(element, next) }
+            head = elements.reversed().fold(head) { next, element -> newInstance(element, next) }
             _size += elements.size
         } else {
             val n = head!! stepForwards index - 1
 
             if (n === tail) {
-                tail = elements.reversed().fold(tail) { next, element -> MutableChainNode(element, next) }
-                n.next(tail)
+                tail = elements.reversed().fold(tail) { next, element -> newInstance(element, next) }
+                n.next = (tail)
             } else {
-                n.next = elements.reversed().fold(n.next()) { next, element -> MutableChainNode(element, next) }
+                n.next = elements.reversed().fold(n.next) { next, element -> newInstance(element, next) }
             }
             _size += size
         }
@@ -139,10 +145,9 @@ public open class CommonLinkedList<T>(
     override fun addAll(elements: Collection<T>): Boolean {
         if (elements.isEmpty()) return false
         if (head === null) head =
-            elements.reversed().fold(asNull()) { next, element -> MutableChainNode(element, next) }
+            elements.reversed().fold(asNull<C>()) { next, element -> newInstance(element, next) }!!
         else tail!!.append(
-            elements.reversed()
-                .fold(asNull<MutableChainNode<T>>()) { next, element -> MutableChainNode(element, next) }!!
+            elements.reversed().fold(asNull<C>()) { next, element -> newInstance(element, next) }!!
         )
         _size += elements.size
 
@@ -162,7 +167,7 @@ public open class CommonLinkedList<T>(
         var n = head
         while (n != null) {
             if (remaining.remove(n.node) && remaining.isEmpty()) return true
-            n = n.next()
+            n = n.next
         }
 
         return false
@@ -173,7 +178,7 @@ public open class CommonLinkedList<T>(
         var i = 0
         while (n != null) {
             if (n.node == element) return i
-            n = n.next()
+            n = n.next
             i++
         }
 
@@ -190,7 +195,7 @@ public open class CommonLinkedList<T>(
         var index = -1
         while (n != null) {
             if (n.node == element) index = i
-            n = n.next()
+            n = n.next
             i++
         }
 
@@ -207,14 +212,14 @@ public open class CommonLinkedList<T>(
 //        else if (index >= size) throw IndexOutOfBoundsException("Index: $index, size: $size")
 
         var prior = head ?: return false
-        var next = prior.next()
+        var next = prior.next
         while (next != null) {
             if (next.node == element) {
                 if (next === tail) {
                     tail = prior
-                    tail?.next(null)
+                    tail?.next = null
                 } else {
-                    prior.next(next.next())
+                    prior.next = next.next
                 }
                 _size--
 
@@ -232,14 +237,14 @@ public open class CommonLinkedList<T>(
         val remaining = elements.toMutableList()
 
         var prior = head ?: return false
-        var n = prior.next()
+        var n = prior.next
         while (n != null) {
             if (remaining.remove(n.node)) {
                 if (n === tail) {
                     tail = prior
-                    tail?.next(null)
+                    tail?.next = null
                 } else {
-                    prior.next(n.next())
+                    prior.next = n.next
                 }
                 _size--
 
@@ -255,16 +260,16 @@ public open class CommonLinkedList<T>(
 
     override fun retainAll(elements: Collection<T>): Boolean {
         var prior = head ?: return false
-        var n = prior.next()
+        var n = prior.next
         val startingSize = size
 
         while (n != null) {
             if (n.node !in elements) {
                 if (n === tail) {
                     tail = prior
-                    tail?.next(null)
+                    tail?.next = null
                 } else {
-                    prior.next(n.next())
+                    prior.next = n.next
                 }
                 _size--
             }
@@ -278,6 +283,6 @@ public open class CommonLinkedList<T>(
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<T> {
         val subHead = head!! stepForwards fromIndex
-        return CommonLinkedList(subHead, subHead stepForwards (toIndex - fromIndex))
+        return CommonLinkedList(subHead, subHead stepForwards (toIndex - fromIndex), newInstance)
     }
 }
