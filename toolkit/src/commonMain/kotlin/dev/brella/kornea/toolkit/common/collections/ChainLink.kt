@@ -1,6 +1,7 @@
 package dev.brella.kornea.toolkit.common.collections
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.toolkit.common.KorneaToolkit
 import kotlin.js.JsName
 
@@ -49,7 +50,8 @@ public interface ChainNode<out T, out C: ChainNode<T, C>> : ChainLink<C> {
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public interface MutableChainNode<T, C: MutableChainNode<T, C>> : MutableChainLink<C>, ChainNode<T, C> {
+@ChangedSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
+public interface MutableChainNode<out T, C: MutableChainNode<T, C>> : MutableChainLink<C>, ChainNode<T, C> {
     public data class Base<T>(override val node: T, override var next: Base<T>?) : MutableChainNode<T, Base<T>>
 
     public companion object {
@@ -59,7 +61,8 @@ public interface MutableChainNode<T, C: MutableChainNode<T, C>> : MutableChainLi
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public interface DoubleChainNode<T, out C: DoubleChainNode<T, C>> : DoubleChainLink<C>, ChainNode<T, C> {
+@ChangedSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
+public interface DoubleChainNode<out T, out C: DoubleChainNode<T, C>> : DoubleChainLink<C>, ChainNode<T, C> {
     public data class Base<T>(
         override val node: T,
         override val previous: DoubleChainNode<T, *>?,
@@ -76,7 +79,8 @@ public interface DoubleChainNode<T, out C: DoubleChainNode<T, C>> : DoubleChainL
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
-public interface MutableDoubleChainNode<T, C: MutableDoubleChainNode<T, C>> : MutableChainNode<T, C>, DoubleChainNode<T, C>, MutableDoubleChainLink<C> {
+@ChangedSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
+public interface MutableDoubleChainNode<out T, C: MutableDoubleChainNode<T, C>> : MutableChainNode<T, C>, DoubleChainNode<T, C>, MutableDoubleChainLink<C> {
     public data class Base<T>(
         override val node: T,
         override var previous: Base<T>?,

@@ -2,6 +2,7 @@
 
 package dev.brella.kornea.toolkit.common
 
+import dev.brella.kornea.annotations.AvailableSince
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -30,3 +31,16 @@ public inline fun <T, R> freeze(receiver: T, block: (T) -> R): R {
 
 public inline fun <T> T?.isNull(): Boolean = this == null
 public inline fun <T> T?.isNotNull(): Boolean = this != null
+
+@AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
+public inline fun loopAtMostOnce(block: () -> Unit) {
+    block()
+    block()
+}
+
+@AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
+public inline fun loopAtMostTwice(block: () -> Unit) {
+    block()
+    block()
+    block()
+}

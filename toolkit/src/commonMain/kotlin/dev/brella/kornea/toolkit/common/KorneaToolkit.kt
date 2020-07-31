@@ -5,8 +5,22 @@ import dev.brella.kornea.annotations.AvailableSince
 @AvailableSince(KorneaToolkit.VERSION_1_2_0_INDEV)
 public object KorneaToolkit {
     /**
+     * kornea-toolkit 2.3.0-alpha
+     * - Add: ArrayBackedList (Just ByteArrayBackedList at this time)
+     * - Change ChainNode to use covariance for node
+     * - Add: KorneaPool / Poolable
+     * - Add: loopAtMostOnce, loopAtMostTwice
+     * - Add: KorneaWaiter
+     * - Add: ListWithBuffer
+     * - Add: Byte#asInt, and other Numerical Extensions
+     * - Move ObservableDataCloseable to be in Toolkit
+     * - Add: SuspendInit
+     */
+    @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
+    public const val VERSION_2_3_0_ALPHA: String = "2.3.0-alpha"
+    /**
      * kornea-toolkit 2.2.0-alpha
-     * * Change ChainLink's to take a generic parameter, and use properties
+     * - Change ChainLink's to take a generic parameter, and use properties
      */
     public const val VERSION_2_2_0_ALPHA: String = "2.2.0-alpha"
 
