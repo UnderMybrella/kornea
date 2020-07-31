@@ -2,10 +2,14 @@
 
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.annotations.WrongBytecodeGenerated
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.flow.extensions.copyTo
+import dev.brella.kornea.toolkit.common.ObservableDataCloseable
+import dev.brella.kornea.toolkit.common.closeAfter
 
 @ExperimentalUnsignedTypes
 public interface InputFlow : ObservableDataCloseable {
@@ -36,7 +40,11 @@ public interface InputFlow : ObservableDataCloseable {
 
 @ExperimentalUnsignedTypes
 public interface PeekableInputFlow: InputFlow {
-    public suspend fun peek(forward: Int = 1): Int?
+    public suspend fun peek(forward: Int): Int?
+    @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
+    public suspend fun peek(forward: Int, b: ByteArray): Int? = peek(forward, b, 0, b.size)
+    @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
+    public suspend fun peek(forward: Int, b: ByteArray, off: Int, len: Int): Int?
 }
 
 @ExperimentalUnsignedTypes
@@ -55,6 +63,14 @@ public interface SeekableInputFlow: InputFlow {
 }
 
 @ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
+public suspend inline fun PeekableInputFlow.peek(): Int? = peek(1)
+@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
+public suspend inline fun PeekableInputFlow.peek(b: ByteArray): Int? = peek(1, b)
+@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
+public suspend inline fun PeekableInputFlow.peek(b: ByteArray, off: Int, len: Int): Int? = peek(1, b, off, len)
+
+@ExperimentalUnsignedTypes
 public suspend inline fun InputFlow.skip(number: Number): ULong? = skip(number.toLong().toULong())
 
 @ExperimentalUnsignedTypes
@@ -63,6 +79,18 @@ public suspend fun InputFlow.readBytes(bufferSize: Int = 8192): ByteArray {
     copyTo(buffer, bufferSize)
     return buffer.getData()
 }
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
+public suspend inline fun InputFlow.readPacket(packet: FlowPacket): ByteArray? = if (read(packet.buffer) == packet.size) packet.buffer else null
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
+public suspend inline fun PeekableInputFlow.peekPacket(forward: Int, packet: FlowPacket): ByteArray? = if (peek(forward, packet.buffer) == packet.size) packet.buffer else null
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
+public suspend inline fun PeekableInputFlow.peekPacket(packet: FlowPacket): ByteArray? = if (peek(packet.buffer) == packet.size) packet.buffer else null
 
 @ExperimentalUnsignedTypes
 public suspend fun InputFlow.readExact(count: Int): ByteArray? = readExact(ByteArray(count), 0, count)

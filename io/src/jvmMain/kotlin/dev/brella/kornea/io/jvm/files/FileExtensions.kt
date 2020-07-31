@@ -77,8 +77,7 @@ public suspend fun AsynchronousFileChannel.readAwait(dst: ByteBuffer, position: 
 public suspend fun AsynchronousFileChannel.readAwaitOrNull(dst: ByteBuffer, position: Long): Int? =
     suspendCoroutine<Int> { cont -> read(dst, position, cont,
         INT_CONTINUATION_COMPLETION_HANDLER
-    ) }
-        .takeIf(::readResultIsValid)
+    ) }.takeIf(::readResultIsValid)
 
 public suspend fun AsynchronousFileChannel.writeAwait(src: ByteBuffer, position: Long): Int =
     suspendCoroutine<Int> { cont -> write(src, position, cont,

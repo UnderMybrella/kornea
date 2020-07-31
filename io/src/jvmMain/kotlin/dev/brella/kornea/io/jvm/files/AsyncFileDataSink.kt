@@ -7,8 +7,8 @@ import dev.brella.kornea.io.common.DataSink
 import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkClosed
 import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkUnknown
 import dev.brella.kornea.io.common.DataSink.Companion.korneaTooManySinksOpen
-import dev.brella.kornea.io.common.ObservableDataCloseable
-import dev.brella.kornea.io.common.closeAll
+import dev.brella.kornea.toolkit.common.ObservableDataCloseable
+import dev.brella.kornea.toolkit.common.closeAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import java.io.File

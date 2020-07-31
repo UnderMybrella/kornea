@@ -4,6 +4,7 @@ import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
+import kotlin.math.min
 
 @ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_4_2_0_INDEV)
@@ -82,6 +83,34 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
         }
 
         return buffer[pos + forward - 1].toInt() and 0xFF
+    }
+
+    override suspend fun peek(forward: Int, b: ByteArray, off: Int, len: Int): Int? {
+        if (pos >= count) {
+            fill()
+            if (pos >= count) {
+                return null
+            }
+        } else if (pos + forward > count) {
+            if ((pos + forward) - count < buffer.size) { /* Shuffle down */
+                buffer.copyOfRange(pos, count).copyInto(buffer, 0, 0, count - pos)
+                pos = count - pos
+                fillPartial()
+                pos = 0
+            } else if (buffer.size >= MAX_BUFFER_SIZE) {
+                throw IllegalStateException("OOM; Required array size too large")
+            } else { /* Grow */
+                /* grow buffer */
+                val nbuf = ByteArray(if (pos <= MAX_BUFFER_SIZE - pos) pos * 2 else MAX_BUFFER_SIZE)
+                buffer.copyInto(nbuf, 0, 0, pos)
+                buffer = nbuf
+                fillPartial()
+            }
+        }
+
+        val peeking = min(len, count - (pos + forward - 1))
+        buffer.copyInto(b, destinationOffset = off, pos + forward - 1, pos + forward - 1 + peeking)
+        return peeking
     }
 
     override suspend fun read(): Int? {

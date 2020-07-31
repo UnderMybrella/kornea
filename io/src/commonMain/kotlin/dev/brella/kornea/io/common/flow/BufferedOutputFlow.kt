@@ -1,7 +1,7 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.io.common.BaseDataCloseable
-import dev.brella.kornea.io.common.DataCloseableEventHandler
+import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
 
 @ExperimentalUnsignedTypes
 public open class BufferedOutputFlow(protected val backing: OutputFlow): BaseDataCloseable(), CountingOutputFlow, PrintOutputFlow {

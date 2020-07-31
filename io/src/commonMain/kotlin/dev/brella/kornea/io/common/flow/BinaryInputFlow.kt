@@ -21,6 +21,16 @@ public class BinaryInputFlow(
     override suspend fun peek(forward: Int): Int? =
         if ((pos + forward - 1) < view.size()) view.get(pos + forward - 1) else null
 
+    override suspend fun peek(forward: Int, b: ByteArray, off: Int, len: Int): Int? {
+        if (pos + forward - 1 < view.size()) {
+            val peeking = min(len, view.size() - (pos + forward - 1))
+            view.copyInto(b, off, pos + forward - 1, pos + forward - 1 + peeking)
+            return peeking
+        }
+
+        return null
+    }
+
     override suspend fun read(): Int? = if (pos < view.size()) view.get(pos++) else null
     override suspend fun read(b: ByteArray): Int? = read(b, 0, b.size)
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? {

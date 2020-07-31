@@ -1,7 +1,7 @@
 package dev.brella.kornea.io.common
 
-import dev.brella.kornea.io.common.DataCloseableEventHandler
-import dev.brella.kornea.io.common.ObservableDataCloseable
+import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
+import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 import dev.brella.kornea.toolkit.common.ImmutableListView
 
 @ExperimentalUnsignedTypes

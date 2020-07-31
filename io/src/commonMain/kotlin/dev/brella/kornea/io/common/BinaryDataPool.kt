@@ -1,6 +1,5 @@
 package dev.brella.kornea.io.common
 
-import kotlinx.coroutines.sync.Mutex
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.DataSink.Companion.ERRORS_SINK_CLOSED
@@ -8,6 +7,7 @@ import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkClosed
 import dev.brella.kornea.io.common.flow.BinaryInputFlow
 import dev.brella.kornea.io.common.flow.BinaryOutputFlow
 import dev.brella.kornea.io.common.flow.MultiViewOutputFlow
+import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 import dev.brella.kornea.toolkit.common.ReadWriteSemaphore
 import dev.brella.kornea.toolkit.common.SharedStateRW
 import dev.brella.kornea.toolkit.common.SynchronisedBinaryView
@@ -72,7 +72,7 @@ public class BinaryDataPool(
     }
 
     override suspend fun openOutputFlow(): KorneaResult<MultiViewOutputFlow<BinaryOutputFlow>> =
-        if (canOpenOutputFlow()) KorneaResult.success(MultiViewOutputFlow(output, outputSemaphore, outputInstanceCount))
+        if (canOpenOutputFlow()) KorneaResult.success(MultiViewOutputFlow.invoke(output, outputSemaphore, outputInstanceCount))
         else KorneaResult.errorAsIllegalState(ERRORS_SINK_CLOSED, "Sink closed")
 
     override suspend fun canOpenOutputFlow(): Boolean = !outputClosed

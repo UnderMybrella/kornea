@@ -2,7 +2,8 @@
 
 package dev.brella.kornea.io.common.flow
 
-import dev.brella.kornea.io.common.ObservableDataCloseable
+import dev.brella.kornea.io.common.FlowPacket
+import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 
 @ExperimentalUnsignedTypes
 public typealias OutputFlowEventHandler = suspend (flow: OutputFlow) -> Unit
@@ -53,3 +54,6 @@ public open class SinkCountingOutputFlow(protected val sink: OutputFlow) : Count
 
 @ExperimentalUnsignedTypes
 public suspend fun OutputFlow.writeByte(byte: Number): Unit = write(byte.toInt())
+
+@ExperimentalUnsignedTypes
+public suspend inline fun OutputFlow.writePacket(packet: FlowPacket): Unit = write(packet.buffer)//if (read(packet.buffer) == packet.size) packet.buffer else null

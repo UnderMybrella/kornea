@@ -4,6 +4,14 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 2.0.0-alpha
+     * - Add PeekableInputFlow#peek(b, off, len)
+     * - Implement all read operations for ByteArray, and add variants without an index
+     * - Add FlowPacket and FlowState; a way to optimise reads for small packets of data
+     */
+    public const val VERSION_2_0_0_ALPHA: String = "2.0.0-alpha"
+
+    /**
      * kornea-io 1.3.0-alpha
      * - Add [FannedPrintFlow][dev.brella.kornea.io.common.flow.FannedPrintFlow] and [SequentialPrintFlow][dev.brella.kornea.io.common.flow.SequentialPrintFlow]
      */

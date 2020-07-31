@@ -18,7 +18,7 @@ import java.nio.InvalidMarkException
  * @throws  IllegalArgumentException
  * If the preconditions on `newPosition` do not hold
  */
-public fun <T: Buffer> T.positionSafe(newPosition: Int): Buffer = (this as Buffer).position(newPosition)
+public inline fun <T: Buffer> T.positionSafe(newPosition: Int): T = (this as Buffer).position(newPosition) as T
 
 /**
  * Sets this buffer's limit.  If the position is larger than the new limit
@@ -34,14 +34,14 @@ public fun <T: Buffer> T.positionSafe(newPosition: Int): Buffer = (this as Buffe
  * @throws  IllegalArgumentException
  * If the preconditions on `newLimit` do not hold
  */
-public fun <T: Buffer> T.limitSafe(newLimit: Int): Buffer = (this as Buffer).limit(newLimit)
+public inline fun <T: Buffer> T.limitSafe(newLimit: Int): T = (this as Buffer).limit(newLimit) as T
 
 /**
  * Sets this buffer's mark at its position.
  *
  * @return  This buffer
  */
-public fun <T: Buffer> T.markSafe(): Buffer = (this as Buffer).mark()
+public inline fun <T: Buffer> T.markSafe(): T = (this as Buffer).mark() as T
 
 /**
  * Resets this buffer's position to the previously-marked position.
@@ -55,7 +55,7 @@ public fun <T: Buffer> T.markSafe(): Buffer = (this as Buffer).mark()
  * @throws  InvalidMarkException
  * If the mark has not been set
  */
-public fun <T: Buffer> T.resetSafe(): Buffer = (this as Buffer).reset()
+public inline fun <T: Buffer> T.resetSafe(): T = (this as Buffer).reset() as T
 
 /**
  * Clears this buffer.  The position is set to zero, the limit is set to
@@ -76,7 +76,7 @@ public fun <T: Buffer> T.resetSafe(): Buffer = (this as Buffer).reset()
  *
  * @return  This buffer
  */
-public fun <T: Buffer> T.clearSafe(): Buffer = (this as Buffer).clear()
+public inline fun <T: Buffer> T.clearSafe(): T = (this as Buffer).clear() as T
 
 /**
  * Flips this buffer.  The limit is set to the current position and then
@@ -100,7 +100,7 @@ public fun <T: Buffer> T.clearSafe(): Buffer = (this as Buffer).clear()
  *
  * @return  This buffer
  */
-public fun <T: Buffer> T.flipSafe(): Buffer = (this as Buffer).flip()
+public inline fun <T: Buffer> T.flipSafe(): T = (this as Buffer).flip() as T
 
 /**
  * Rewinds this buffer.  The position is set to zero and the mark is
@@ -118,4 +118,13 @@ public fun <T: Buffer> T.flipSafe(): Buffer = (this as Buffer).flip()
  *
  * @return  This buffer
  */
-public fun <T: Buffer> T.rewindSafe(): Buffer = (this as Buffer).rewind()
+public inline fun <T: Buffer> T.rewindSafe(): T = (this as Buffer).rewind() as T
+
+public inline fun <T: Buffer, R> T.bookmark(block: T.() -> R): R {
+    val pos = position()
+    try {
+        return block()
+    } finally {
+        positionSafe(pos)
+    }
+}

@@ -1,86 +1,134 @@
 package dev.brella.kornea.io.jvm.files
 
+import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.flow.PeekableInputFlow
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
+import dev.brella.kornea.io.jvm.bookmark
 import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.limitSafe
 import dev.brella.kornea.io.jvm.positionSafe
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runInterruptible
+import dev.brella.kornea.toolkit.common.*
+import dev.brella.kornea.toolkit.common.pools.KorneaPool
+import dev.brella.kornea.toolkit.common.pools.KorneaPools
+import dev.brella.kornea.toolkit.common.pools.Poolable
+import dev.brella.kornea.toolkit.common.pools.PoolableWrapper
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
+import java.lang.Integer.min
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import java.util.concurrent.Executors
+import kotlin.coroutines.CoroutineContext
+import kotlin.reflect.KMutableProperty0
 
 @ExperimentalUnsignedTypes
-public class AsyncFileInputFlow(
+@ExperimentalKorneaToolkit
+public class AsyncFileInputFlow private constructor(
     private val channel: AsynchronousFileChannel,
     private val localChannel: Boolean,
     public val backing: Path,
     override val location: String?
-) : BaseDataCloseable(), PeekableInputFlow, SeekableInputFlow {
+) : BaseDataCloseable(), PeekableInputFlow, SeekableInputFlow, SuspendInit {
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
+
+        private val THREAD_POOL: KorneaPool<CoroutineContext> = KorneaPools.newCachedPool(Int.MAX_VALUE) {
+            PoolableWrapper(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
+        }
+
+        public suspend operator fun invoke(
+            channel: AsynchronousFileChannel,
+            localChannel: Boolean,
+            backing: Path,
+            location: String?
+        ): AsyncFileInputFlow =
+            init(AsyncFileInputFlow(channel, localChannel, backing, location))
+
+        public suspend operator fun invoke(
+            backingPath: Path,
+            location: String? = backingPath.toString()
+        ): AsyncFileInputFlow =
+            init(AsyncFileInputFlow(backingPath, location))
+
+        public suspend operator fun invoke(
+            backingFile: File,
+            location: String? = backingFile.toString()
+        ): AsyncFileInputFlow =
+            init(AsyncFileInputFlow(backingFile, location))
     }
 
-    public constructor(backingPath: Path, location: String? = backingPath.toString()) : this(
+    private constructor(backingPath: Path, location: String? = backingPath.toString()) : this(
         AsynchronousFileChannel.open(
             backingPath,
             StandardOpenOption.READ
         ), true, backingPath, location
     )
 
-    public constructor(backingFile: File, location: String? = backingFile.toString()) : this(backingFile.toPath(), location)
+    private constructor(backingFile: File, location: String? = backingFile.toString()) : this(
+        backingFile.toPath(),
+        location
+    )
 
-    private val bufferMutex: Mutex = Mutex()
+    //    private var coroutineContext: Poolable<CoroutineContext>? = null
+    private val mutex: Mutex = Mutex()
+
     private var flowFilePointer: Long = 0L
     private var buffer: ByteBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE).apply { limitSafe(0) } //Force a refill
     private var peekFilePointer: Long = 0L
     private var peekBuffer: ByteBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE).apply { limitSafe(0) }
-    private var count: Int = 0
 
-    private suspend fun fill(moveFilePointer: Boolean = true, filePointer: Long = flowFilePointer): Int? {
+    private suspend inline fun ByteBuffer.fill(
+        moveFilePointer: Boolean = true,
+        filePointer: KMutableProperty0<Long> = ::flowFilePointer
+    ): Int? =
         if (!isClosed) {
-            buffer.clearSafe()
-            return fillPartial(moveFilePointer, filePointer)
+            clearSafe()
+            fillPartial(moveFilePointer, filePointer)
         } else {
-            return null
+            null
         }
-    }
 
-    private suspend fun fillPartial(moveFilePointer: Boolean = true, filePointer: Long = flowFilePointer): Int? {
+    private suspend fun ByteBuffer.fillPartial(
+        moveFilePointer: Boolean = true,
+        filePointer: KMutableProperty0<Long> = ::flowFilePointer
+    ): Int? {
         if (!isClosed) {
-            buffer.limitSafe(buffer.capacity())
-            val pos = buffer.position()
-            val n = channel.readAwaitOrNull(buffer, filePointer) ?: return null
-            if (n > 0) {
-                if (moveFilePointer) flowFilePointer = filePointer + n
-                buffer.positionSafe(pos)
-                buffer.limitSafe(n)
+            limitSafe(capacity())
+            val pos = position()
+            val n = channel.readAwaitOrNull(this, filePointer.get())
+            limitSafe(position())
+            positionSafe(pos)
+
+            if (n == null || n < 0) {
+                return null
+            } else if (n > 0) {
+                if (moveFilePointer) filePointer.set(filePointer.get() + n)
+
+                return n
             }
 
-            return n
+            return 0
         } else {
             return null
         }
     }
 
-    override suspend fun read(): Int? {
-        bufferMutex.withLock {
+    override suspend fun read(): Int? =
+        mutex.withLock {
             if (!buffer.hasRemaining()) {
-                fill() ?: return null
+                buffer.fill() ?: return@withLock null
 
-                if (!buffer.hasRemaining()) return null
+                if (!buffer.hasRemaining()) return@withLock null
             }
 
-            return buffer.get().toInt() and 0xFF
+            return@withLock buffer.get().asInt()
         }
-    }
 
     private suspend fun read1(b: ByteArray, off: Int, len: Int): Int? {
         var avail = buffer.remaining()
@@ -93,7 +141,7 @@ public class AsyncFileInputFlow(
                 return n
             }
 
-            avail = fill() ?: return null
+            avail = buffer.fill() ?: return null
 
             if (!buffer.hasRemaining()) return null
         }
@@ -104,85 +152,123 @@ public class AsyncFileInputFlow(
         return cnt
     }
 
-    override suspend fun read(b: ByteArray, off: Int, len: Int): Int? {
-        if ((off or len or (off + len) or (b.size - (off + len))) < 0) {
-            throw IndexOutOfBoundsException()
-        } else if (len == 0) {
-            return 0
-        }
+    override suspend fun read(b: ByteArray, off: Int, len: Int): Int? =
+        mutex.withLock {
+            if ((off or len or (off + len) or (b.size - (off + len))) < 0) {
+                throw IndexOutOfBoundsException()
+            } else if (len == 0) {
+                return@withLock 0
+            }
 
-        var n = 0
+            var n = 0
 
-        bufferMutex.withLock {
-            while (true) {
-                val nread = read1(b, off + n, len - n) ?: return if (n > 0) n else null
-                if (nread <= 0)
-                    return if (n == 0) nread else n
+            while (n < len) {
+                val nread = read1(b, off + n, len - n) ?: return@withLock if (n > 0) n else null
+                if (nread <= 0) return@withLock if (n == 0) nread else n
                 n += nread
-                if (n >= len)
-                    return n
-//            if (backing.available() ?: 0u <= 0u)
-//                return n
+                yield()
             }
+
+            return@withLock n
         }
 
-        return n
-    }
+    public suspend fun readAt(b: ByteArray, off: Int, len: Int, filePointer: Long): Int? =
+        mutex.withLock { channel.readAwaitOrNull(ByteBuffer.wrap(b, off, len), filePointer) }
 
-    public suspend fun readAt(b: ByteArray, off: Int, len: Int, filePointer: Long): Int? {
-        val bytebuf = ByteBuffer.wrap(b, off, len)
+    override suspend fun peek(forward: Int): Int? =
+        mutex.withLock {
+            loopAtMostTwice {
+                val bufferForward = buffer.position() + forward
 
-        return channel.readAwaitOrNull(bytebuf, filePointer)
-    }
+                if (bufferForward < buffer.limit()) {
+                    //Within the main buffer
+                    return@withLock buffer.get(buffer.position() + forward - 1).asInt()
+                } else if (flowFilePointer - buffer.limit() + forward in peekFilePointer - peekBuffer.limit() until peekFilePointer) {
+                    //Within the peek buffer
+                    return@withLock peekBuffer.get((flowFilePointer - buffer.limit() + forward - peekFilePointer + peekBuffer.limit()).toInt())
+                        .asInt()
+                } else if (!buffer.hasRemaining()) {
+                    buffer.fill()
 
-    override suspend fun peek(forward: Int): Int? {
-        bufferMutex.withLock {
-            if (!buffer.hasRemaining()) {
-                fill()
+                    return@loopAtMostTwice
+                } else if (!peekBuffer.hasRemaining()) {
+                    peekBuffer.fill()
 
-                if (!buffer.hasRemaining()) return null
-            }
-
-            if (buffer.position() + forward >= buffer.limit()) {
-                if ((buffer.position() + forward + 1) - count < buffer.capacity()) { /* Shuffle down */
+                    return@loopAtMostTwice
+                } else if (bufferForward < buffer.capacity()) {
+                    //Shuffle down
                     val tmp = ByteArray(buffer.capacity() - buffer.position())
                     buffer.get(tmp)
                     buffer.clearSafe()
                     buffer.put(tmp)
-                    fillPartial()
+                    buffer.fillPartial()
                     buffer.positionSafe(0)
 
-                    if (buffer.remaining() < forward) return null //Probably hit the end of the file
+                    return@loopAtMostTwice
                 } else {
-                    val absPosition = flowFilePointer + buffer.position() + forward
-                    if (peekFilePointer != -1L && absPosition in peekFilePointer until peekFilePointer + peekBuffer.limit()) {
-                        return peekBuffer.get((absPosition - peekFilePointer).toInt()).toInt() and 0xFF
-                    } else {
-                        peekFilePointer = absPosition
-                        peekBuffer.clearSafe()
-                        val read = fill(false, peekFilePointer)?.toLong()
-
-                        if (read == null) {
-                            peekFilePointer = -1
-                        } else {
-                            peekFilePointer += read
-                        }
-
-                        if (buffer.remaining() < forward) return null //Probably hit the end of the file
-                        return peekBuffer.get(0).toInt() and 0xFF
-                    }
+                    return@withLock null
                 }
             }
 
-            return buffer.get(buffer.position() + forward - 1).toInt() and 0xFF
+            null
         }
-    }
 
-    override suspend fun skip(n: ULong): ULong {
-        bufferMutex.withLock {
+    override suspend fun peek(forward: Int, b: ByteArray, off: Int, len: Int): Int? =
+        mutex.withLock {
+            loopAtMostTwice {
+                val bufferStartPos = (flowFilePointer - buffer.limit())
+                val peekStartPos = (peekFilePointer - peekBuffer.limit())
+
+                val bufferStart = buffer.position() + forward
+                val bufferForward = bufferStart + len
+
+                val bufferAbsStart = bufferStartPos + forward
+                val bufferAbsForward = bufferAbsStart + len
+                val peekRange = peekStartPos until peekFilePointer
+
+                if (bufferAbsStart in peekRange && bufferAbsForward in peekRange) {
+                    //Within the peek buffer
+                    return@withLock peekBuffer.bookmark {
+                        positionSafe((bufferAbsStart - peekStartPos).toInt())
+                        get(b, off, min(buffer.limit() - bufferStart, len))
+                        len
+                    }
+                } else if (bufferStart < buffer.limit()) {
+                    //Within the main buffer
+                    return@withLock buffer.bookmark {
+                        positionSafe(bufferStart)
+                        get(b, off, min(buffer.limit() - bufferStart, len))
+                        len
+                    }
+                } else if (!buffer.hasRemaining()) {
+                    buffer.fill()
+
+                    return@loopAtMostTwice
+                } else if (!peekBuffer.hasRemaining()) {
+                    peekBuffer.fill()
+
+                    return@loopAtMostTwice
+                } else if (bufferForward < buffer.capacity()) {
+                    //Shuffle down
+                    val tmp = ByteArray(buffer.capacity() - buffer.position())
+                    buffer.get(tmp)
+                    buffer.clearSafe()
+                    buffer.put(tmp)
+                    buffer.fillPartial()
+                    buffer.positionSafe(0)
+
+                    return@loopAtMostTwice
+                }
+            }
+
+            null
+        }
+
+    override suspend fun skip(n: ULong): ULong =
+        mutex.withLock {
             if (!buffer.hasRemaining()) {
                 flowFilePointer += n.toLong()
-                return n
+                return@withLock n
             }
 
             if (buffer.remaining() < n.toInt()) {
@@ -190,23 +276,22 @@ public class AsyncFileInputFlow(
                 buffer.positionSafe(buffer.capacity())
                 flowFilePointer += n.toInt() - avail
 
-                return n
+                return@withLock n
             } else {
                 buffer.positionSafe(buffer.position() + n.toInt())
 
-                return n
+                return@withLock n
             }
         }
-    }
 
     override suspend fun available(): ULong = remaining()
     override suspend fun remaining(): ULong = size() - position()
     override suspend fun size(): ULong = runInterruptible(Dispatchers.IO) { channel.size().toULong() }
     override suspend fun position(): ULong =
-        bufferMutex.withLock { runInterruptible(Dispatchers.IO) { flowFilePointer - buffer.limit() + buffer.position() } }.toULong()
+        mutex.withLock { flowFilePointer - buffer.limit() + buffer.position() }.toULong()
 
-    override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
-        bufferMutex.withLock {
+    override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong =
+        mutex.withLock {
             when (mode) {
                 EnumSeekMode.FROM_BEGINNING -> {
                     if (pos in (flowFilePointer - buffer.limit()) until flowFilePointer) {
@@ -234,18 +319,20 @@ public class AsyncFileInputFlow(
                 }
             }
 
-            return position()
+            return@withLock position()
         }
+
+    override suspend fun init() {
+//        coroutineContext = THREAD_POOL.hire().get()
     }
 
-    override suspend fun close() {
-        super<PeekableInputFlow>.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            if (localChannel) {
-                runInterruptible(Dispatchers.IO) { channel.close() }
-            }
-            closed = true
+        if (localChannel) {
+            mutex.withLock { runInterruptible(Dispatchers.IO) { channel.close() } }
         }
+
+//        THREAD_POOL.retire(coroutineContext!!)
     }
 }

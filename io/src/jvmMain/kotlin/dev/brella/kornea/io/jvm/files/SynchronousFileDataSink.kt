@@ -5,6 +5,8 @@ import dev.brella.kornea.io.common.*
 import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkClosed
 import dev.brella.kornea.io.common.DataSink.Companion.korneaTooManySinksOpen
 import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkUnknown
+import dev.brella.kornea.toolkit.common.ObservableDataCloseable
+import dev.brella.kornea.toolkit.common.closeAll
 import java.io.File
 
 @ExperimentalUnsignedTypes
