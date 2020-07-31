@@ -1,6 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
 
-version = '1.0.1-alpha'
+version = '1.0.2-alpha'
 
 kotlin {
     /* Targets configuration omitted. 
@@ -22,38 +22,13 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation kotlin('stdlib-common')
                 implementation project(":kornea-annotations")
             }
         }
-        commonTest {
-            dependencies {
-                implementation kotlin('test-common')
-                implementation kotlin('test-annotations-common')
-            }
-        }
-        jvmMain {
-            dependencies {
-                implementation kotlin('stdlib-jdk8')
-            }
-        }
-        jsMain {
-            dependencies {
-                implementation kotlin('stdlib-js')
-            }
-        }
-        mingwX64Main {
-            dependencies {
-            }
-        }
-        linuxX64Main {
-            dependencies {
-            }
-        }
-
         all {
             languageSettings {
                 enableLanguageFeature("InlineClasses")
+                useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
                 explicitApi()
             }
         }

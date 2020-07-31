@@ -1,8 +1,8 @@
 package dev.brella.kornea.img
 
 import dev.brella.kornea.io.common.flow.InputFlow
-import dev.brella.kornea.io.common.readInt16LE
-import dev.brella.kornea.io.common.readInt32LE
+import dev.brella.kornea.io.common.flow.extensions.readInt16LE
+import dev.brella.kornea.io.common.flow.extensions.readInt32LE
 
 object DXT1PixelData {
     @ExperimentalUnsignedTypes

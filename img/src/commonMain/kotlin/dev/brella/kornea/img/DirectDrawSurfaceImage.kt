@@ -4,11 +4,10 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.cast
 import dev.brella.kornea.errors.common.getOrBreak
 import dev.brella.kornea.errors.common.korneaNotEnoughData
-import dev.brella.kornea.errors.common.*
 import dev.brella.kornea.img.bc7.BC7PixelData
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.isBitSet
-import dev.brella.kornea.io.common.readInt32LE
+import dev.brella.kornea.io.common.flow.extensions.readInt32LE
 
 const val DDS1_MAGIC_NUMBER_LE = 0x31534444
 const val DDS_MAGIC_NUMBER_LE = 0x20534444

@@ -17,6 +17,7 @@ include ':errors'
 include ':io'
 include ':img'
 include ':modelling'
+include ':office'
 include ':toolkit'
 include ':bootstrap'
 
