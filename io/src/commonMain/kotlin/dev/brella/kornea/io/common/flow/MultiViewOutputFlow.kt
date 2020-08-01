@@ -1,12 +1,9 @@
 package dev.brella.kornea.io.common.flow
 
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.toolkit.common.*
-import kotlinx.coroutines.sync.Semaphore
 
 @ExperimentalKorneaToolkit
 @ExperimentalUnsignedTypes

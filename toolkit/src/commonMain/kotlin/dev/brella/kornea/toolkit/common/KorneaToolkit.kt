@@ -5,6 +5,13 @@ import dev.brella.kornea.annotations.AvailableSince
 @AvailableSince(KorneaToolkit.VERSION_1_2_0_INDEV)
 public object KorneaToolkit {
     /**
+     * kornea-toolkit 2.4.0-alpha
+     * - Move [PrintFlow] from kornea-io to kornea-toolkit
+     */
+    @AvailableSince(VERSION_2_4_0_ALPHA)
+    public const val VERSION_2_4_0_ALPHA: String = "2.4.0-alpha"
+
+    /**
      * kornea-toolkit 2.3.0-alpha
      * - Add: ArrayBackedList (Just ByteArrayBackedList at this time)
      * - Change ChainNode to use covariance for node
@@ -16,7 +23,7 @@ public object KorneaToolkit {
      * - Move ObservableDataCloseable to be in Toolkit
      * - Add: SuspendInit
      */
-    @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
+    @AvailableSince(VERSION_2_3_0_ALPHA)
     public const val VERSION_2_3_0_ALPHA: String = "2.3.0-alpha"
     /**
      * kornea-toolkit 2.2.0-alpha

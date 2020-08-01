@@ -9,7 +9,8 @@ import java.io.File
 import java.io.FileOutputStream
 
 @ExperimentalUnsignedTypes
-public class SynchronousFileOutputFlow(public val backing: File) : BaseDataCloseable(), CountingOutputFlow, PrintOutputFlow {
+public class SynchronousFileOutputFlow(public val backing: File) : BaseDataCloseable(), CountingOutputFlow,
+    PrintOutputFlow {
     private val stream = FileOutputStream(backing)
     private val channel = stream.channel
     override val streamOffset: Long

@@ -4,6 +4,12 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 2.1.0-alpha
+     * - Move PrintFlow to kornea-toolkit
+     */
+    public const val VERSION_2_1_0_ALPHA: String = "2.1.0-alpha"
+
+    /**
      * kornea-io 2.0.0-alpha
      * - Add PeekableInputFlow#peek(b, off, len)
      * - Implement all read operations for ByteArray, and add variants without an index
@@ -44,7 +50,7 @@ public object KorneaIO {
 
     /**
      * kornea-io 4.2.0
-     * - Add [AppendableAwait], [PrintFlow][dev.brella.kornea.io.common.flow.PrintFlow], and [PrintOutputFlow][dev.brella.kornea.io.common.flow.PrintOutputFlow PrintOutputFlow]
+     * - Add [AppendableAwait], [PrintFlow][dev.brella.kornea.io.common.flow.PrintFlow], and [PrintOutputFlow][dev.brella.kornea.toolkit.common.PrintOutputFlow PrintOutputFlow]
      */
     @AvailableSince(VERSION_4_2_0_INDEV)
     public const val VERSION_4_2_0_INDEV: String = "4.2.0-indev"
