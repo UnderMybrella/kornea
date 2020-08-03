@@ -127,6 +127,10 @@ public object FlowStateSelector {
 public inline fun <T> withState(select: FlowStateSelector.() -> T): T =
     FlowStateSelector.select()
 
+@AvailableSince(KorneaIO.VERSION_2_3_0_ALPHA)
+public inline fun <T: DataCloseable, R> KorneaResult<T>.mapWithState(select: FlowStateSelector.(T) -> R): KorneaResult<R> =
+    map { FlowStateSelector.select(it) }
+
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_2_0_ALPHA)
 @WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("useBlockCrossinline(t, block)", "dev.brella.kornea.toolkit.common.useBlockCrossinline"))

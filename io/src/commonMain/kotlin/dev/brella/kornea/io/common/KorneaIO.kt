@@ -4,6 +4,12 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 2.3.0-alpha
+     * - Add a mapWithState function for KorneaResults
+     */
+    public const val VERSION_2_3_0_ALPHA: String = "2.3.0-alpha"
+
+    /**
      * kornea-io 2.2.0-alpha
      * - Add use methods that accept a state selector
      */
