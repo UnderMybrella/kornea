@@ -4,6 +4,12 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 2.2.0-alpha
+     * - Add use methods that accept a state selector
+     */
+    public const val VERSION_2_2_0_ALPHA: String = "2.2.0-alpha"
+
+    /**
      * kornea-io 2.1.0-alpha
      * - Move PrintFlow to kornea-toolkit
      */

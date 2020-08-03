@@ -1,13 +1,13 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.annotations.WrongBytecodeGenerated
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.asType
 import dev.brella.kornea.errors.common.flatMap
 import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.*
-import dev.brella.kornea.toolkit.common.use
-import dev.brella.kornea.toolkit.common.useAndFlatMap
+import dev.brella.kornea.toolkit.common.*
 import kotlin.reflect.KClass
 
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
@@ -98,6 +98,12 @@ public interface IntFlowState : Int16FlowState, Int32FlowState, Int64FlowState {
 
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
 public object FlowStateSelector {
+    public inline fun int(flow: InputFlow): IntFlowState.BaseInput =
+        IntFlowState.input(flow)
+
+    public inline fun int(flow: OutputFlow): IntFlowState.BaseOutput =
+        IntFlowState.output(flow)
+
     public inline fun int16(flow: InputFlow): Int16FlowState.BaseInput =
         Int16FlowState.input(flow)
 
@@ -120,3 +126,25 @@ public object FlowStateSelector {
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
 public inline fun <T> withState(select: FlowStateSelector.() -> T): T =
     FlowStateSelector.select()
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_2_2_0_ALPHA)
+@WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("useBlockCrossinline(t, block)", "dev.brella.kornea.toolkit.common.useBlockCrossinline"))
+public suspend inline fun <T : DataCloseable?, R> use(select: FlowStateSelector.() -> T, block: (T) -> R): R =
+    FlowStateSelector.select().use(block)
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_2_2_0_ALPHA)
+public suspend inline fun <T : DataCloseable?, R> useCrossinline(select: FlowStateSelector.() -> T, crossinline block: suspend (T) -> R): R =
+    FlowStateSelector.select().useCrossinline(block)
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_2_2_0_ALPHA)
+@WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("useCrossinline(select, block)", "dev.brella.kornea.io.common.flow.useCrossinline"))
+public suspend inline fun <T : DataCloseable?, R> useSuspending(select: FlowStateSelector.() -> T, @Suppress("REDUNDANT_INLINE_SUSPEND_FUNCTION_TYPE") block: suspend (T) -> R): R =
+    FlowStateSelector.select().useSuspending(block)
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_2_2_0_ALPHA)
+public suspend inline fun <T : DataCloseable?, R> useBlockCrossinline(select: FlowStateSelector.() -> T, crossinline block: (T) -> R): R =
+    FlowStateSelector.select().useBlockCrossinline(block)
