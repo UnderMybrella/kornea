@@ -27,6 +27,8 @@ public inline fun <T, S: Poolable<T>> S.returnTo(pool: KorneaPool<in T>): S {
 @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
 public class PoolableWrapper<out T>(public val inner: T): Poolable<T> {
     private var pool: KorneaPool<in T>? = null
+    override val isClosed: Boolean
+        get() = pool == null
 
     override fun get(): T = inner
     override fun whenObtained(from: KorneaPool<in T>) {

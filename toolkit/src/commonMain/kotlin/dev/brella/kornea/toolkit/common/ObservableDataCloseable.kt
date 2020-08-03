@@ -11,14 +11,14 @@ public typealias DataCloseableEventHandler = suspend (closeable: ObservableDataC
 
 @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
 public interface DataCloseable {
+    public val isClosed: Boolean
+
     public suspend fun close()
 }
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
 public interface ObservableDataCloseable: DataCloseable {
-    public val isClosed: Boolean
-
     public val closeHandlers: List<DataCloseableEventHandler>
 
     public suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean

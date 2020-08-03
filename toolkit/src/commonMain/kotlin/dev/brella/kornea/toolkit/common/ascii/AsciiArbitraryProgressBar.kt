@@ -62,7 +62,7 @@ public suspend inline fun <T> arbitraryProgressBar(
     trackIndicator: Char = AsciiArbitraryProgressBarConfig.defaultTrackIndicator,
     loadingText: String? = AsciiArbitraryProgressBarConfig.defaultLoadingText,
     loadedText: String? = AsciiArbitraryProgressBarConfig.defaultLoadedText,
-    crossinline operation: () -> T
+    crossinline operation: suspend () -> T
 ): T = coroutineScope {
     val arbitrary =
         createArbitraryProgressBar(
@@ -96,7 +96,7 @@ public suspend inline fun <T> AsciiArbitraryProgressBarConfig.arbitraryProgressB
     trackIndicator: Char = defaultTrackIndicator,
     loadingText: String? = defaultLoadingText,
     loadedText: String? = defaultLoadedText,
-    crossinline operation: () -> T
+    crossinline operation: suspend () -> T
 ): T = coroutineScope {
     val arbitrary =
         createArbitraryProgressBar(

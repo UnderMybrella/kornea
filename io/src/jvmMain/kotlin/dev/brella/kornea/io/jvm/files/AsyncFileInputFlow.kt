@@ -12,7 +12,6 @@ import dev.brella.kornea.io.jvm.positionSafe
 import dev.brella.kornea.toolkit.common.*
 import dev.brella.kornea.toolkit.common.pools.KorneaPool
 import dev.brella.kornea.toolkit.common.pools.KorneaPools
-import dev.brella.kornea.toolkit.common.pools.Poolable
 import dev.brella.kornea.toolkit.common.pools.PoolableWrapper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -34,7 +33,7 @@ public class AsyncFileInputFlow private constructor(
     private val localChannel: Boolean,
     public val backing: Path,
     override val location: String?
-) : BaseDataCloseable(), PeekableInputFlow, SeekableInputFlow, SuspendInit {
+) : BaseDataCloseable(), PeekableInputFlow, SeekableInputFlow, SuspendInit0 {
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
 
