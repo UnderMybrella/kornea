@@ -181,6 +181,14 @@ public inline fun <T> withState(select: FlowStateSelector.() -> T): T =
 public inline fun <T: DataCloseable, R> KorneaResult<T>.mapWithState(select: FlowStateSelector.(T) -> R): KorneaResult<R> =
     map { FlowStateSelector.select(it) }
 
+@AvailableSince(KorneaIO.VERSION_3_1_0_ALPHA)
+public suspend inline fun <T: DataCloseable, reified R> KorneaResult<T>.useMapWithState(select: FlowStateSelector.(T) -> R): KorneaResult<R> =
+    useAndMap { FlowStateSelector.select(it) }
+
+@AvailableSince(KorneaIO.VERSION_3_1_0_ALPHA)
+public suspend inline fun <T: DataCloseable, reified R> KorneaResult<T>.useFlatMapWithState(select: FlowStateSelector.(T) -> KorneaResult<R>): KorneaResult<R> =
+    useAndFlatMap { FlowStateSelector.select(it) }
+
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_2_0_ALPHA)
 @WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("useBlockCrossinline(t, block)", "dev.brella.kornea.toolkit.common.useBlockCrossinline"))
