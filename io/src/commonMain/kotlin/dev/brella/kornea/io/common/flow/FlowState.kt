@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.annotations.WrongBytecodeGenerated
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.asType
@@ -15,34 +16,83 @@ public interface FlowState
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public interface InputFlowState : FlowState, InputFlow {
-    public companion object {
-        public val REGISTRAR: MutableMap<KClass<*>, (InputFlow) -> InputFlowState> = HashMap()
-    }
-
-    public val flow: InputFlow
+@ChangedSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public interface InputFlowState<out F: InputFlow> : FlowState, InputFlow {
+    public val flow: F
 }
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public interface OutputFlowState : FlowState, OutputFlow {
-    public companion object {
-        public val REGISTRAR: MutableMap<KClass<*>, (OutputFlow) -> OutputFlowState> = HashMap()
-    }
+@ChangedSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public interface OutputFlowState<out F: OutputFlow> : FlowState, OutputFlow {
+    public val flow: F
+}
 
-    public val flow: OutputFlow
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<PeekableInputFlow>.peek(forward: Int): Int? = flow.peek(forward)
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<PeekableInputFlow>.peek(forward: Int, b: ByteArray): Int? = flow.peek(forward, b)
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<PeekableInputFlow>.peek(forward: Int, b: ByteArray, off: Int, len: Int): Int? = flow.peek(forward, b, off, len)
+
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<PeekableInputFlow>.peek(): Int? = flow.peek()
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<PeekableInputFlow>.peek(b: ByteArray): Int? = flow.peek(b)
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<PeekableInputFlow>.peek(b: ByteArray, off: Int, len: Int): Int? = flow.peek(b, off, len)
+
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<PeekableInputFlow>.peekPacket(forward: Int, packet: FlowPacket): ByteArray? = flow.peekPacket(forward, packet)
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<PeekableInputFlow>.peekPacket(packet: FlowPacket): ByteArray? = flow.peekPacket(packet)
+
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun InputFlowState<SeekableInputFlow>.seek(pos: Long, mode: EnumSeekMode): ULong = flow.seek(pos, mode)
+
+//@ExperimentalUnsignedTypes
+//public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(block: () -> R): R = bookmark(this, block)
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+@WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("bookmarkCrossinline(t, block)", "dev.brella.kornea.io.common.flow.bookmarkCrossinline"))
+public suspend inline fun <T : InputFlowState<SeekableInputFlow>, R> bookmark(t: T, block: () -> R): R {
+//    contract {
+//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//    }
+
+    val position = t.flow.position()
+    try {
+        return block()
+    } finally {
+        t.flow.seek(position.toLong(), EnumSeekMode.FROM_BEGINNING)
+    }
+}
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_3_0_0_ALPHA)
+public suspend inline fun <T : InputFlowState<SeekableInputFlow>, R> bookmarkCrossinline(t: T, crossinline block: suspend () -> R): R {
+//    contract {
+//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//    }
+
+    val position = t.position()
+    try {
+        return block()
+    } finally {
+        t.flow.seek(position.toLong(), EnumSeekMode.FROM_BEGINNING)
+    }
 }
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
 public interface Int16FlowState : FlowState {
     public abstract class Base(override val int16Packet: Int16Packet = Int16Packet()) : Int16FlowState
-    public open class BaseInput(override val flow: InputFlow) : Base(), InputFlowState, InputFlow by flow
-    public open class BaseOutput(override val flow: OutputFlow) : Base(), OutputFlowState, OutputFlow by flow
+    public open class BaseInput<F: InputFlow>(override val flow: F) : Base(), InputFlowState<F>, InputFlow by flow
+    public open class BaseOutput<F: OutputFlow>(override val flow: F) : Base(), OutputFlowState<F>, OutputFlow by flow
 
     public companion object {
-        public inline fun input(flow: InputFlow): BaseInput = BaseInput(flow)
-        public inline fun output(flow: OutputFlow): BaseOutput = BaseOutput(flow)
+        public inline fun <F: InputFlow> input(flow: F): BaseInput<F> = BaseInput(flow)
+        public inline fun <F: OutputFlow> output(flow: F): BaseOutput<F> = BaseOutput(flow)
     }
 
     public val int16Packet: Int16Packet
@@ -52,12 +102,12 @@ public interface Int16FlowState : FlowState {
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
 public interface Int32FlowState : FlowState {
     public abstract class Base(override val int32Packet: Int32Packet = Int32Packet()) : Int32FlowState
-    public open class BaseInput(override val flow: InputFlow) : Base(), InputFlowState, InputFlow by flow
-    public open class BaseOutput(override val flow: OutputFlow) : Base(), OutputFlowState, OutputFlow by flow
+    public open class BaseInput<F: InputFlow>(override val flow: F) : Base(), InputFlowState<F>, InputFlow by flow
+    public open class BaseOutput<F: OutputFlow>(override val flow: F) : Base(), OutputFlowState<F>, OutputFlow by flow
 
     public companion object {
-        public inline fun input(flow: InputFlow): BaseInput = BaseInput(flow)
-        public inline fun output(flow: OutputFlow): BaseOutput = BaseOutput(flow)
+        public inline fun <F: InputFlow> input(flow: F): BaseInput<F> = BaseInput(flow)
+        public inline fun <F: OutputFlow> output(flow: F): BaseOutput<F> = BaseOutput(flow)
     }
 
     public val int32Packet: Int32Packet
@@ -67,12 +117,12 @@ public interface Int32FlowState : FlowState {
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
 public interface Int64FlowState : FlowState {
     public abstract class Base(override val int64Packet: Int64Packet = Int64Packet()) : Int64FlowState
-    public open class BaseInput(override val flow: InputFlow) : Base(), InputFlowState, InputFlow by flow
-    public open class BaseOutput(override val flow: OutputFlow) : Base(), OutputFlowState, OutputFlow by flow
+    public open class BaseInput<F: InputFlow>(override val flow: F) : Base(), InputFlowState<F>, InputFlow by flow
+    public open class BaseOutput<F: OutputFlow>(override val flow: F) : Base(), OutputFlowState<F>, OutputFlow by flow
 
     public companion object {
-        public inline fun input(flow: InputFlow): BaseInput = BaseInput(flow)
-        public inline fun output(flow: OutputFlow): BaseOutput = BaseOutput(flow)
+        public inline fun <F: InputFlow> input(flow: F): BaseInput<F> = BaseInput(flow)
+        public inline fun <F: OutputFlow> output(flow: F): BaseOutput<F> = BaseOutput(flow)
     }
 
     public val int64Packet: Int64Packet
@@ -87,39 +137,39 @@ public interface IntFlowState : Int16FlowState, Int32FlowState, Int64FlowState {
         override val int64Packet: Int64Packet = Int64Packet()
     ) : IntFlowState
 
-    public open class BaseInput(override val flow: InputFlow) : Base(), InputFlowState, InputFlow by flow
-    public open class BaseOutput(override val flow: OutputFlow) : Base(), OutputFlowState, OutputFlow by flow
+    public open class BaseInput<F: InputFlow>(override val flow: F) : Base(), InputFlowState<F>, InputFlow by flow
+    public open class BaseOutput<F: OutputFlow>(override val flow: F) : Base(), OutputFlowState<F>, OutputFlow by flow
 
     public companion object {
-        public inline fun input(flow: InputFlow): BaseInput = BaseInput(flow)
-        public inline fun output(flow: OutputFlow): BaseOutput = BaseOutput(flow)
+        public inline fun <F: InputFlow> input(flow: F): BaseInput<F> = BaseInput(flow)
+        public inline fun <F: OutputFlow> output(flow: F): BaseOutput<F> = BaseOutput(flow)
     }
 }
 
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
 public object FlowStateSelector {
-    public inline fun int(flow: InputFlow): IntFlowState.BaseInput =
+    public inline fun <F: InputFlow> int(flow: F): IntFlowState.BaseInput<F> =
         IntFlowState.input(flow)
 
-    public inline fun int(flow: OutputFlow): IntFlowState.BaseOutput =
+    public inline fun <F: OutputFlow> int(flow: F): IntFlowState.BaseOutput<F> =
         IntFlowState.output(flow)
 
-    public inline fun int16(flow: InputFlow): Int16FlowState.BaseInput =
+    public inline fun <F: InputFlow> int16(flow: F): Int16FlowState.BaseInput<F> =
         Int16FlowState.input(flow)
 
-    public inline fun int16(flow: OutputFlow): Int16FlowState.BaseOutput =
+    public inline fun <F: OutputFlow> int16(flow: F): Int16FlowState.BaseOutput<F> =
         Int16FlowState.output(flow)
 
-    public inline fun int32(flow: InputFlow): Int32FlowState.BaseInput =
+    public inline fun <F: InputFlow> int32(flow: F): Int32FlowState.BaseInput<F> =
         Int32FlowState.input(flow)
 
-    public inline fun int32(flow: OutputFlow): Int32FlowState.BaseOutput =
+    public inline fun <F: OutputFlow> int32(flow: F): Int32FlowState.BaseOutput<F> =
         Int32FlowState.output(flow)
 
-    public inline fun int64(flow: InputFlow): Int64FlowState.BaseInput =
+    public inline fun <F: InputFlow> int64(flow: F): Int64FlowState.BaseInput<F> =
         Int64FlowState.input(flow)
 
-    public inline fun int64(flow: OutputFlow): Int64FlowState.BaseOutput =
+    public inline fun <F: OutputFlow> int64(flow: F): Int64FlowState.BaseOutput<F> =
         Int64FlowState.output(flow)
 }
 

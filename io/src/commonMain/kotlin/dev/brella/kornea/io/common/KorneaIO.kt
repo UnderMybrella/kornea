@@ -4,6 +4,12 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 3.0.0-alpha
+     * - Remove FlowState; add generic parameter to InputFlowState and OutputFlowState
+     */
+    public const val VERSION_3_0_0_ALPHA: String = "3.0.0-alpha"
+
+    /**
      * kornea-io 2.3.0-alpha
      * - Add a mapWithState function for KorneaResults
      */
