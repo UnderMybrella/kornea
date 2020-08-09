@@ -93,7 +93,7 @@ public suspend fun OutputFlow.writeInt16BE(num: Number) {
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
-public suspend fun OutputFlow.writeVariableInt16(index: Int, num: Number) {
+public suspend fun OutputFlow.writeVariableInt16(num: Number) {
     val short = num.toShort()
 
     if (short < 0x80) {

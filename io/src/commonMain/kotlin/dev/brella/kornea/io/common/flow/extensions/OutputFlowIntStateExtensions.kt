@@ -66,7 +66,7 @@ public suspend fun <T> T.writeInt16BE(num: Number) where T: Int16FlowState, T: O
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
-public suspend fun <T> T.writeVariableInt16(index: Int, num: Number) where T: Int16FlowState, T: OutputFlowState<*> {
+public suspend fun <T> T.writeVariableInt16(num: Number) where T: Int16FlowState, T: OutputFlowState<*> {
     val short = num.toShort()
 
     if (short < 0x80) {
