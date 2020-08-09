@@ -1,5 +1,7 @@
 package dev.brella.kornea.io.common.flow.extensions
 
+import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.flow.*
 
 @ExperimentalUnsignedTypes
@@ -41,6 +43,11 @@ public suspend fun <T> T.peekInt16LE(): Int? where T: Int16FlowState, T: InputFl
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.peekInt16BE(): Int? where T: Int16FlowState, T: InputFlowState<PeekableInputFlow> =
     peekPacket(int16Packet)?.readInt16BE()
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
+public suspend fun <T> T.peekVariableInt16(): Int? where T: Int16FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int16Packet)?.readVariableInt16()
 
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.peekFloatBE(): Float? where T: Int32FlowState, T: InputFlowState<PeekableInputFlow> = peekInt32BE()?.let { Float.fromBits(it) }
@@ -109,6 +116,11 @@ public suspend fun <T> T.readInt16LE(): Int? where T: Int16FlowState, T: InputFl
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.readInt16BE(): Int? where T: Int16FlowState, T: InputFlow =
     readPacket(int16Packet)?.readInt16BE()
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
+public suspend fun <T> T.readVariableInt16(): Int? where T: Int16FlowState, T: InputFlow =
+    readPacket(int16Packet)?.readVariableInt16()
 
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.readFloatBE(): Float? where T: Int16FlowState, T: InputFlow = readInt32BE()?.let { Float.fromBits(it) }

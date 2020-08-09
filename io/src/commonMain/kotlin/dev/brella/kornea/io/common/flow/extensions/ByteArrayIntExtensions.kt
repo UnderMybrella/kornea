@@ -1,6 +1,11 @@
 package dev.brella.kornea.io.common.flow.extensions
 
+import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.toolkit.common.*
+import kotlin.experimental.and
+import kotlin.experimental.or
 
 /** Read from base */
 
@@ -116,6 +121,13 @@ public fun ByteArray.readInt16BE(): Int? {
         return null
 
     return this[0].asInt(8) or this[1].asInt(0)
+}
+
+@AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
+public fun ByteArray.readVariableInt16(): Int? {
+    val first = this[0].asInt()
+    if (first < 0x80) return first
+    return (first and 0x7F) or this[1].asInt(7)
 }
 
 public inline fun ByteArray.readFloatBE(): Float? = this.readInt32BE()?.let { Float.fromBits(it) }
@@ -275,6 +287,13 @@ public fun ByteArray.readInt16BE(index: Int): Int? {
     return (a shl 8) or b
 }
 
+@AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
+public fun ByteArray.readVariableInt16(index: Int): Int? {
+    val first = this[index].asInt()
+    if (first < 0x80) return first
+    return (first and 0x7F) or (this.getOrNull(index + 1) ?: return null).asInt(7)
+}
+
 public fun ByteArray.readFloatBE(index: Int): Float? = this.readInt32BE(index)?.let { Float.fromBits(it) }
 public fun ByteArray.readFloatLE(index: Int): Float? = this.readInt32LE(index)?.let { Float.fromBits(it) }
 public fun ByteArray.readFloat32BE(index: Int): Float? = this.readInt32BE(index)?.let { Float.fromBits(it) }
@@ -411,8 +430,8 @@ public fun ByteArray.writeInt16LE(num: Number): Number? {
 
     val short = num.toShort()
 
-    this[1] = short.asByte(8)
     this[0] = short.asByte(0)
+    this[1] = short.asByte(8)
 
     return short
 }
@@ -420,7 +439,25 @@ public fun ByteArray.writeInt16BE(num: Number): Number? {
     if (size < 2)
         return null
 
-    return this[0].asInt(8) or this[1].asInt(0)
+    val short = num.toShort()
+
+    this[0] = short.asByte(8)
+    this[1] = short.asByte(0)
+
+    return short
+}
+
+public fun ByteArray.writeVariableInt16(num: Number): Number? {
+    val short = num.toShort()
+
+    if (short < 0x80) {
+        this[0] = short.asByte()
+    } else {
+        this[0] = short.or(0x80).asByte()
+        this[1] = short.asByte(7)
+    }
+
+    return short
 }
 
 public inline fun ByteArray.writeFloatBE(num: Number): Number? = this.writeInt32BE(num.toFloat().toBits())
@@ -556,6 +593,21 @@ public fun ByteArray.writeInt16BE(index: Int, num: Number): Number? {
 
     this[index + 0] = short.asByte(0)
     this[index + 1] = short.asByte(8)
+
+    return short
+}
+
+public fun ByteArray.writeVariableInt16(index: Int, num: Number): Number? {
+    val short = num.toShort()
+
+    if (short < 0x80 && size - 1 < index) {
+        this[index] = short.asByte()
+    } else if (size - 2 < index) {
+        this[index] = short.or(0x80).asByte()
+        this[index + 1] = short.asByte(7)
+    } else {
+        return null
+    }
 
     return short
 }

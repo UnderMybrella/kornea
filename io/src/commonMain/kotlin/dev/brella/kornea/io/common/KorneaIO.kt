@@ -4,9 +4,16 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 3.2.2-alpha
+     * - Add read/writeVariableInt16 methods to the new Flow hierarchy
+     */
+    public const val VERSION_3_2_2_ALPHA: String = "3.2.2-alpha"
+
+    /**
      * kornea-io 3.2.1-alpha
      * - Adjust [FlowStateSelector][dev.brella.kornea.io.common.flow.FlowStateSelector] to be a set of interfaces with extension methods, to allow proper method references
      */
+    public const val VERSION_3_2_1_ALPHA: String = "3.2.1-alpha"
 
     /**
      * kornea-io 3.2.0-alpha

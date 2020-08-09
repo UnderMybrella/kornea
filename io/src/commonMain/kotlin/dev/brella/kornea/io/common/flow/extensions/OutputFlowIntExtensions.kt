@@ -1,7 +1,11 @@
 package dev.brella.kornea.io.common.flow.extensions
 
+import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.flow.OutputFlow
+import dev.brella.kornea.toolkit.common.asByte
 import dev.brella.kornea.toolkit.common.asInt
+import kotlin.experimental.or
 
 @ExperimentalUnsignedTypes
 public suspend fun OutputFlow.writeInt64LE(num: Number) {
@@ -85,6 +89,19 @@ public suspend fun OutputFlow.writeInt16BE(num: Number) {
 
     write(short.asInt(8, 0xFF))
     write(short.asInt(0, 0xFF))
+}
+
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
+public suspend fun OutputFlow.writeVariableInt16(index: Int, num: Number) {
+    val short = num.toShort()
+
+    if (short < 0x80) {
+        write(short.asInt(0, 0xFF))
+    } else {
+        write(short.or(0x80).asInt(0, 0xFF))
+        write(short.asInt(7, 0xFF))
+    }
 }
 
 @ExperimentalUnsignedTypes

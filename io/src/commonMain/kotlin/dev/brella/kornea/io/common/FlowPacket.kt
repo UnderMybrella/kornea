@@ -8,6 +8,13 @@ public interface FlowPacket {
     public val size: Int get() = buffer.size
 }
 
+@AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
+public inline operator fun FlowPacket.get(index: Int): Byte = buffer[index]
+@AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
+public inline operator fun FlowPacket.set(index: Int, byte: Number){
+    buffer[index] = byte.toByte()
+}
+
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
 public inline class Int16Packet(override val buffer: ByteArray = ByteArray(2)) : FlowPacket
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
