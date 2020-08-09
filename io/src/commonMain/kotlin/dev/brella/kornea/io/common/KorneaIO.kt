@@ -4,6 +4,15 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 3.2.0-alpha
+     * - Add invoke method to BufferedInputFlow#Companion
+     * - Add [PipeFlow][dev.brella.kornea.io.common.flow.PipeFlow]
+     * - Add [SynchronisedOutputFlow][dev.brella.kornea.io.common.flow.SynchronisedOutputFlow]
+     * - Add [InputFlow#asFlow][dev.brella.kornea.io.common.flow.extensions.asFlow]
+     */
+    public const val VERSION_3_2_0_ALPHA: String = "3.2.0-alpha"
+
+    /**
      * kornea-io 3.1.0-alpha
      * - Add [useMapWithState][dev.brella.kornea.io.common.flow.useMapWithState]
      *      and [useFlatMapWithState][dev.brella.kornea.io.common.flow.useFlatMapWithState]
@@ -51,7 +60,7 @@ public object KorneaIO {
     /**
      * kornea-io 1.2.0-alpha
      * - Add [StdoutPrintFlow][dev.brella.kornea.io.common.flow.StdoutPrintFlow]
-     * - Change [StandardInputFlow][dev.brella.kornea.io.common.flow.StandardInputFlow] implementations, in particular for the JVM.
+     * - Change [StandardInputFlow][dev.brella.kornea.io.common.flow.StdinInputFlow] implementations, in particular for the JVM.
      * - Add [FannedInputFlow][dev.brella.kornea.io.common.flow.FannedInputFlow]
      * - Add [ConflatingBufferedInputFlow][dev.brella.kornea.io.common.flow.ConflatingBufferedInputFlow]
      */

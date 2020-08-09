@@ -1,18 +1,20 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
-import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.toolkit.common.*
 
 @ExperimentalKorneaToolkit
 @ExperimentalUnsignedTypes
-@AvailableSince(KorneaToolkit.VERSION_1_2_0_INDEV)
+@AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
+@ChangedSince(KorneaIO.VERSION_3_2_0_ALPHA)
 public open class MultiViewOutputFlow<O : OutputFlow> protected constructor(
-    protected val backing: O,
-    protected val semaphore: ReadWriteSemaphore,
+    backing: O,
+    semaphore: ReadWriteSemaphore,
     protected val instanceCount: SharedStateRW<Int>
-) : BaseDataCloseable(), OutputFlow, PrintOutputFlow {
+) : SynchronisedOutputFlow<O>(backing, semaphore, false) {
     public companion object {
         public suspend operator fun <O : OutputFlow> invoke(
             backing: O,
@@ -25,21 +27,12 @@ public open class MultiViewOutputFlow<O : OutputFlow> protected constructor(
         }
     }
 
-    protected suspend inline fun <T> access(crossinline block: suspend () -> T): T =
-        semaphore.withWritePermit { block() }
-
-    override suspend fun write(byte: Int): Unit = access { backing.write(byte) }
-    override suspend fun write(b: ByteArray): Unit = access { backing.write(b) }
-    override suspend fun write(b: ByteArray, off: Int, len: Int): Unit = access { backing.write(b, off, len) }
-
-    override suspend fun flush(): Unit = access { backing.flush() }
-
     override suspend fun whenClosed() {
         super.whenClosed()
 
         access {
             if (instanceCount.mutateState { it - 1 }.accessState { it == 0 })
-                backing.close()
+                output.close()
         }
     }
 }

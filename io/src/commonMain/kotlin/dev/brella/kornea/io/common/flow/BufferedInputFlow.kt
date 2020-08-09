@@ -12,6 +12,12 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
         public const val MAX_BUFFER_SIZE: Int = Int.MAX_VALUE - 8
+
+        public inline operator fun invoke(backing: InputFlow, location: String? = backing.location): Sink =
+            Sink(backing, location)
+
+        public inline operator fun invoke(backing: SeekableInputFlow, location: String? = backing.location): Sink.Seekable =
+            Sink.Seekable(backing, location)
     }
 
     public open class Sink(protected open val backing: InputFlow, location: String? = backing.location): BufferedInputFlow(location) {

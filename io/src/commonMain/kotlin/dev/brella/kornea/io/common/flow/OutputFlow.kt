@@ -16,6 +16,10 @@ public interface OutputFlow: ObservableDataCloseable {
     public suspend fun flush()
 }
 
+public interface OutputFlowByDelegate<O: OutputFlow>: OutputFlow {
+    public val output: O
+}
+
 @ExperimentalUnsignedTypes
 public interface CountingOutputFlow: OutputFlow {
     public val streamOffset: Long

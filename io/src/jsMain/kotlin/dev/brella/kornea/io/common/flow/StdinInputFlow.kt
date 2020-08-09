@@ -10,7 +10,7 @@ import org.w3c.dom.HTMLInputElement
 
 @ExperimentalStdlibApi
 @ExperimentalUnsignedTypes
-public actual class StandardInputFlow(inputElement: HTMLInputElement, location: String? = inputElement.name) : InputFlow, ConflatingBufferedInputFlow(location) {
+public actual class StdinInputFlow(inputElement: HTMLInputElement, location: String? = inputElement.name) : InputFlow, ConflatingBufferedInputFlow(location) {
     init {
         inputElement.onkeydown = { event ->
             if (event.keyCode == 13) {
