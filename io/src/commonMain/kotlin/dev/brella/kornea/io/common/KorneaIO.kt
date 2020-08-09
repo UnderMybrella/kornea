@@ -4,6 +4,11 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 3.2.1-alpha
+     * - Adjust [FlowStateSelector][dev.brella.kornea.io.common.flow.FlowStateSelector] to be a set of interfaces with extension methods, to allow proper method references
+     */
+
+    /**
      * kornea-io 3.2.0-alpha
      * - Add invoke method to BufferedInputFlow#Companion
      * - Add [PipeFlow][dev.brella.kornea.io.common.flow.PipeFlow]
