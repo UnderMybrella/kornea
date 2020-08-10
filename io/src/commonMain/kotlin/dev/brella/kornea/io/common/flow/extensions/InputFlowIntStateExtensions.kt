@@ -21,6 +21,30 @@ public suspend fun <T> T.peekUInt64BE(): ULong? where T: Int64FlowState, T: Inpu
     peekPacket(int64Packet)?.readUInt64BE()
 
 @ExperimentalUnsignedTypes
+public suspend fun <T> T.peekInt56LE(): Long? where T: Int56FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int56Packet)?.readInt56LE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.peekInt56BE(): Long? where T: Int56FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int56Packet)?.readInt56BE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.peekInt48LE(): Long? where T: Int48FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int48Packet)?.readInt48LE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.peekInt48BE(): Long? where T: Int48FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int48Packet)?.readInt48BE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.peekInt40LE(): Long? where T: Int40FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int40Packet)?.readInt40LE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.peekInt40BE(): Long? where T: Int40FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int40Packet)?.readInt40BE()
+
+@ExperimentalUnsignedTypes
 public suspend fun <T> T.peekInt32LE(): Int? where T: Int32FlowState, T: InputFlowState<PeekableInputFlow> =
     peekPacket(int32Packet)?.readInt32LE()
 
@@ -35,6 +59,14 @@ public suspend fun <T> T.peekUInt32LE(): UInt? where T: Int32FlowState, T: Input
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.peekUInt32BE(): UInt? where T: Int32FlowState, T: InputFlowState<PeekableInputFlow> =
     peekPacket(int32Packet)?.readUInt32BE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.peekInt24LE(): Int? where T: Int24FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int24Packet)?.readInt24LE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.peekInt24BE(): Int? where T: Int24FlowState, T: InputFlowState<PeekableInputFlow> =
+    peekPacket(int24Packet)?.readInt24BE()
 
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.peekInt16LE(): Int? where T: Int16FlowState, T: InputFlowState<PeekableInputFlow> =
@@ -92,6 +124,30 @@ public suspend fun <T> T.readUInt64LE(): ULong? where T: Int64FlowState, T: Inpu
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.readUInt64BE(): ULong? where T: Int64FlowState, T: InputFlow =
     readPacket(int64Packet)?.readUInt64BE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.readInt56LE(): Long? where T: Int56FlowState, T: InputFlow =
+    readPacket(int56Packet)?.readInt56LE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.readInt56BE(): Long? where T: Int56FlowState, T: InputFlow =
+    readPacket(int56Packet)?.readInt56BE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.readInt48LE(): Long? where T: Int48FlowState, T: InputFlow =
+    readPacket(int48Packet)?.readInt48LE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.readInt48BE(): Long? where T: Int48FlowState, T: InputFlow =
+    readPacket(int48Packet)?.readInt48BE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.readInt40LE(): Long? where T: Int40FlowState, T: InputFlow =
+    readPacket(int40Packet)?.readInt40LE()
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.readInt40BE(): Long? where T: Int40FlowState, T: InputFlow =
+    readPacket(int40Packet)?.readInt40BE()
 
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.readInt32LE(): Int? where T: Int32FlowState, T: InputFlow =

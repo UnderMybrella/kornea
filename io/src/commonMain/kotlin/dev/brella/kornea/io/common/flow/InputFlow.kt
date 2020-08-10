@@ -82,15 +82,15 @@ public suspend fun InputFlow.readBytes(bufferSize: Int = 8192): ByteArray {
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public suspend inline fun InputFlow.readPacket(packet: FlowPacket): ByteArray? = if (read(packet.buffer) == packet.size) packet.buffer else null
+public suspend inline fun InputFlow.readPacket(packet: FlowPacket): ByteArray? = if (read(packet.buffer, 0, packet.size) == packet.size) packet.buffer else null
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public suspend inline fun PeekableInputFlow.peekPacket(forward: Int, packet: FlowPacket): ByteArray? = if (peek(forward, packet.buffer) == packet.size) packet.buffer else null
+public suspend inline fun PeekableInputFlow.peekPacket(forward: Int, packet: FlowPacket): ByteArray? = if (peek(forward, packet.buffer, 0, packet.size) == packet.size) packet.buffer else null
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public suspend inline fun PeekableInputFlow.peekPacket(packet: FlowPacket): ByteArray? = if (peek(packet.buffer) == packet.size) packet.buffer else null
+public suspend inline fun PeekableInputFlow.peekPacket(packet: FlowPacket): ByteArray? = if (peek(packet.buffer, 0, packet.size) == packet.size) packet.buffer else null
 
 @ExperimentalUnsignedTypes
 public suspend fun InputFlow.readExact(count: Int): ByteArray? = readExact(ByteArray(count), 0, count)

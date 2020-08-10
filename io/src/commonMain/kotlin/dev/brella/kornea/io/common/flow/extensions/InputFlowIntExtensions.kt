@@ -63,6 +63,82 @@ public suspend fun PeekableInputFlow.peekUInt64BE(): ULong? {
 }
 
 @ExperimentalUnsignedTypes
+public suspend fun PeekableInputFlow.peekInt56LE(): Long? {
+    val a = peek(1)?.toLong() ?: return null
+    val b = peek(2)?.toLong() ?: return null
+    val c = peek(3)?.toLong() ?: return null
+    val d = peek(4)?.toLong() ?: return null
+    val e = peek(5)?.toLong() ?: return null
+    val f = peek(6)?.toLong() ?: return null
+    val g = peek(7)?.toLong() ?: return null
+
+    return (g shl 48) or (f shl 40) or (e shl 32) or
+            (d shl 24) or (c shl 16) or (b shl 8) or a
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun PeekableInputFlow.peekInt56BE(): Long? {
+    val b = peek(2)?.toLong() ?: return null
+    val c = peek(3)?.toLong() ?: return null
+    val d = peek(4)?.toLong() ?: return null
+    val e = peek(5)?.toLong() ?: return null
+    val f = peek(6)?.toLong() ?: return null
+    val g = peek(7)?.toLong() ?: return null
+    val h = peek(8)?.toLong() ?: return null
+
+    return (b shl 48) or (c shl 40) or (d shl 32) or
+            (e shl 24) or (f shl 16) or (g shl 8) or h
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun PeekableInputFlow.peekInt48LE(): Long? {
+    val a = peek(1)?.toLong() ?: return null
+    val b = peek(2)?.toLong() ?: return null
+    val c = peek(3)?.toLong() ?: return null
+    val d = peek(4)?.toLong() ?: return null
+    val e = peek(5)?.toLong() ?: return null
+    val f = peek(6)?.toLong() ?: return null
+
+    return (f shl 40) or (e shl 32) or
+            (d shl 24) or (c shl 16) or (b shl 8) or a
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun PeekableInputFlow.peekInt48BE(): Long? {
+    val c = peek(3)?.toLong() ?: return null
+    val d = peek(4)?.toLong() ?: return null
+    val e = peek(5)?.toLong() ?: return null
+    val f = peek(6)?.toLong() ?: return null
+    val g = peek(7)?.toLong() ?: return null
+    val h = peek(8)?.toLong() ?: return null
+
+    return (c shl 40) or (d shl 32) or
+            (e shl 24) or (f shl 16) or (g shl 8) or h
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun PeekableInputFlow.peekInt40LE(): Long? {
+    val a = peek(1)?.toLong() ?: return null
+    val b = peek(2)?.toLong() ?: return null
+    val c = peek(3)?.toLong() ?: return null
+    val d = peek(4)?.toLong() ?: return null
+    val e = peek(5)?.toLong() ?: return null
+
+    return (e shl 32) or (d shl 24) or (c shl 16) or (b shl 8) or a
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun PeekableInputFlow.peekInt40BE(): Long? {
+    val d = peek(4)?.toLong() ?: return null
+    val e = peek(5)?.toLong() ?: return null
+    val f = peek(6)?.toLong() ?: return null
+    val g = peek(7)?.toLong() ?: return null
+    val h = peek(8)?.toLong() ?: return null
+
+    return (d shl 32) or (e shl 24) or (f shl 16) or (g shl 8) or h
+}
+
+@ExperimentalUnsignedTypes
 public suspend fun PeekableInputFlow.peekInt32LE(): Int? {
     val a = peek(1) ?: return null
     val b = peek(2) ?: return null
@@ -100,6 +176,24 @@ public suspend fun PeekableInputFlow.peekUInt32BE(): UInt? {
     val d = peek(4) ?: return null
 
     return ((a shl 24) or (b shl 16) or (c shl 8) or d).toUInt()
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun PeekableInputFlow.peekInt24LE(): Int? {
+    val a = peek(1) ?: return null
+    val b = peek(2) ?: return null
+    val c = peek(3) ?: return null
+
+    return (c shl 16) or (b shl 8) or a
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun PeekableInputFlow.peekInt24BE(): Int? {
+    val a = peek(1) ?: return null
+    val b = peek(2) ?: return null
+    val c = peek(3) ?: return null
+    
+    return (a shl 16) or (b shl 8) or c
 }
 
 @ExperimentalUnsignedTypes
@@ -196,6 +290,82 @@ public suspend fun InputFlow.readUInt64BE(): ULong? {
 
     return ((a shl 56) or (b shl 48) or (c shl 40) or (d shl 32) or
             (e shl 24) or (f shl 16) or (g shl 8) or h).toULong()
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readInt56LE(): Long? {
+    val a = read()?.toLong() ?: return null
+    val b = read()?.toLong() ?: return null
+    val c = read()?.toLong() ?: return null
+    val d = read()?.toLong() ?: return null
+    val e = read()?.toLong() ?: return null
+    val f = read()?.toLong() ?: return null
+    val g = read()?.toLong() ?: return null
+
+    return (g shl 48) or (f shl 40) or (e shl 32) or
+            (d shl 24) or (c shl 16) or (b shl 8) or a
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readInt56BE(): Long? {
+    val b = read()?.toLong() ?: return null
+    val c = read()?.toLong() ?: return null
+    val d = read()?.toLong() ?: return null
+    val e = read()?.toLong() ?: return null
+    val f = read()?.toLong() ?: return null
+    val g = read()?.toLong() ?: return null
+    val h = read()?.toLong() ?: return null
+
+    return (b shl 48) or (c shl 40) or (d shl 32) or
+            (e shl 24) or (f shl 16) or (g shl 8) or h
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readInt48LE(): Long? {
+    val a = read()?.toLong() ?: return null
+    val b = read()?.toLong() ?: return null
+    val c = read()?.toLong() ?: return null
+    val d = read()?.toLong() ?: return null
+    val e = read()?.toLong() ?: return null
+    val f = read()?.toLong() ?: return null
+
+    return (f shl 40) or (e shl 32) or
+            (d shl 24) or (c shl 16) or (b shl 8) or a
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readInt48BE(): Long? {
+    val c = read()?.toLong() ?: return null
+    val d = read()?.toLong() ?: return null
+    val e = read()?.toLong() ?: return null
+    val f = read()?.toLong() ?: return null
+    val g = read()?.toLong() ?: return null
+    val h = read()?.toLong() ?: return null
+
+    return (c shl 40) or (d shl 32) or
+            (e shl 24) or (f shl 16) or (g shl 8) or h
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readInt40LE(): Long? {
+    val a = read()?.toLong() ?: return null
+    val b = read()?.toLong() ?: return null
+    val c = read()?.toLong() ?: return null
+    val d = read()?.toLong() ?: return null
+    val e = read()?.toLong() ?: return null
+
+    return (e shl 32) or (d shl 24) or (c shl 16) or (b shl 8) or a
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun InputFlow.readInt40BE(): Long? {
+    val d = read()?.toLong() ?: return null
+    val e = read()?.toLong() ?: return null
+    val f = read()?.toLong() ?: return null
+    val g = read()?.toLong() ?: return null
+    val h = read()?.toLong() ?: return null
+
+    return (d shl 32) or (e shl 24) or (f shl 16) or (g shl 8) or h
 }
 
 @ExperimentalUnsignedTypes

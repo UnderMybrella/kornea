@@ -63,6 +63,75 @@ public fun ByteArray.readUInt64BE(): ULong? {
             this[7].asULong(0)
 }
 
+public fun ByteArray.readInt56LE(): Long? {
+    if (size < 7)
+        return null
+
+    return this[6].asLong(48) or
+            this[5].asLong(40) or
+            this[4].asLong(32) or
+            this[3].asLong(24) or
+            this[2].asLong(16) or
+            this[1].asLong(8) or
+            this[0].asLong(0)
+}
+public fun ByteArray.readInt56BE(): Long? {
+    if (size < 7)
+        return null
+
+    return this[0].asLong(48) or
+            this[1].asLong(40) or
+            this[2].asLong(32) or
+            this[3].asLong(24) or
+            this[4].asLong(16) or
+            this[5].asLong(8) or
+            this[6].asLong(0)
+}
+
+public fun ByteArray.readInt48LE(): Long? {
+    if (size < 6)
+        return null
+
+    return this[5].asLong(40) or
+            this[4].asLong(32) or
+            this[3].asLong(24) or
+            this[2].asLong(16) or
+            this[1].asLong(8) or
+            this[0].asLong(0)
+}
+public fun ByteArray.readInt48BE(): Long? {
+    if (size < 6)
+        return null
+
+    return this[0].asLong(40) or
+            this[1].asLong(32) or
+            this[2].asLong(24) or
+            this[3].asLong(16) or
+            this[4].asLong(8) or
+            this[5].asLong(0)
+}
+
+public fun ByteArray.readInt40LE(): Long? {
+    if (size < 5)
+        return null
+
+    return this[4].asLong(32) or
+            this[3].asLong(24) or
+            this[2].asLong(16) or
+            this[1].asLong(8) or
+            this[0].asLong(0)
+}
+public fun ByteArray.readInt40BE(): Long? {
+    if (size < 5)
+        return null
+
+    return this[0].asLong(32) or
+            this[1].asLong(24) or
+            this[2].asLong(16) or
+            this[3].asLong(8) or
+            this[4].asLong(0)
+}
+
 public fun ByteArray.readInt32LE(): Int? {
     if (size < 4)
         return null
@@ -99,6 +168,14 @@ public fun ByteArray.readUInt32BE(): UInt? {
             this[1].asUInt(16) or
             this[2].asUInt(8) or
             this[3].asUInt(0)
+}
+
+public fun ByteArray.readInt24LE(): Int? {
+    if (size < 3) return null
+
+    return this[0].asInt(0) or
+            this[1].asInt(8) or
+            this[2].asInt(16)
 }
 
 public fun ByteArray.readInt24BE(): Int? {
@@ -207,6 +284,75 @@ public fun ByteArray.readUInt64BE(index: Int): ULong? {
 
     return (a shl 56) or (b shl 48) or (c shl 40) or (d shl 32) or
             (e shl 24) or (f shl 16) or (g shl 8) or h
+}
+
+public fun ByteArray.readInt56LE(index: Int): Long? {
+    if (size < 7)
+        return null
+
+    return this[index + 6].asLong(48) or
+            this[index + 5].asLong(40) or
+            this[index + 4].asLong(32) or
+            this[index + 3].asLong(24) or
+            this[index + 2].asLong(16) or
+            this[index + 1].asLong(8) or
+            this[index + 0].asLong(0)
+}
+public fun ByteArray.readInt56BE(index: Int): Long? {
+    if (size < 7)
+        return null
+
+    return this[index + 0].asLong(48) or
+            this[index + 1].asLong(40) or
+            this[index + 2].asLong(32) or
+            this[index + 3].asLong(24) or
+            this[index + 4].asLong(16) or
+            this[index + 5].asLong(8) or
+            this[index + 6].asLong(0)
+}
+
+public fun ByteArray.readInt48LE(index: Int): Long? {
+    if (size < 6)
+        return null
+
+    return this[index + 5].asLong(40) or
+            this[index + 4].asLong(32) or
+            this[index + 3].asLong(24) or
+            this[index + 2].asLong(16) or
+            this[index + 1].asLong(8) or
+            this[index + 0].asLong(0)
+}
+public fun ByteArray.readInt48BE(index: Int): Long? {
+    if (size < 6)
+        return null
+
+    return this[index + 0].asLong(40) or
+            this[index + 1].asLong(32) or
+            this[index + 2].asLong(24) or
+            this[index + 3].asLong(16) or
+            this[index + 4].asLong(8) or
+            this[index + 5].asLong(0)
+}
+
+public fun ByteArray.readInt40LE(index: Int): Long? {
+    if (size < 5)
+        return null
+
+    return this[index + 4].asLong(32) or
+            this[index + 3].asLong(24) or
+            this[index + 2].asLong(16) or
+            this[index + 1].asLong(8) or
+            this[index + 0].asLong(0)
+}
+public fun ByteArray.readInt40BE(index: Int): Long? {
+    if (size < 5)
+        return null
+
+    return this[index + 0].asLong(32) or
+            this[index + 1].asLong(24) or
+            this[index + 2].asLong(16) or
+            this[index + 3].asLong(8) or
+            this[index + 4].asLong(0)
 }
 
 public fun ByteArray.readInt32LE(index: Int): Int? {
@@ -362,6 +508,99 @@ public inline fun ByteArray.writeUInt64BE(num: UByte): Number? = writeUInt64BE(n
 public inline fun ByteArray.writeUInt64LE(num: Number): Number? = writeInt64LE(num)
 public inline fun ByteArray.writeUInt64BE(num: Number): Number? = writeInt64BE(num)
 
+public fun ByteArray.writeInt56LE(num: Number): Number? {
+    if (size < 7)
+        return null
+
+    val long = num.toLong()
+
+    this[0] = long.asByte(0)
+    this[1] = long.asByte(8)
+    this[2] = long.asByte(16)
+    this[3] = long.asByte(24)
+    this[4] = long.asByte(32)
+    this[5] = long.asByte(40)
+    this[6] = long.asByte(48)
+
+    return long
+}
+public fun ByteArray.writeInt56BE(num: Number): Number? {
+    if (size < 7)
+        return null
+
+    val long = num.toLong()
+
+    this[0] = long.asByte(48)
+    this[1] = long.asByte(40)
+    this[2] = long.asByte(32)
+    this[3] = long.asByte(24)
+    this[4] = long.asByte(16)
+    this[5] = long.asByte(8)
+    this[6] = long.asByte(0)
+
+    return long
+}
+
+public fun ByteArray.writeInt48LE(num: Number): Number? {
+    if (size < 6)
+        return null
+
+    val long = num.toLong()
+
+    this[0] = long.asByte(0)
+    this[1] = long.asByte(8)
+    this[2] = long.asByte(16)
+    this[3] = long.asByte(24)
+    this[4] = long.asByte(32)
+    this[5] = long.asByte(40)
+
+    return long
+}
+public fun ByteArray.writeInt48BE(num: Number): Number? {
+    if (size < 6)
+        return null
+
+    val long = num.toLong()
+
+    this[0] = long.asByte(40)
+    this[1] = long.asByte(32)
+    this[2] = long.asByte(24)
+    this[3] = long.asByte(16)
+    this[4] = long.asByte(8)
+    this[5] = long.asByte(0)
+
+    return long
+}
+
+public fun ByteArray.writeInt40LE(num: Number): Number? {
+    if (size < 5)
+        return null
+
+    val long = num.toLong()
+
+    this[0] = long.asByte(0)
+    this[1] = long.asByte(8)
+    this[2] = long.asByte(16)
+    this[3] = long.asByte(24)
+    this[4] = long.asByte(32)
+
+    return long
+}
+public fun ByteArray.writeInt40BE(num: Number): Number? {
+    if (size < 5)
+        return null
+
+    val long = num.toLong()
+
+    this[0] = long.asByte(32)
+    this[1] = long.asByte(24)
+    this[2] = long.asByte(16)
+    this[3] = long.asByte(8)
+    this[4] = long.asByte(0)
+
+    return long
+}
+
 public fun ByteArray.writeInt32LE(num: Number): Number? {
     if (size < 4)
         return null
@@ -411,18 +650,31 @@ public inline fun ByteArray.writeUInt32BE(num: UByte): Number? = writeUInt32LE(n
 public inline fun ByteArray.writeUInt32LE(num: Number): Number? = writeInt32LE(num)
 public inline fun ByteArray.writeUInt32BE(num: Number): Number? = writeInt32BE(num)
 
-//public fun ByteArray.writeInt24BE(num: Number): Number? {
-//    if (size < 3)
-//        return null
-//
-////    val word = num.to
-//
-//    this[0] =
-//
-//    return this[0].asInt(16) or
-//            this[1].asInt(8) or
-//            this[2].asInt(0)
-//}
+public fun ByteArray.writeInt24LE(num: Number): Number? {
+    if (size < 3)
+        return null
+
+    val word = num.toInt() and 0xFFFFFF
+
+    this[0] = word.asByte(0)
+    this[1] = word.asByte(8)
+    this[2] = word.asByte(16)
+
+    return word
+}
+
+public fun ByteArray.writeInt24BE(num: Number): Number? {
+    if (size < 3)
+        return null
+
+    val word = num.toInt() and 0xFFFFFF
+
+    this[0] = word.asByte(16)
+    this[1] = word.asByte(8)
+    this[2] = word.asByte(0)
+
+    return word
+}
 
 public fun ByteArray.writeInt16LE(num: Number): Number? {
     if (size < 2)
@@ -527,6 +779,99 @@ public inline fun ByteArray.writeUInt64BE(index: Int, num: UShort): Number? = wr
 public inline fun ByteArray.writeUInt64BE(index: Int, num: UByte): Number? = writeInt64BE(index, num.toByte())
 public inline fun ByteArray.writeUInt64BE(index: Int, num: Number): Number? = writeInt64BE(index, num)
 
+public fun ByteArray.writeInt56LE(index: Int, num: Number): Number? {
+    if (size < 7)
+        return null
+
+    val long = num.toLong()
+
+    this[index + 0] = long.asByte(0)
+    this[index + 1] = long.asByte(8)
+    this[index + 2] = long.asByte(16)
+    this[index + 3] = long.asByte(24)
+    this[index + 4] = long.asByte(32)
+    this[index + 5] = long.asByte(40)
+    this[index + 6] = long.asByte(48)
+
+    return long
+}
+public fun ByteArray.writeInt56BE(index: Int, num: Number): Number? {
+    if (size < 7)
+        return null
+
+    val long = num.toLong()
+
+    this[index + 0] = long.asByte(48)
+    this[index + 1] = long.asByte(40)
+    this[index + 2] = long.asByte(32)
+    this[index + 3] = long.asByte(24)
+    this[index + 4] = long.asByte(16)
+    this[index + 5] = long.asByte(8)
+    this[index + 6] = long.asByte(0)
+
+    return long
+}
+
+public fun ByteArray.writeInt48LE(index: Int, num: Number): Number? {
+    if (size < 6)
+        return null
+
+    val long = num.toLong()
+
+    this[index + 0] = long.asByte(0)
+    this[index + 1] = long.asByte(8)
+    this[index + 2] = long.asByte(16)
+    this[index + 3] = long.asByte(24)
+    this[index + 4] = long.asByte(32)
+    this[index + 5] = long.asByte(40)
+
+    return long
+}
+public fun ByteArray.writeInt48BE(index: Int, num: Number): Number? {
+    if (size < 6)
+        return null
+
+    val long = num.toLong()
+
+    this[index + 0] = long.asByte(40)
+    this[index + 1] = long.asByte(32)
+    this[index + 2] = long.asByte(24)
+    this[index + 3] = long.asByte(16)
+    this[index + 4] = long.asByte(8)
+    this[index + 5] = long.asByte(0)
+
+    return long
+}
+
+public fun ByteArray.writeInt40LE(index: Int, num: Number): Number? {
+    if (size < 5)
+        return null
+
+    val long = num.toLong()
+
+    this[index + 0] = long.asByte(0)
+    this[index + 1] = long.asByte(8)
+    this[index + 2] = long.asByte(16)
+    this[index + 3] = long.asByte(24)
+    this[index + 4] = long.asByte(32)
+
+    return long
+}
+public fun ByteArray.writeInt40BE(index: Int, num: Number): Number? {
+    if (size < 5)
+        return null
+
+    val long = num.toLong()
+
+    this[index + 0] = long.asByte(32)
+    this[index + 1] = long.asByte(24)
+    this[index + 2] = long.asByte(16)
+    this[index + 3] = long.asByte(8)
+    this[index + 4] = long.asByte(0)
+
+    return long
+}
+
 public fun ByteArray.writeInt32LE(index: Int, num: Number): Number? {
     if (size - 4 < index)
         return null
@@ -573,6 +918,32 @@ public inline fun ByteArray.writeUInt32BE(index: Int, num: UShort): Number? = wr
 @ExperimentalUnsignedTypes
 public inline fun ByteArray.writeUInt32BE(index: Int, num: UByte): Number? = writeUInt32BE(index, num.toByte())
 public inline fun ByteArray.writeUInt32BE(index: Int, num: Number): Number? = writeInt32BE(index, num)
+
+public fun ByteArray.writeInt24LE(index: Int, num: Number): Number? {
+    if (size < 3)
+        return null
+
+    val word = num.toInt() and 0xFFFFFF
+
+    this[index + 0] = word.asByte(0)
+    this[index + 1] = word.asByte(8)
+    this[index + 2] = word.asByte(16)
+
+    return word
+}
+
+public fun ByteArray.writeInt24BE(index: Int, num: Number): Number? {
+    if (size < 3)
+        return null
+
+    val word = num.toInt() and 0xFFFFFF
+
+    this[index + 0] = word.asByte(16)
+    this[index + 1] = word.asByte(8)
+    this[index + 2] = word.asByte(0)
+
+    return word
+}
 
 public fun ByteArray.writeInt16LE(index: Int, num: Number): Number? {
     if (size - 2 < index)

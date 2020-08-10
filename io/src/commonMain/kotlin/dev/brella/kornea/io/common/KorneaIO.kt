@@ -4,6 +4,11 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 3.3.0-alpha
+     * - Add in 'odd' byte number packets (Like Int24, Int48, etc)
+     */
+    public const val VERSION_3_3_0_ALPHA: String = "3.3.0-alpha"
+    /**
      * kornea-io 3.2.2-alpha
      * - Add read/writeVariableInt16 methods to the new Flow hierarchy
      */

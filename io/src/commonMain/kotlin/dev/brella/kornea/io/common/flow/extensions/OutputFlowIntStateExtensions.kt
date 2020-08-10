@@ -20,6 +20,42 @@ public suspend fun <T> T.writeInt64BE(num: Number) where T: Int64FlowState, T: O
 }
 
 @ExperimentalUnsignedTypes
+public suspend fun <T> T.writeInt56LE(num: Number) where T: Int56FlowState, T: OutputFlowState<*> {
+    int56Packet.writeInt56LE(num)
+    writePacket(int56Packet)
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.writeInt56BE(num: Number) where T: Int56FlowState, T: OutputFlowState<*> {
+    int56Packet.writeInt56BE(num)
+    writePacket(int56Packet)
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.writeInt48LE(num: Number) where T: Int48FlowState, T: OutputFlowState<*> {
+    int48Packet.writeInt48LE(num)
+    writePacket(int48Packet)
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.writeInt48BE(num: Number) where T: Int48FlowState, T: OutputFlowState<*> {
+    int48Packet.writeInt48BE(num)
+    writePacket(int48Packet)
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.writeInt40LE(num: Number) where T: Int40FlowState, T: OutputFlowState<*> {
+    int40Packet.writeInt40LE(num)
+    writePacket(int40Packet)
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.writeInt40BE(num: Number) where T: Int40FlowState, T: OutputFlowState<*> {
+    int40Packet.writeInt40BE(num)
+    writePacket(int40Packet)
+}
+
+@ExperimentalUnsignedTypes
 public suspend fun <T> T.writeInt32LE(num: Number) where T: Int32FlowState, T: OutputFlowState<*> {
     int32Packet.writeInt32LE(num)
     writePacket(int32Packet)
@@ -51,6 +87,18 @@ public suspend inline fun <T> T.writeUInt32BE(num: UShort): Unit where T: Int32F
 public suspend inline fun <T> T.writeUInt32BE(num: UByte): Unit where T: Int32FlowState, T: OutputFlowState<*> = writeInt32BE(num.toByte())
 @ExperimentalUnsignedTypes
 public suspend inline fun <T> T.writeUInt32BE(num: Number): Unit where T: Int32FlowState, T: OutputFlowState<*> = writeInt32BE(num)
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.writeInt24LE(num: Number) where T: Int24FlowState, T: OutputFlowState<*> {
+    int24Packet.writeInt24LE(num)
+    writePacket(int24Packet)
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun <T> T.writeInt24BE(num: Number) where T: Int24FlowState, T: OutputFlowState<*> {
+    int24Packet.writeInt24BE(num)
+    writePacket(int24Packet)
+}
 
 @ExperimentalUnsignedTypes
 public suspend fun <T> T.writeInt16LE(num: Number) where T: Int16FlowState, T: OutputFlowState<*> {

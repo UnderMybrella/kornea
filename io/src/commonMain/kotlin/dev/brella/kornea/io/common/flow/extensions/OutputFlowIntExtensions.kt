@@ -3,7 +3,6 @@ package dev.brella.kornea.io.common.flow.extensions
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.flow.OutputFlow
-import dev.brella.kornea.toolkit.common.asByte
 import dev.brella.kornea.toolkit.common.asInt
 import kotlin.experimental.or
 
@@ -27,6 +26,75 @@ public suspend fun OutputFlow.writeInt64BE(num: Number) {
     write(long.asInt(56, 0xFF))
     write(long.asInt(48, 0xFF))
     write(long.asInt(40, 0xFF))
+    write(long.asInt(32, 0xFF))
+    write(long.asInt(24, 0xFF))
+    write(long.asInt(16, 0xFF))
+    write(long.asInt(8, 0xFF))
+    write(long.asInt(0, 0xFF))
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun OutputFlow.writeInt56LE(num: Number) {
+    val long = num.toLong()
+
+    write(long.asInt(0, 0xFF))
+    write(long.asInt(8, 0xFF))
+    write(long.asInt(16, 0xFF))
+    write(long.asInt(24, 0xFF))
+    write(long.asInt(32, 0xFF))
+    write(long.asInt(40, 0xFF))
+    write(long.asInt(48, 0xFF))
+}
+@ExperimentalUnsignedTypes
+public suspend fun OutputFlow.writeInt56BE(num: Number) {
+    val long = num.toLong()
+
+    write(long.asInt(48, 0xFF))
+    write(long.asInt(40, 0xFF))
+    write(long.asInt(32, 0xFF))
+    write(long.asInt(24, 0xFF))
+    write(long.asInt(16, 0xFF))
+    write(long.asInt(8, 0xFF))
+    write(long.asInt(0, 0xFF))
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun OutputFlow.writeInt48LE(num: Number) {
+    val long = num.toLong()
+
+    write(long.asInt(0, 0xFF))
+    write(long.asInt(8, 0xFF))
+    write(long.asInt(16, 0xFF))
+    write(long.asInt(24, 0xFF))
+    write(long.asInt(32, 0xFF))
+    write(long.asInt(40, 0xFF))
+}
+@ExperimentalUnsignedTypes
+public suspend fun OutputFlow.writeInt48BE(num: Number) {
+    val long = num.toLong()
+
+    write(long.asInt(40, 0xFF))
+    write(long.asInt(32, 0xFF))
+    write(long.asInt(24, 0xFF))
+    write(long.asInt(16, 0xFF))
+    write(long.asInt(8, 0xFF))
+    write(long.asInt(0, 0xFF))
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun OutputFlow.writeInt40LE(num: Number) {
+    val long = num.toLong()
+
+    write(long.asInt(0, 0xFF))
+    write(long.asInt(8, 0xFF))
+    write(long.asInt(16, 0xFF))
+    write(long.asInt(24, 0xFF))
+    write(long.asInt(32, 0xFF))
+}
+@ExperimentalUnsignedTypes
+public suspend fun OutputFlow.writeInt40BE(num: Number) {
+    val long = num.toLong()
+
     write(long.asInt(32, 0xFF))
     write(long.asInt(24, 0xFF))
     write(long.asInt(16, 0xFF))
@@ -74,6 +142,24 @@ public suspend inline fun OutputFlow.writeUInt32BE(num: UShort): Unit = writeInt
 public suspend inline fun OutputFlow.writeUInt32BE(num: UByte): Unit = writeInt32BE(num.toByte())
 @ExperimentalUnsignedTypes
 public suspend inline fun OutputFlow.writeUInt32BE(num: Number): Unit = writeInt32BE(num)
+
+@ExperimentalUnsignedTypes
+public suspend fun OutputFlow.writeInt24LE(num: Number) {
+    val int = num.toInt()
+
+    write(int.asInt(0, 0xFF))
+    write(int.asInt(8, 0xFF))
+    write(int.asInt(16, 0xFF))
+}
+
+@ExperimentalUnsignedTypes
+public suspend fun OutputFlow.writeInt24BE(num: Number) {
+    val int = num.toInt()
+
+    write(int.asInt(16, 0xFF))
+    write(int.asInt(8, 0xFF))
+    write(int.asInt(0, 0xFF))
+}
 
 @ExperimentalUnsignedTypes
 public suspend fun OutputFlow.writeInt16LE(num: Number) {

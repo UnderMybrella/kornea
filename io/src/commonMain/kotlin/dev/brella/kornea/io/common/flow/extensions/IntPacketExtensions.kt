@@ -18,6 +18,7 @@ public fun Int64Packet.readInt64LE(): Long? {
             b.asLong(8) or
             a.asLong(0)
 }
+
 public fun Int64Packet.readInt64BE(): Long? {
     if (size < 8)
         return null
@@ -45,6 +46,7 @@ public fun Int64Packet.readUInt64LE(): ULong? {
             b.asULong(8) or
             a.asULong(0)
 }
+
 public fun Int64Packet.readUInt64BE(): ULong? {
     if (size < 8)
         return null
@@ -59,6 +61,78 @@ public fun Int64Packet.readUInt64BE(): ULong? {
             h.asULong(0)
 }
 
+public fun Int56Packet.readInt56LE(): Int? {
+    if (size < 7)
+        return null
+
+    return g.asInt(48) or 
+            f.asInt(40) or 
+            e.asInt(32) or
+            d.asInt(24) or
+            c.asInt(16) or
+            b.asInt(8) or
+            a.asInt(0)
+}
+
+public fun Int56Packet.readInt56BE(): Int? {
+    if (size < 7)
+        return null
+
+    return a.asInt(48) or
+            b.asInt(40) or
+            c.asInt(32) or
+            d.asInt(24) or
+            e.asInt(16) or 
+            f.asInt(8) or 
+            g.asInt()
+}
+
+public fun Int48Packet.readInt48LE(): Int? {
+    if (size < 6)
+        return null
+
+    return f.asInt(40) or
+            e.asInt(32) or
+            d.asInt(24) or
+            c.asInt(16) or
+            b.asInt(8) or
+            a.asInt(0)
+}
+
+public fun Int48Packet.readInt48BE(): Int? {
+    if (size < 6)
+        return null
+
+    return a.asInt(40) or
+            b.asInt(32) or
+            c.asInt(24) or
+            d.asInt(16) or 
+            e.asInt(8) or 
+            f.asInt(0)
+}
+
+public fun Int40Packet.readInt40LE(): Int? {
+    if (size < 5)
+        return null
+
+    return e.asInt(32) or 
+            d.asInt(24) or
+            c.asInt(16) or
+            b.asInt(8) or
+            a.asInt(0)
+}
+
+public fun Int40Packet.readInt40BE(): Int? {
+    if (size < 5)
+        return null
+
+    return a.asInt(32) or
+            b.asInt(24) or
+            c.asInt(16) or
+            d.asInt(8) or 
+            e.asInt(0)
+}
+
 public fun Int32Packet.readInt32LE(): Int? {
     if (size < 4)
         return null
@@ -68,6 +142,7 @@ public fun Int32Packet.readInt32LE(): Int? {
             b.asInt(8) or
             a.asInt(0)
 }
+
 public fun Int32Packet.readInt32BE(): Int? {
     if (size < 4)
         return null
@@ -87,6 +162,7 @@ public fun Int32Packet.readUInt32LE(): UInt? {
             b.asUInt(8) or
             a.asUInt(0)
 }
+
 public fun Int32Packet.readUInt32BE(): UInt? {
     if (size < 4)
         return null
@@ -97,12 +173,29 @@ public fun Int32Packet.readUInt32BE(): UInt? {
             d.asUInt(0)
 }
 
+public fun Int24Packet.readInt24LE(): Int? {
+    if (size < 3) return null
+
+    return c.asInt(16) or
+            b.asInt(8) or
+            a.asInt()
+}
+
+public fun Int24Packet.readInt24BE(): Int? {
+    if (size < 3) return null
+
+    return a.asInt(16) or
+            b.asInt(8) or
+            c.asInt()
+}
+
 public fun Int16Packet.readInt16LE(): Int? {
     if (size < 2)
         return null
 
     return b.asInt(8) or a.asInt(0)
 }
+
 public fun Int16Packet.readInt16BE(): Int? {
     if (size < 2)
         return null
@@ -124,7 +217,7 @@ public inline fun Int64Packet.readFloat64LE(): Double? = this.readInt64LE()?.let
 public fun Int64Packet.writeInt64LE(num: Number): Number? {
     if (size < 8)
         return null
-    
+
     val long = num.toLong()
 
     a = long.asByte(0)
@@ -138,6 +231,7 @@ public fun Int64Packet.writeInt64LE(num: Number): Number? {
 
     return long
 }
+
 public fun Int64Packet.writeInt64BE(num: Number): Number? {
     if (size < 8)
         return null
@@ -158,24 +252,126 @@ public fun Int64Packet.writeInt64BE(num: Number): Number? {
 
 @ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64LE(num: ULong): Number? = writeUInt64LE(num.toLong())
+
 @ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64LE(num: UInt): Number? = writeUInt64LE(num.toInt())
+
 @ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64LE(num: UShort): Number? = writeUInt64LE(num.toShort())
+
 @ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64LE(num: UByte): Number? = writeUInt64LE(num.toByte())
 
 @ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64BE(num: ULong): Number? = writeUInt64BE(num.toLong())
+
 @ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64BE(num: UInt): Number? = writeUInt64BE(num.toInt())
+
 @ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64BE(num: UShort): Number? = writeUInt64BE(num.toShort())
+
 @ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64BE(num: UByte): Number? = writeUInt64BE(num.toByte())
 
 public inline fun Int64Packet.writeUInt64LE(num: Number): Number? = writeInt64LE(num)
 public inline fun Int64Packet.writeUInt64BE(num: Number): Number? = writeInt64BE(num)
+
+public fun Int56Packet.writeInt56LE(num: Number): Number? {
+    if (size < 7)
+        return null
+
+    val long = num.toLong() and 0xFFFFFFFFFFFFFF
+
+    a = long.asByte(0)
+    b = long.asByte(8)
+    c = long.asByte(16)
+    d = long.asByte(24)
+    e = long.asByte(32)
+    f = long.asByte(40)
+    g = long.asByte(48)
+
+    return long
+}
+
+public fun Int56Packet.writeInt56BE(num: Number): Number? {
+    if (size < 7)
+        return null
+
+    val long = num.toLong() and 0xFFFFFFFFFFFFFF
+
+    a = long.asByte(48)
+    b = long.asByte(40)
+    c = long.asByte(32)
+    d = long.asByte(24)
+    e = long.asByte(16)
+    f = long.asByte(8)
+    g = long.asByte(0)
+
+    return long
+}
+
+public fun Int48Packet.writeInt48LE(num: Number): Number? {
+    if (size < 6)
+        return null
+
+    val long = num.toLong() and 0xFFFFFFFFFFFF
+
+    a = long.asByte(0)
+    b = long.asByte(8)
+    c = long.asByte(16)
+    d = long.asByte(24)
+    e = long.asByte(32)
+    f = long.asByte(40)
+
+    return long
+}
+
+public fun Int48Packet.writeInt48BE(num: Number): Number? {
+    if (size < 6)
+        return null
+
+    val long = num.toLong() and 0xFFFFFFFFFFFF
+
+    a = long.asByte(40)
+    b = long.asByte(32)
+    c = long.asByte(24)
+    d = long.asByte(16)
+    e = long.asByte(8)
+    f = long.asByte()
+
+    return long
+}
+
+public fun Int40Packet.writeInt40LE(num: Number): Number? {
+    if (size < 5)
+        return null
+
+    val long = num.toLong() and 0xFFFFFFFFFF
+
+    a = long.asByte(0)
+    b = long.asByte(8)
+    c = long.asByte(16)
+    d = long.asByte(24)
+    e = long.asByte(32)
+
+    return long
+}
+
+public fun Int40Packet.writeInt40BE(num: Number): Number? {
+    if (size < 4)
+        return null
+
+    val int = num.toInt()
+
+    a = int.asByte(32)
+    b = int.asByte(24)
+    c = int.asByte(16)
+    d = int.asByte(8)
+    e = int.asByte(0)
+
+    return int
+}
 
 public fun Int32Packet.writeInt32LE(num: Number): Number? {
     if (size < 4)
@@ -190,6 +386,7 @@ public fun Int32Packet.writeInt32LE(num: Number): Number? {
 
     return int
 }
+
 public fun Int32Packet.writeInt32BE(num: Number): Number? {
     if (size < 4)
         return null
@@ -206,19 +403,25 @@ public fun Int32Packet.writeInt32BE(num: Number): Number? {
 
 @ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32LE(num: ULong): Number? = writeUInt32LE(num.toLong())
+
 @ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32LE(num: UInt): Number? = writeUInt32LE(num.toInt())
+
 @ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32LE(num: UShort): Number? = writeUInt32LE(num.toShort())
+
 @ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32LE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
 @ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32BE(num: ULong): Number? = writeUInt32LE(num.toLong())
+
 @ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32BE(num: UInt): Number? = writeUInt32LE(num.toInt())
+
 @ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32BE(num: UShort): Number? = writeUInt32LE(num.toShort())
+
 @ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32BE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
@@ -239,6 +442,32 @@ public inline fun Int32Packet.writeUInt32BE(num: Number): Number? = writeInt32BE
 //            c.asInt(0)
 //}
 
+public fun Int24Packet.writeInt24LE(num: Number): Number? {
+    if (size < 2)
+        return null
+
+    val int = num.toInt() and 0xFFFFFF
+
+    a = int.asByte(0)
+    b = int.asByte(8)
+    c = int.asByte(16)
+
+    return int
+}
+
+public fun Int24Packet.writeInt24BE(num: Number): Number? {
+    if (size < 2)
+        return null
+
+    val int = num.toInt() and 0xFFFFFF
+
+    a = int.asByte(16)
+    b = int.asByte(8)
+    c = int.asByte(0)
+
+    return int
+}
+
 public fun Int16Packet.writeInt16LE(num: Number): Number? {
     if (size < 2)
         return null
@@ -250,11 +479,17 @@ public fun Int16Packet.writeInt16LE(num: Number): Number? {
 
     return short
 }
+
 public fun Int16Packet.writeInt16BE(num: Number): Number? {
     if (size < 2)
         return null
 
-    return a.asInt(8) or b.asInt(0)
+    val short = num.toShort()
+
+    a = short.asByte(8)
+    b = short.asByte(0)
+
+    return short
 }
 
 public inline fun Int32Packet.writeFloatBE(num: Number): Number? = this.writeInt32BE(num.toFloat().toBits())

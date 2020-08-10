@@ -60,4 +60,4 @@ public open class SinkCountingOutputFlow(protected val sink: OutputFlow) : Count
 public suspend fun OutputFlow.writeByte(byte: Number): Unit = write(byte.toInt())
 
 @ExperimentalUnsignedTypes
-public suspend inline fun OutputFlow.writePacket(packet: FlowPacket): Unit = write(packet.buffer)//if (read(packet.buffer) == packet.size) packet.buffer else null
+public suspend inline fun OutputFlow.writePacket(packet: FlowPacket): Unit = write(packet.buffer, 0, packet.size)//if (read(packet.buffer) == packet.size) packet.buffer else null
