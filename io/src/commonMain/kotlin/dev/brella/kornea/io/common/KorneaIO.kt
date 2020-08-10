@@ -4,6 +4,12 @@ import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
     /**
+     * kornea-io 3.4.0-alpha
+     * - Add a buffer to BinaryInputFlow's by default, and also support int states for odd byte number flows
+     */
+    public const val VERSION_3_4_0_ALPHA: String = "3.4.0-alpha"
+
+    /**
      * kornea-io 3.3.0-alpha
      * - Add in 'odd' byte number packets (Like Int24, Int48, etc)
      */

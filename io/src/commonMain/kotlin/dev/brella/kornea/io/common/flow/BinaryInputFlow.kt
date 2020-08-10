@@ -11,7 +11,27 @@ public class BinaryInputFlow(
     private val view: BinaryView,
     private var pos: Int = 0,
     override val location: String? = null
-) : BaseDataCloseable(), InputFlow, PeekableInputFlow, SeekableInputFlow {
+) : BaseDataCloseable(), InputFlow, PeekableInputFlow, SeekableInputFlow, IntFlowState, InputFlowState<BinaryInputFlow> {
+    private val buffer: ByteArray = ByteArray(8)
+
+    override val int16Packet: Int16Packet
+        get() = Int16Packet(buffer)
+    override val int24Packet: Int24Packet
+        get() = Int24Packet(buffer)
+    override val int32Packet: Int32Packet
+        get() = Int32Packet(buffer)
+    override val int40Packet: Int40Packet
+        get() = Int40Packet(buffer)
+    override val int48Packet: Int48Packet
+        get() = Int48Packet(buffer)
+    override val int56Packet: Int56Packet
+        get() = Int56Packet(buffer)
+    override val int64Packet: Int64Packet
+        get() = Int64Packet(buffer)
+
+    override val flow: BinaryInputFlow
+        get() = this
+
     public constructor(array: ByteArray, pos: Int = 0, location: String? = null) :
             this(BinaryArrayView(array), pos, location)
 

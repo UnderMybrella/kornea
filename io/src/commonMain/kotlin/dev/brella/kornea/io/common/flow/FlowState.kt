@@ -254,27 +254,91 @@ public interface FlowStateSelector : InputFlowStateSelector, OutputFlowStateSele
     public companion object : FlowStateSelector
 }
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> F.withIntState(): IntFlowState.BaseInput<F> = IntFlowState.input(this)
 public inline fun <F : InputFlow> InputFlowStateSelector.int(flow: F): IntFlowState.BaseInput<F> =
     IntFlowState.input(flow)
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> F.withIntState(): IntFlowState.BaseOutput<F> = IntFlowState.output(this)
 public inline fun <F : OutputFlow> OutputFlowStateSelector.int(flow: F): IntFlowState.BaseOutput<F> =
     IntFlowState.output(flow)
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> F.withInt16State(): Int16FlowState.BaseInput<F> = Int16FlowState.input(this)
 public inline fun <F : InputFlow> InputFlowStateSelector.int16(flow: F): Int16FlowState.BaseInput<F> =
     Int16FlowState.input(flow)
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> F.withInt16State(): Int16FlowState.BaseOutput<F> = Int16FlowState.output(this)
 public inline fun <F : OutputFlow> OutputFlowStateSelector.int16(flow: F): Int16FlowState.BaseOutput<F> =
     Int16FlowState.output(flow)
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> F.withInt24State(): Int24FlowState.BaseInput<F> = Int24FlowState.input(this)
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> InputFlowStateSelector.int24(flow: F): Int24FlowState.BaseInput<F> =
+    Int24FlowState.input(flow)
+
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> F.withInt24State(): Int24FlowState.BaseOutput<F> = Int24FlowState.output(this)
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> OutputFlowStateSelector.int24(flow: F): Int24FlowState.BaseOutput<F> =
+    Int24FlowState.output(flow)
+
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> F.withInt32State(): Int32FlowState.BaseInput<F> = Int32FlowState.input(this)
 public inline fun <F : InputFlow> InputFlowStateSelector.int32(flow: F): Int32FlowState.BaseInput<F> =
     Int32FlowState.input(flow)
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> F.withInt32State(): Int32FlowState.BaseOutput<F> = Int32FlowState.output(this)
 public inline fun <F : OutputFlow> OutputFlowStateSelector.int32(flow: F): Int32FlowState.BaseOutput<F> =
     Int32FlowState.output(flow)
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> F.withInt40State(): Int40FlowState.BaseInput<F> = Int40FlowState.input(this)
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> InputFlowStateSelector.int40(flow: F): Int40FlowState.BaseInput<F> =
+    Int40FlowState.input(flow)
+
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> F.withInt40State(): Int40FlowState.BaseOutput<F> = Int40FlowState.output(this)
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> OutputFlowStateSelector.int40(flow: F): Int40FlowState.BaseOutput<F> =
+    Int40FlowState.output(flow)
+
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> F.withInt48State(): Int48FlowState.BaseInput<F> = Int48FlowState.input(this)
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> InputFlowStateSelector.int48(flow: F): Int48FlowState.BaseInput<F> =
+    Int48FlowState.input(flow)
+
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> F.withInt48State(): Int48FlowState.BaseOutput<F> = Int48FlowState.output(this)
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> OutputFlowStateSelector.int48(flow: F): Int48FlowState.BaseOutput<F> =
+    Int48FlowState.output(flow)
+
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> F.withInt56State(): Int56FlowState.BaseInput<F> = Int56FlowState.input(this)
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> InputFlowStateSelector.int56(flow: F): Int56FlowState.BaseInput<F> =
+    Int56FlowState.input(flow)
+
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> F.withInt56State(): Int56FlowState.BaseOutput<F> = Int56FlowState.output(this)
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> OutputFlowStateSelector.int56(flow: F): Int56FlowState.BaseOutput<F> =
+    Int56FlowState.output(flow)
+
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : InputFlow> F.withInt64State(): Int64FlowState.BaseInput<F> = Int64FlowState.input(this)
 public inline fun <F : InputFlow> InputFlowStateSelector.int64(flow: F): Int64FlowState.BaseInput<F> =
     Int64FlowState.input(flow)
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F : OutputFlow> F.withInt64State(): Int64FlowState.BaseOutput<F> = Int64FlowState.output(this)
 public inline fun <F : OutputFlow> OutputFlowStateSelector.int64(flow: F): Int64FlowState.BaseOutput<F> =
     Int64FlowState.output(flow)
 
@@ -282,8 +346,12 @@ public inline fun <F : OutputFlow> OutputFlowStateSelector.int64(flow: F): Int64
 public inline fun <T> withState(select: FlowStateSelector.() -> T): T =
     FlowStateSelector.select()
 
+@AvailableSince(KorneaIO.VERSION_3_4_0_ALPHA)
+public inline fun <F, reified T> F.withState(select: FlowStateSelector.(F) -> T): T =
+    FlowStateSelector.select(this)
+
 @AvailableSince(KorneaIO.VERSION_2_3_0_ALPHA)
-public inline fun <T : DataCloseable, R> KorneaResult<T>.mapWithState(select: FlowStateSelector.(T) -> R): KorneaResult<R> =
+public inline fun <T : DataCloseable, reified R> KorneaResult<T>.mapWithState(select: FlowStateSelector.(T) -> R): KorneaResult<R> =
     map { FlowStateSelector.select(it) }
 
 @AvailableSince(KorneaIO.VERSION_3_1_0_ALPHA)
