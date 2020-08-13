@@ -20,6 +20,10 @@ internal expect inline fun <C: Configuration> defaultConfig(defaultConfig: C): R
 public suspend inline fun <C: Configuration> Configurable<C>.config(): C? =
     coroutineContext[this]?.let { if (it is Configuration.MISSING) null else it as C }
 
+@AvailableSince(KorneaConfig.VERSION_1_0_1_INDEV)
+public inline fun <C: Configuration> Configurable<C>.config(coroutineContext: CoroutineContext): C? =
+    coroutineContext[this]?.let { if (it is Configuration.MISSING) null else it as C }
+
 @AvailableSince(KorneaConfig.VERSION_1_0_0_INDEV)
 public suspend inline fun <C: Configuration> Configurable<C>.configure(configure: (config: C?) -> C?): CoroutineContext {
     val newConfig = configure(config())

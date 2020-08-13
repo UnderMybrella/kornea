@@ -1,6 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.multiplatform'
 
-version = '1.0.2-alpha'
+version = '2.0.0-alpha'
 
 kotlin {
     /* Targets configuration omitted. 
@@ -8,21 +8,47 @@ kotlin {
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
     js()
-    mingwX64() {
-        binaries {
-            sharedLib {
-            }
 
-            staticLib {
-            }
-        }
-    }
+    /** Android/Native */
+    androidNativeArm32()
+    androidNativeArm64()
+
+    /** iOS */
+    iosArm32()
+    iosArm64()
+    iosX64()
+
+    /** watchOS */
+    watchosArm32()
+    watchosArm64()
+    watchosX86()
+
+    /** tvOS */
+    tvosArm64()
+    tvosX64()
+
+    /** Linux */
+    linuxArm64()
+    linuxArm32Hfp()
+    linuxMips32()
+    linuxMipsel32()
     linuxX64()
+
+    /** MacOS */
+    macosX64()
+
+    /** Windows */
+    mingwX64()
+    mingwX86()
+
+    /** WebAssembly */
+    wasm32()
 
     sourceSets {
         commonMain {
             dependencies {
                 implementation project(":kornea-annotations")
+                api project(":kornea-config")
             }
         }
         all {
