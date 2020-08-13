@@ -3,6 +3,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+        mavenLocal()
     }
 }
 
@@ -13,6 +14,10 @@ rootProject.name = 'kornea'
 include ':annotations'
 include ':apollo'
 include ':benchmarks'
+include ':config'
+include ':config-plugin'
+include ':config-plugin-compiler'
+
 include ':errors'
 include ':io'
 include ':img'

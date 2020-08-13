@@ -3,28 +3,46 @@ apply plugin: 'org.jetbrains.kotlin.multiplatform'
 version = '1.0.2-alpha'
 
 kotlin {
-    /* Targets configuration omitted. 
-    *  To find out how to configure the targets, please follow the link:
-    *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
+    /* https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
     js()
-    mingwX64() {
-        binaries {
-            sharedLib {
-            }
 
-            staticLib {
-            }
-        }
-    }
+    /** Android/Native */
+    androidNativeArm32()
+    androidNativeArm64()
+
+    /** iOS */
+    iosArm32()
+    iosArm64()
+    iosX64()
+
+    /** watchOS */
+    watchosArm32()
+    watchosArm64()
+    watchosX86()
+
+    /** tvOS */
+    tvosArm64()
+    tvosX64()
+
+    /** Linux */
+    linuxArm64()
+    linuxArm32Hfp()
+    linuxMips32()
+    linuxMipsel32()
     linuxX64()
 
+    /** MacOS */
+    macosX64()
+
+    /** Windows */
+    mingwX64()
+    mingwX86()
+
+    /** WebAssembly */
+    wasm32()
+
     sourceSets {
-        jvmMain {
-            dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinx_coroutines"
-            }
-        }
         all {
             languageSettings {
                 useExperimentalAnnotation("kotlin.RequiresOptIn")

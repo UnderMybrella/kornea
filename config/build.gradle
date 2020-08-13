@@ -1,0 +1,200 @@
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+apply plugin: 'kotlinx-atomicfu'
+
+version = '1.0.0-indev'
+
+kotlin {
+    /* https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
+    jvm()
+    js()
+
+    /** Android/Native */
+    androidNativeArm32()
+    androidNativeArm64()
+
+    /** iOS */
+    iosArm32()
+    iosArm64()
+    iosX64()
+
+    /** watchOS */
+    watchosArm32()
+    watchosArm64()
+    watchosX86()
+
+    /** tvOS */
+    tvosArm64()
+    tvosX64()
+
+    /** Linux */
+    linuxArm64()
+    linuxArm32Hfp()
+    linuxMips32()
+    linuxMipsel32()
+    linuxX64()
+
+    /** MacOS */
+    macosX64()
+
+    /** Windows */
+    mingwX64()
+    mingwX86()
+
+    /** WebAssembly */
+    wasm32()
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation project(":kornea-annotations")
+            }
+        }
+
+        commonAtomicfuMain {
+            dependsOn commonMain
+            dependencies {
+                implementation "org.jetbrains.kotlinx:atomicfu:$kotlinx_atomicfu"
+            }
+        }
+
+        jvmMain {
+            dependsOn commonAtomicfuMain
+        }
+
+        jsMain {
+            dependsOn commonAtomicfuMain
+        }
+
+        nativeMain {
+            dependsOn commonMain
+        }
+
+        nativeSelfAtomicMain {
+            dependsOn nativeMain
+        }
+
+        androidNativeMain {
+            dependsOn nativeSelfAtomicMain
+        }
+
+        androidNativeArm32Main {
+            dependsOn androidNativeMain
+        }
+
+        androidNativeArm64Main {
+            dependsOn androidNativeMain
+        }
+
+        iOSMain {
+            dependsOn nativeMain
+            dependsOn commonAtomicfuMain
+        }
+
+        iosArm32Main {
+            dependsOn iOSMain
+        }
+
+        iosArm64Main {
+            dependsOn iOSMain
+        }
+
+        iosX64Main {
+            dependsOn iOSMain
+        }
+
+        watchOSMain {
+            dependsOn nativeSelfAtomicMain
+        }
+
+        watchosArm32Main {
+            dependsOn watchOSMain
+        }
+
+        watchosArm64Main {
+            dependsOn watchOSMain
+        }
+
+        watchosX86Main {
+            dependsOn watchOSMain
+        }
+
+        tvOSMain {
+            dependsOn nativeSelfAtomicMain
+        }
+
+        tvosArm64Main {
+            dependsOn tvOSMain
+        }
+
+        tvosX64Main {
+            dependsOn tvOSMain
+        }
+
+        linuxMain {
+            dependsOn nativeMain
+        }
+
+        linuxArm64Main {
+            dependsOn linuxMain
+            dependsOn nativeSelfAtomicMain
+        }
+
+        linuxArm32HfpMain {
+            dependsOn linuxMain
+            dependsOn nativeSelfAtomicMain
+        }
+
+        linuxMips32Main {
+            dependsOn linuxMain
+            dependsOn nativeSelfAtomicMain
+        }
+
+        linuxMipsel32Main {
+            dependsOn linuxMain
+            dependsOn nativeSelfAtomicMain
+        }
+
+        linuxX64Main {
+            dependsOn linuxMain
+            dependsOn commonAtomicfuMain
+        }
+
+        macOSMain {
+            dependsOn nativeMain
+            dependsOn commonAtomicfuMain
+        }
+
+        macosX64Main {
+            dependsOn macOSMain
+        }
+
+        windowsMain {
+            dependsOn nativeMain
+        }
+
+        mingwX64Main {
+            dependsOn windowsMain
+            dependsOn commonAtomicfuMain
+        }
+
+        mingwX86Main {
+            dependsOn windowsMain
+            dependsOn nativeSelfAtomicMain
+        }
+
+        wasm32Main {
+            dependsOn nativeSelfAtomicMain
+        }
+
+        all {
+            languageSettings {
+                enableLanguageFeature("InlineClasses")
+                explicitApi()
+            }
+        }
+    }
+}
+
+atomicfu {
+    dependenciesVersion = null
+}
