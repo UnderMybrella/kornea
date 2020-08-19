@@ -1,4 +1,4 @@
-package dev.brella.kornea.toolkit.common
+package dev.brella.kornea.toolkit.coroutines
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
@@ -138,18 +138,31 @@ internal class ExchangerCoroutine<E>(parentContext: CoroutineContext, private va
     internal val _exchanger = ExchangerChannels(_outputChannel, _inputChannel, this)
 
     override fun cancel() {
-        cancel(null)
+        cancelInternal(defaultCancellationException())
     }
 
-    override fun cancel(cause: Throwable?): Boolean {
-        cancel(cause?.toCancellationException())
-
+    @Deprecated(level = DeprecationLevel.HIDDEN, message = "Since 1.2.0, binary compatibility with versions <= 1.1.x")
+    final override fun cancel(cause: Throwable?): Boolean {
+        cancelInternal(defaultCancellationException())
         return true
     }
 
-    override fun cancel(cause: CancellationException?) {
-        _inputChannel.cancel(cause) // cancel the channel
-        _outputChannel.cancel(cause)
-        cancelCoroutine(cause) // cancel the job
+    final override fun cancel(cause: CancellationException?) {
+        cancelInternal(cause ?: defaultCancellationException())
+    }
+
+    override fun cancelInternal(cause: Throwable) {
+        val exception = cause.toCancellationException()
+        _channel.cancel(exception) // cancel the channel
+        cancelCoroutine(exception) // cancel the job
+    }
+
+    override fun onCancelled(cause: Throwable, handled: Boolean) {
+        super.onCancelled(cause, handled)
+
+        if (cause is CancellationException) {
+            _inputChannel.cancel(cause) // cancel the channel
+            _outputChannel.cancel(cause)
+        }
     }
 }
