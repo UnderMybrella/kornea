@@ -17,8 +17,14 @@ public interface OutputFlow: ObservableDataCloseable {
 }
 
 public interface OutputFlowByDelegate<O: OutputFlow>: OutputFlow {
+    public companion object {
+        public inline operator fun <O: OutputFlow> invoke(output: O): OutputFlowByDelegate<O> = OutputFlowByDelegateImpl(output)
+    }
     public val output: O
 }
+
+@PublishedApi
+internal class OutputFlowByDelegateImpl<O: OutputFlow>(override val output: O): OutputFlowByDelegate<O>, OutputFlow by output
 
 @ExperimentalUnsignedTypes
 public interface CountingOutputFlow: OutputFlow {

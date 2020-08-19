@@ -1,14 +1,11 @@
 package dev.brella.kornea.io.common.flow
 
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
 import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 import dev.brella.kornea.toolkit.common.use
-import kotlinx.coroutines.*
 import kotlin.properties.Delegates
 
 @ExperimentalUnsignedTypes
-public open class FlowReader(protected val backing: InputFlow, protected val timeout: Long = 1_000) : ObservableDataCloseable by backing {
+public open class FlowReader(protected val backing: InputFlow) : ObservableDataCloseable by backing {
     private val cb: CharArray = CharArray(8192)
     private var nChars: Int = 0
     private var nextChar: Int = 0
@@ -40,7 +37,7 @@ public open class FlowReader(protected val backing: InputFlow, protected val tim
 
         for (i in offset until offset + length) {
             if (foundLF) {
-                cbuf[i] = withTimeoutOrNull(timeout) { readUtf8Character() } ?: return if (i == offset) null else i - offset
+                cbuf[i] = readUtf8Character() ?: return if (i == offset) null else i - offset
             } else {
                 cbuf[i] = readUtf8Character() ?: return if (i == offset) null else i - offset
                 foundLF = cbuf[i] == '\n'
@@ -136,26 +133,12 @@ public open class FlowReader(protected val backing: InputFlow, protected val tim
                 return str
             }
 
-            s.append(String(cb, startChar, i - startChar))
+            s.append(cb.concatToString(startChar, startChar + (i - startChar)))
         }
     }
 }
 
 @ExperimentalUnsignedTypes
-@ExperimentalCoroutinesApi
-//Removed noinline from operation. If the compiler starts crashing, add it back
-public suspend inline fun <T> FlowReader.useLines(scope: CoroutineScope, operation: (ReceiveChannel<String>) -> T): T = use { reader ->
-    operation(scope.produce {
-        while (isActive) {
-            send(reader.readLine() ?: break)
-        }
-
-        close()
-    })
-}
-
-@ExperimentalUnsignedTypes
-@ExperimentalCoroutinesApi
 //Removed noinline from operation. If the compiler starts crashing, add it back
 public suspend inline fun FlowReader.useEachLine(operation: (String) -> Unit): Unit = use { reader ->
     while (!isClosed) { operation(reader.readLine() ?: break) }

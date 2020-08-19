@@ -4,8 +4,6 @@ import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
-import dev.brella.kornea.toolkit.common.ReadWriteSemaphore
-import dev.brella.kornea.toolkit.common.SynchronisedBinaryView
 
 @AvailableSince(KorneaIO.VERSION_3_2_0_ALPHA)
 public interface PipeFlow<I : InputFlow, O : OutputFlow> : InputFlow, OutputFlowByDelegate<O> {
@@ -33,15 +31,4 @@ public interface PipeFlow<I : InputFlow, O : OutputFlow> : InputFlow, OutputFlow
 
     public val input: I
     public override val output: O
-}
-
-@AvailableSince(KorneaIO.VERSION_3_2_0_ALPHA)
-public inline fun BinaryPipeFlow(location: String? = null): PipeFlow<BinaryInputFlow, OutputFlowByDelegate<BinaryOutputFlow>> {
-    val semaphore = ReadWriteSemaphore(1)
-    val pipe = BinaryOutputFlow()
-
-    return PipeFlow(
-        BinaryInputFlow(SynchronisedBinaryView(pipe, semaphore), location = location),
-        SynchronisedOutputFlow(BinaryOutputFlow(), semaphore)
-    )
 }

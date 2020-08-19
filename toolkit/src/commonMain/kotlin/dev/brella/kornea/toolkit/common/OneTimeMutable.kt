@@ -3,12 +3,12 @@ package dev.brella.kornea.toolkit.common
 import kotlin.reflect.KProperty
 
 public class OneTimeMutable<T> {
-    private var _value: Any? = UNINITIALIZED_VALUE
+    private var _value: Any? = UNINITIALISED_VALUE
     @Suppress("UNCHECKED_CAST")
     public var value: T
         get() = _value as? T ?: throw IllegalStateException("Value not initialised")
         set(value) {
-            if (_value === UNINITIALIZED_VALUE) {
+            if (_value === UNINITIALISED_VALUE) {
                 _value = value
             } else {
                 throw IllegalStateException("Value was already initialised")
@@ -21,12 +21,12 @@ public class OneTimeMutable<T> {
     }
 }
 
-public class OneTimeMutableInline<T>(private var _value: Any? = UNINITIALIZED_VALUE) {
+public class OneTimeMutableInline<T>(private var _value: Any? = UNINITIALISED_VALUE) {
     @Suppress("UNCHECKED_CAST")
     public var value: T
         get() = _value as? T ?: throw IllegalStateException("Value not initialised")
         set(value) {
-            if (_value === UNINITIALIZED_VALUE) {
+            if (_value === UNINITIALISED_VALUE) {
                 _value = value
             } else {
                 throw IllegalStateException("Value was already initialised")

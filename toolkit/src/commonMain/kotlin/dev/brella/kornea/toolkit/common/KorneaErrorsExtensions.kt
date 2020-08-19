@@ -30,7 +30,7 @@ public inline fun <R> KorneaResult<*>.filterToInstance(
     }
 
 @Suppress("UNCHECKED_CAST")
-@AvailableSince(KorneaErrors.VERSION_3_4_0)
+@AvailableSince(KorneaErrors.VERSION_3_4_0_INDEV)
 public inline fun <R> KorneaResult<*>.filterToInstance(
     default: KorneaResult<R>,
     info: KorneaTypeChecker<R>
@@ -42,7 +42,7 @@ public inline fun <R> KorneaResult<*>.filterToInstance(
     }
 
 @Suppress("UNCHECKED_CAST")
-@AvailableSince(KorneaErrors.VERSION_3_4_0)
+@AvailableSince(KorneaErrors.VERSION_3_4_0_INDEV)
 public inline fun <T, R : T> KorneaResult<T>.filterToInstance(
     info: KorneaTypeChecker<R>,
     transform: (T) -> KorneaResult<R>

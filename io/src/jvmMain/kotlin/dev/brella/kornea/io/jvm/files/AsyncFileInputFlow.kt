@@ -10,9 +10,9 @@ import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.limitSafe
 import dev.brella.kornea.io.jvm.positionSafe
 import dev.brella.kornea.toolkit.common.*
-import dev.brella.kornea.toolkit.common.pools.KorneaPool
-import dev.brella.kornea.toolkit.common.pools.KorneaPools
-import dev.brella.kornea.toolkit.common.pools.PoolableWrapper
+import dev.brella.kornea.toolkit.coroutines.pools.KorneaPool
+import dev.brella.kornea.toolkit.coroutines.pools.KorneaPools
+import dev.brella.kornea.toolkit.coroutines.pools.PoolableWrapper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

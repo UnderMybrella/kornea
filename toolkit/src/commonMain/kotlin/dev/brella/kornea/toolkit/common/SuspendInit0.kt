@@ -2,7 +2,6 @@ package dev.brella.kornea.toolkit.common
 
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.annotations.ChangedSince
-import kotlinx.coroutines.CoroutineScope
 
 @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
 @ChangedSince(KorneaToolkit.VERSION_3_0_0_ALPHA)

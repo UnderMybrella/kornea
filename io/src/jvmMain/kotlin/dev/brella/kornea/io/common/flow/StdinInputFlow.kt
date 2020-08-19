@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.io.coroutine.flow.ConflatingBufferedInputFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import java.util.concurrent.CopyOnWriteArrayList

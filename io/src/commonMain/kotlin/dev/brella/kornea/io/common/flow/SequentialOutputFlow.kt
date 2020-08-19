@@ -3,8 +3,6 @@ package dev.brella.kornea.io.common.flow
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * An output flow that calls each [OutputFlow] function on [sequence] one after another
