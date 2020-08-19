@@ -3,6 +3,7 @@ package dev.brella.kornea.toolkit.coroutines
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
+import dev.brella.kornea.toolkit.common.asNull
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -138,23 +139,7 @@ internal class ExchangerCoroutine<E>(parentContext: CoroutineContext, private va
     internal val _exchanger = ExchangerChannels(_outputChannel, _inputChannel, this)
 
     override fun cancel() {
-        cancelInternal(defaultCancellationException())
-    }
-
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "Since 1.2.0, binary compatibility with versions <= 1.1.x")
-    final override fun cancel(cause: Throwable?): Boolean {
-        cancelInternal(defaultCancellationException())
-        return true
-    }
-
-    final override fun cancel(cause: CancellationException?) {
-        cancelInternal(cause ?: defaultCancellationException())
-    }
-
-    override fun cancelInternal(cause: Throwable) {
-        val exception = cause.toCancellationException()
-        _channel.cancel(exception) // cancel the channel
-        cancelCoroutine(exception) // cancel the job
+        super<AbstractCoroutine>.cancel(CancellationException("Cancelled with no parameter"))
     }
 
     override fun onCancelled(cause: Throwable, handled: Boolean) {
