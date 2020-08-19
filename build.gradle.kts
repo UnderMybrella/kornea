@@ -19,6 +19,8 @@ plugins {
 }
 
 allprojects {
+    group = "dev.brella"
+
     repositories {
         mavenCentral()
         jcenter()
@@ -30,6 +32,8 @@ allprojects {
 
 configure(subprojects) {
     apply(plugin = "maven-publish")
+
+    group = "dev.brella"
 
 //    group = artifactGroup
 
