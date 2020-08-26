@@ -1,6 +1,6 @@
 apply(plugin = KOTLIN_MULTIPLATFORM_PLUGIN)
 
-version = "1.0.4-alpha"
+version = "1.0.5-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
