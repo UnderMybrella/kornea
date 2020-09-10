@@ -7,7 +7,7 @@ public inline fun <reified T> Array<out T>.recast(): Array<T> = Array(size, this
 public inline fun <T, reified R> Array<T>.mapToArray(block: (T) -> R): Array<R> = mapToArray(indices, block)
 public inline fun <T, reified R> Array<T>.mapToArray(start: Int, block: (T) -> R): Array<R> = mapToArray(start .. lastIndex, block)
 public inline fun <T, reified R> Array<T>.mapToArray(range: IntRange, block: (T) -> R): Array<R> =
-    Array(range.last - range.first) { i -> block(get(i + range.first)) }
+    Array(range.last - range.first + 1) { i -> block(get(i + range.first)) }
 
 public inline fun <T, R> Array<out T>.mapToArrayWith(transform: (T) -> R): Array<Pair<T, R>> =
     mapToArrayWith(::Pair, transform)

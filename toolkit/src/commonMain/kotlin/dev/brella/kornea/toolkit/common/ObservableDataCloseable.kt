@@ -154,9 +154,9 @@ internal suspend fun DataCloseable?.closeFinally(cause: Throwable?) = when {
 }
 
 @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
-public suspend fun <T: DataCloseable> Array<T>.closeAll(): Unit = forEach { data -> data.close() }
+public suspend fun <T: DataCloseable> Array<T>.closeAll(): Unit = toList().forEach { data -> data.close() }
 @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
-public suspend fun <T: DataCloseable> Iterable<T>.closeAll(): Unit = forEach { data -> data.close() }
+public suspend fun <T: DataCloseable> Iterable<T>.closeAll(): Unit = toList().forEach { data -> data.close() }
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
