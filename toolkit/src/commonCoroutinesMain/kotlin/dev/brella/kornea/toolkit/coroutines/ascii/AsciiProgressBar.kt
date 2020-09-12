@@ -259,7 +259,7 @@ internal class AsciiProgressBar(
 
     override suspend fun update(current: Long) {
         withContext(context) {
-            val percent = (current * 10000.0 / progressLimit) / 100.0
+            val percent = (current * 10000.0 / progressLimit).roundToInt() / 100.0
             output.print(buildString {
                 append('\r')
                 if (showPercentage) {
