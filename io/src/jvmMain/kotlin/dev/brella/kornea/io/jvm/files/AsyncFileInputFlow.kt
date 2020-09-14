@@ -5,10 +5,7 @@ import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.flow.PeekableInputFlow
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
-import dev.brella.kornea.io.jvm.bookmark
-import dev.brella.kornea.io.jvm.clearSafe
-import dev.brella.kornea.io.jvm.limitSafe
-import dev.brella.kornea.io.jvm.positionSafe
+import dev.brella.kornea.io.jvm.*
 import dev.brella.kornea.toolkit.common.*
 import dev.brella.kornea.toolkit.coroutines.pools.KorneaPool
 import dev.brella.kornea.toolkit.coroutines.pools.KorneaPools
@@ -87,7 +84,7 @@ public class AsyncFileInputFlow private constructor(
         filePointer: KMutableProperty0<Long> = ::flowFilePointer
     ): Int? =
         if (!isClosed) {
-            clearSafe()
+            buffer.positionSafe(0).limitSafe(0)
             fillPartial(moveFilePointer, filePointer)
         } else {
             null
@@ -297,7 +294,7 @@ public class AsyncFileInputFlow private constructor(
                         buffer.positionSafe((flowFilePointer - pos).toInt())
                     } else {
                         flowFilePointer = pos
-                        buffer.clearSafe()
+                        buffer.positionSafe(0).limitSafe(0)
                     }
                 }
                 EnumSeekMode.FROM_POSITION -> {
@@ -305,6 +302,7 @@ public class AsyncFileInputFlow private constructor(
                         buffer.positionSafe((buffer.position() + pos).toInt())
                     } else {
                         flowFilePointer += buffer.position() + pos - buffer.limit()
+                        buffer.positionSafe(0).limitSafe(0)
                     }
                 }
                 EnumSeekMode.FROM_END -> {
@@ -313,7 +311,7 @@ public class AsyncFileInputFlow private constructor(
                         buffer.positionSafe((flowFilePointer - pos).toInt())
                     } else {
                         flowFilePointer = pos
-                        buffer.clearSafe()
+                        buffer.positionSafe(0).limitSafe(0)
                     }
                 }
             }
