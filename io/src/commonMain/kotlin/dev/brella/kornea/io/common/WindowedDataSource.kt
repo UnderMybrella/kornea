@@ -2,6 +2,7 @@ package dev.brella.kornea.io.common
 
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
+import dev.brella.kornea.io.common.flow.SeekableInputFlow
 import dev.brella.kornea.io.common.flow.WindowedInputFlow
 
 @ExperimentalUnsignedTypes
@@ -18,7 +19,10 @@ public open class WindowedDataSource(
     public companion object {
         @Suppress("RedundantSuspendModifier")
         public suspend fun openLimitedInputFlow(self: WindowedDataSource, location: String?): KorneaResult<WindowedInputFlow> =
-            self.parent.openInputFlow().map { parentFlow -> WindowedInputFlow(parentFlow, self.windowOffset, self.windowSize, location ?: self.location) }
+            self.parent.openInputFlow().map { parentFlow ->
+                if (parentFlow is SeekableInputFlow) WindowedInputFlow.Seekable(parentFlow, self.windowOffset, self.windowSize, location ?: self.location)
+                else WindowedInputFlow(parentFlow, self.windowOffset, self.windowSize, location ?: self.location)
+            }
     }
 
     override val dataSize: ULong?

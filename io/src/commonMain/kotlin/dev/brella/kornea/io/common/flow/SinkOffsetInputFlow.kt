@@ -25,7 +25,10 @@ public open class SinkOffsetInputFlow private constructor(
             offset: ULong,
             location: String? = "${backing.location}+${offset.toString(16)}h"
         ): SinkOffsetInputFlow {
-            val flow = SinkOffsetInputFlow(backing, offset, location)
+            val flow =
+                if (backing is SeekableInputFlow) Seekable(backing, offset, location)
+                else SinkOffsetInputFlow(backing, offset, location)
+
             flow.initialSkip()
             return flow
         }

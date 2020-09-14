@@ -2,6 +2,7 @@ package dev.brella.kornea.io.common
 
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
+import dev.brella.kornea.io.common.flow.SeekableInputFlow
 import dev.brella.kornea.io.common.flow.SinkOffsetInputFlow
 
 @ExperimentalUnsignedTypes
@@ -15,7 +16,10 @@ public open class OffsetDataSource(
     public companion object {
         @Suppress("RedundantSuspendModifier")
         public suspend fun openLimitedInputFlow(self: OffsetDataSource, location: String?): KorneaResult<SinkOffsetInputFlow> =
-            self.parent.openInputFlow().map { parentFlow -> SinkOffsetInputFlow(parentFlow, self.offset, location ?: self.location) }
+            self.parent.openInputFlow().map { parentFlow ->
+                if (parentFlow is SeekableInputFlow) SinkOffsetInputFlow.Seekable(parentFlow, self.offset, location ?: self.location)
+                else SinkOffsetInputFlow(parentFlow, self.offset, location ?: self.location)
+            }
     }
 
     override val dataSize: ULong?

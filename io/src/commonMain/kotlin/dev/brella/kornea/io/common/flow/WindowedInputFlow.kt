@@ -15,8 +15,10 @@ public open class WindowedInputFlow private constructor(
             offset: ULong,
             windowSize: ULong,
             location: String? =
-                "${window.location}[${offset.toString(16).toUpperCase()}h,${offset.plus(windowSize).toString(16)
-                    .toUpperCase()}h]"
+                "${window.location}[${offset.toString(16).toUpperCase()}h,${
+                    offset.plus(windowSize).toString(16)
+                        .toUpperCase()
+                }h]"
         ): WindowedInputFlow {
             val flow = Seekable(window, offset, windowSize, location)
             flow.initialSkip()
@@ -28,10 +30,14 @@ public open class WindowedInputFlow private constructor(
             offset: ULong,
             windowSize: ULong,
             location: String? =
-                "${window.location}[${offset.toString(16).toUpperCase()}h,${offset.plus(windowSize).toString(16)
-                    .toUpperCase()}h]"
+                "${window.location}[${offset.toString(16).toUpperCase()}h,${
+                    offset.plus(windowSize).toString(16)
+                        .toUpperCase()
+                }h]"
         ): WindowedInputFlow {
-            val flow = WindowedInputFlow(window, offset, windowSize, location)
+            val flow =
+                if (window is SeekableInputFlow) Seekable(window, offset, windowSize, location)
+                else WindowedInputFlow(window, offset, windowSize, location)
             flow.initialSkip()
             return flow
         }
@@ -49,8 +55,10 @@ public open class WindowedInputFlow private constructor(
                 offset: ULong,
                 windowSize: ULong,
                 location: String? =
-                    "${window.location}[${offset.toString(16).toUpperCase()}h,${offset.plus(windowSize).toString(16)
-                        .toUpperCase()}h]"
+                    "${window.location}[${offset.toString(16).toUpperCase()}h,${
+                        offset.plus(windowSize).toString(16)
+                            .toUpperCase()
+                    }h]"
             ): WindowedInputFlow {
                 val flow = Seekable(window, offset, windowSize, location)
                 flow.initialSkip()
