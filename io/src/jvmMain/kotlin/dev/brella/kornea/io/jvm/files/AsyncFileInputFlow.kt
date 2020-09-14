@@ -318,8 +318,8 @@ public class AsyncFileInputFlow private constructor(
                 }
             }
 
-            return@withLock position()
-        }
+            this
+        }.position()
 
     override suspend fun init() {
 //        coroutineContext = THREAD_POOL.hire().get()
