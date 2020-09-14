@@ -1,6 +1,8 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.io.common.*
+import dev.brella.kornea.toolkit.common.SuspendInit0
+import dev.brella.kornea.toolkit.common.init
 
 @ExperimentalUnsignedTypes
 public open class SinkOffsetInputFlow private constructor(
@@ -8,33 +10,26 @@ public open class SinkOffsetInputFlow private constructor(
     override val baseOffset: ULong,
     override val location: String? =
         "${backing.location}+${baseOffset.toString(16)}h"
-) : BaseDataCloseable(), OffsetInputFlow {
+) : BaseDataCloseable(), OffsetInputFlow, SuspendInit0 {
     public companion object {
         public suspend operator fun invoke(
             backing: SeekableInputFlow,
             offset: ULong,
             location: String? = "${backing.location}+${offset.toString(16)}h"
-        ): Seekable {
-            val flow = Seekable(backing, offset, location)
-            flow.initialSkip()
-            return flow
-        }
+        ): Seekable  = Seekable(backing, offset, location)
 
         public suspend operator fun invoke(
             backing: InputFlow,
             offset: ULong,
             location: String? = "${backing.location}+${offset.toString(16)}h"
         ): SinkOffsetInputFlow {
-            val flow =
-                if (backing is SeekableInputFlow) Seekable(backing, offset, location)
-                else SinkOffsetInputFlow(backing, offset, location)
+            if (backing is SeekableInputFlow) return Seekable(backing, offset, location)
 
-            flow.initialSkip()
-            return flow
+            return init(SinkOffsetInputFlow(backing, offset, location))
         }
     }
 
-    public class Seekable(
+    public class Seekable private constructor(
         override val backing: SeekableInputFlow,
         override val baseOffset: ULong,
         override val location: String? = "${backing.location}+${baseOffset.toString(16)}h"
@@ -44,11 +39,7 @@ public open class SinkOffsetInputFlow private constructor(
                 backing: SeekableInputFlow,
                 offset: ULong,
                 location: String? = "${backing.location}+${offset.toString(16)}h"
-            ): Seekable {
-                val flow = Seekable(backing, offset, location)
-                flow.initialSkip()
-                return flow
-            }
+            ): Seekable = init(Seekable(backing, offset, location))
         }
 
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
@@ -109,7 +100,7 @@ public open class SinkOffsetInputFlow private constructor(
     override suspend fun size(): ULong? = backing.size()?.minus(baseOffset)
     override suspend fun position(): ULong = sinkOffset
 
-    public suspend fun initialSkip() {
+    override suspend fun init() {
         backing.skip(baseOffset)
     }
 

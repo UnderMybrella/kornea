@@ -1,6 +1,8 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.io.common.*
+import dev.brella.kornea.toolkit.common.SuspendInit0
+import dev.brella.kornea.toolkit.common.init
 
 @ExperimentalUnsignedTypes
 public open class WindowedInputFlow private constructor(
@@ -8,7 +10,7 @@ public open class WindowedInputFlow private constructor(
     override val baseOffset: ULong,
     public val windowSize: ULong,
     override val location: String?
-) : BaseDataCloseable(), OffsetInputFlow {
+) : BaseDataCloseable(), OffsetInputFlow, SuspendInit0 {
     public companion object {
         public suspend operator fun invoke(
             window: SeekableInputFlow,
@@ -19,11 +21,7 @@ public open class WindowedInputFlow private constructor(
                     offset.plus(windowSize).toString(16)
                         .toUpperCase()
                 }h]"
-        ): WindowedInputFlow {
-            val flow = Seekable(window, offset, windowSize, location)
-            flow.initialSkip()
-            return flow
-        }
+        ): WindowedInputFlow = Seekable(window, offset, windowSize, location)
 
         public suspend operator fun invoke(
             window: InputFlow,
@@ -35,11 +33,10 @@ public open class WindowedInputFlow private constructor(
                         .toUpperCase()
                 }h]"
         ): WindowedInputFlow {
-            val flow =
-                if (window is SeekableInputFlow) Seekable(window, offset, windowSize, location)
-                else WindowedInputFlow(window, offset, windowSize, location)
-            flow.initialSkip()
-            return flow
+            if (window is SeekableInputFlow)
+                return Seekable(window, offset, windowSize, location)
+
+            return init(WindowedInputFlow(window, offset, windowSize, location))
         }
     }
 
@@ -59,11 +56,7 @@ public open class WindowedInputFlow private constructor(
                         offset.plus(windowSize).toString(16)
                             .toUpperCase()
                     }h]"
-            ): WindowedInputFlow {
-                val flow = Seekable(window, offset, windowSize, location)
-                flow.initialSkip()
-                return flow
-            }
+            ): Seekable = init(Seekable(window, offset, windowSize, location))
         }
 
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
@@ -134,7 +127,7 @@ public open class WindowedInputFlow private constructor(
     override suspend fun size(): ULong = windowSize
     override suspend fun position(): ULong = windowPosition
 
-    public suspend fun initialSkip() {
+    override suspend fun init() {
         window.skip(baseOffset)
     }
 
