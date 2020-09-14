@@ -138,4 +138,5 @@ public open class WindowedInputFlow private constructor(
     }
 
     override suspend fun globalOffset(): ULong = baseOffset + window.globalOffset()
+    override suspend fun absPosition(): ULong = (window as? InputFlowWithBacking)?.absPosition() ?: window.position()
 }

@@ -111,4 +111,5 @@ public open class SinkOffsetInputFlow private constructor(
     }
 
     override suspend fun globalOffset(): ULong = baseOffset + backing.globalOffset()
+    override suspend fun absPosition(): ULong = (backing as? InputFlowWithBacking)?.absPosition() ?: backing.position()
 }

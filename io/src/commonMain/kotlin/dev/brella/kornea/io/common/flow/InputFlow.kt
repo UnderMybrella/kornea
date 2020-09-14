@@ -50,6 +50,7 @@ public interface PeekableInputFlow: InputFlow {
 @ExperimentalUnsignedTypes
 public interface InputFlowWithBacking: InputFlow {
     public suspend fun globalOffset(): ULong
+    public suspend fun absPosition(): ULong
 }
 
 @ExperimentalUnsignedTypes
