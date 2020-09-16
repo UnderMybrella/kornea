@@ -123,16 +123,19 @@ public class AsyncFileOutputFlow(
     override suspend fun whenClosed() {
         super.whenClosed()
 
-        if (isLocalChannel) {
-            mutex.withLock {
-                flushBuffer()
+        mutex.withLock {
+            if (buffer.position() != 0) {
+                buffer.flipSafe()
+                channel.writeAwaitOrNull(buffer, filePointer)?.let { filePointer += it }
+                buffer.clearSafe()
+            }
+
+            if (isLocalChannel) {
                 runInterruptible(Dispatchers.IO) {
                     channel.force(true)
                     channel.close()
                 }
             }
-        } else {
-            mutex.withLock { flushBuffer() }
         }
     }
 }
