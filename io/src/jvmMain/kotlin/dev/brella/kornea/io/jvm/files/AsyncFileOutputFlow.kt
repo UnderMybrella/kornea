@@ -3,6 +3,7 @@ package dev.brella.kornea.io.jvm.files
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.flow.CountingOutputFlow
 import dev.brella.kornea.io.common.flow.PrintOutputFlow
+import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.flipSafe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
@@ -76,7 +77,7 @@ public class AsyncFileOutputFlow(
         if (!closed && buffer.position() != 0) {
             buffer.flipSafe()
             channel.writeAwaitOrNull(buffer, filePointer)?.let { filePointer += it }
-            buffer.clear()
+            buffer.clearSafe()
         }
     }
 
@@ -130,6 +131,8 @@ public class AsyncFileOutputFlow(
                     channel.close()
                 }
             }
+        } else {
+            mutex.withLock { flushBuffer() }
         }
     }
 }
