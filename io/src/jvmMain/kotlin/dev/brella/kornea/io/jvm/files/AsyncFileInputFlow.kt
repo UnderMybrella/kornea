@@ -291,7 +291,7 @@ public class AsyncFileInputFlow private constructor(
             when (mode) {
                 EnumSeekMode.FROM_BEGINNING -> {
                     if (pos in (flowFilePointer - buffer.limit()) until flowFilePointer) {
-                        buffer.positionSafe((flowFilePointer - pos).toInt())
+                        buffer.positionSafe((pos - (flowFilePointer - buffer.limit())).toInt())
                     } else {
                         flowFilePointer = pos
                         buffer.positionSafe(0).limitSafe(0)
@@ -308,7 +308,7 @@ public class AsyncFileInputFlow private constructor(
                 EnumSeekMode.FROM_END -> {
                     val pos = size().toLong() - pos
                     if (pos in (flowFilePointer - buffer.limit()) until flowFilePointer) {
-                        buffer.positionSafe((flowFilePointer - pos).toInt())
+                        buffer.positionSafe((pos - (flowFilePointer - buffer.limit())).toInt())
                     } else {
                         flowFilePointer = pos
                         buffer.positionSafe(0).limitSafe(0)
