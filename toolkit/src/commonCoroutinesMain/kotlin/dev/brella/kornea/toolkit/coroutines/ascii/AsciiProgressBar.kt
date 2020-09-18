@@ -3,10 +3,8 @@ package dev.brella.kornea.toolkit.coroutines.ascii
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.toolkit.common.*
 import dev.brella.kornea.toolkit.coroutines.ChannelBasedProgressBar
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.*
 import kotlin.time.Duration
@@ -332,8 +330,9 @@ public suspend inline fun <T> progressBar(
     updateInterval: Duration = AsciiProgressBarConfig.defaultUpdateInterval,
     updateOnEmpty: Boolean = AsciiProgressBarConfig.GLOBAL_DEFAULT_UPDATE_ON_EMPTY,
     crossinline op: suspend ProgressBar.() -> T
-): T = coroutineScope {
-    val bar = asciiProgressBar(
+): T {
+    val scope = CoroutineScope(context)
+    val bar = scope.asciiProgressBar(
         progressLimit,
         trackLength,
         trackStyle,
@@ -347,9 +346,11 @@ public suspend inline fun <T> progressBar(
     )
 
     try {
-        bar.op()
+        return bar.op()
     } finally {
         bar.complete()
+
+        scope.coroutineContext[Job]?.cancelAndJoin()
     }
 }
 
@@ -367,8 +368,9 @@ public suspend inline fun <T> AsciiProgressBarConfig.progressBar(
     updateInterval: Duration = defaultUpdateInterval,
     updateOnEmpty: Boolean = defaultUpdateOnEmpty,
     crossinline op: suspend ProgressBar.() -> T
-): T = coroutineScope {
-    val bar = asciiProgressBar(
+): T {
+    val scope = CoroutineScope(context)
+    val bar = scope.asciiProgressBar(
         progressLimit,
         trackLength,
         trackStyle,
@@ -382,8 +384,10 @@ public suspend inline fun <T> AsciiProgressBarConfig.progressBar(
     )
 
     try {
-        bar.op()
+        return bar.op()
     } finally {
         bar.complete()
+
+        scope.coroutineContext[Job]?.cancelAndJoin()
     }
 }
