@@ -238,7 +238,8 @@ internal expect inline fun AsciiProgressBarConfig.Companion.globalDefaultContext
 
 @OptIn(ExperimentalTime::class)
 @AvailableSince(KorneaToolkit.VERSION_3_0_0_ALPHA)
-internal class AsciiProgressBar(
+@PublishedApi
+internal class AsciiProgressBar constructor(
     scope: CoroutineScope,
     override val progressLimit: Long,
     val trackLength: Int,
@@ -287,9 +288,8 @@ internal class AsciiProgressBar(
 }
 
 @ExperimentalTime
-@PublishedApi
 @AvailableSince(KorneaToolkit.VERSION_3_0_0_ALPHA)
-internal suspend fun CoroutineScope.asciiProgressBar(
+public suspend fun CoroutineScope.createAsciiProgressBar(
     progressLimit: Long,
     trackLength: Int,
     trackStyle: AsciiProgressBarStyle,
@@ -332,7 +332,7 @@ public suspend inline fun <T> progressBar(
     crossinline op: suspend ProgressBar.() -> T
 ): T {
     val scope = CoroutineScope(context)
-    val bar = scope.asciiProgressBar(
+    val bar = scope.createAsciiProgressBar(
         progressLimit,
         trackLength,
         trackStyle,
@@ -370,7 +370,7 @@ public suspend inline fun <T> AsciiProgressBarConfig.progressBar(
     crossinline op: suspend ProgressBar.() -> T
 ): T {
     val scope = CoroutineScope(context)
-    val bar = scope.asciiProgressBar(
+    val bar = scope.createAsciiProgressBar(
         progressLimit,
         trackLength,
         trackStyle,
