@@ -2,6 +2,7 @@
 
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.FlowPacket
 import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 
@@ -33,7 +34,7 @@ public interface CountingOutputFlow: OutputFlow {
 
 @ExperimentalUnsignedTypes
 public interface SeekableOutputFlow: OutputFlow {
-
+    public suspend fun seek(pos: Long, mode: EnumSeekMode): ULong
 }
 
 @ExperimentalUnsignedTypes

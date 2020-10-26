@@ -28,9 +28,6 @@ public interface InputFlow : ObservableDataCloseable {
     public suspend fun read(b: ByteArray): Int? = read(b, 0, b.size)
     public suspend fun read(b: ByteArray, off: Int, len: Int): Int?
     public suspend fun skip(n: ULong): ULong?
-    @Suppress("DeprecatedCallableAddReplaceWith")
-    @Deprecated("Use SeekableInputFlow", level = DeprecationLevel.ERROR)
-    public suspend fun seek(pos: Long, mode: Int): ULong? = null
     public suspend fun position(): ULong
 
     public suspend fun available(): ULong?

@@ -1,10 +1,14 @@
 package dev.brella.kornea.io.jvm.files
 
 import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.flow.CountingOutputFlow
 import dev.brella.kornea.io.common.flow.PrintOutputFlow
+import dev.brella.kornea.io.common.flow.SeekableOutputFlow
 import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.flipSafe
+import dev.brella.kornea.io.jvm.limitSafe
+import dev.brella.kornea.io.jvm.positionSafe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.sync.Mutex
@@ -21,7 +25,7 @@ public class AsyncFileOutputFlow(
     private val channel: AsynchronousFileChannel,
     private val isLocalChannel: Boolean,
     public val backing: Path
-) : BaseDataCloseable(), CountingOutputFlow, PrintOutputFlow {
+) : BaseDataCloseable(), CountingOutputFlow, SeekableOutputFlow, PrintOutputFlow {
     public companion object {
         public suspend fun open(
             path: Path,
@@ -119,6 +123,39 @@ public class AsyncFileOutputFlow(
     }
 
     override suspend fun flush(): Unit = mutex.withLock { flushBuffer() }
+
+    override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong =
+        mutex.withLock {
+            when (mode) {
+                EnumSeekMode.FROM_BEGINNING -> {
+                    if (pos in (filePointer - buffer.limit()) until filePointer) {
+                        buffer.positionSafe((pos - (filePointer - buffer.limit())).toInt())
+                    } else {
+                        filePointer = pos
+                        buffer.positionSafe(0).limitSafe(0)
+                    }
+                }
+                EnumSeekMode.FROM_POSITION -> {
+                    if (buffer.position() + pos in 0..buffer.limit()) {
+                        buffer.positionSafe((buffer.position() + pos).toInt())
+                    } else {
+                        filePointer += buffer.position() + pos - buffer.limit()
+                        buffer.positionSafe(0).limitSafe(0)
+                    }
+                }
+                EnumSeekMode.FROM_END -> {
+                    val pos = runInterruptible { channel.size() } - pos
+                    if (pos in (filePointer - buffer.limit()) until filePointer) {
+                        buffer.positionSafe((pos - (filePointer - buffer.limit())).toInt())
+                    } else {
+                        filePointer = pos
+                        buffer.positionSafe(0).limitSafe(0)
+                    }
+                }
+            }
+
+            (filePointer - buffer.limit() + buffer.position()).toULong()
+        }
 
     override suspend fun whenClosed() {
         super.whenClosed()

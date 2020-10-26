@@ -34,10 +34,6 @@ public class AsyncFileInputFlow private constructor(
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
 
-        private val THREAD_POOL: KorneaPool<CoroutineContext> = KorneaPools.newCachedPool(Int.MAX_VALUE) {
-            PoolableWrapper(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
-        }
-
         public suspend operator fun invoke(
             channel: AsynchronousFileChannel,
             localChannel: Boolean,
