@@ -72,9 +72,9 @@ public suspend inline fun PeekableInputFlow.peek(b: ByteArray, off: Int, len: In
 public suspend inline fun InputFlow.skip(number: Number): ULong? = skip(number.toLong().toULong())
 
 @ExperimentalUnsignedTypes
-public suspend fun InputFlow.readBytes(bufferSize: Int = 8192): ByteArray {
+public suspend fun InputFlow.readBytes(bufferSize: Int = 8192, dataSize: Int = Int.MAX_VALUE): ByteArray {
     val buffer = BinaryOutputFlow()
-    copyTo(buffer, bufferSize)
+    copyTo(buffer, bufferSize, dataSize)
     return buffer.getData()
 }
 

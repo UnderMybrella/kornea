@@ -403,6 +403,17 @@ public fun ByteArray.readUInt32BE(index: Int): UInt? {
     return ((a shl 24) or (b shl 16) or (c shl 8) or d)
 }
 
+public fun ByteArray.readInt24LE(index: Int): Int? {
+    if (size - 3 < index)
+        return null
+
+    val a = this[index].toInt() and 0xFF
+    val b = this[index + 1].toInt() and 0xFF
+    val c = this[index + 2].toInt() and 0xFF
+
+    return (c shl 16) or (b shl 8) or a
+}
+
 public fun ByteArray.readInt24BE(index: Int): Int? {
     if (size - 3 < index)
         return null
