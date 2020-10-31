@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 const val KOTLIN_VERSION = "1.4.0"
 
 const val KOTLINX_ATOMICFU_VERSION = "0.14.4"
-const val KOTLINX_COROUTINES_VERSION = "1.3.9"
+const val KOTLINX_COROUTINES_VERSION = "1.4.0"
 const val SHADOW_PLUGIN_VERSION = "4.0.3"
 const val JMH_PLUGIN_VERSION = "0.5.0"
 
