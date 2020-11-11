@@ -74,4 +74,4 @@ internal suspend fun StableRef<*>?.closeFinally(cause: Throwable?) = when {
         }
 }
 
-suspend fun <T : StableRef<*>> Array<T>.disposeAll() = forEach { data -> data.dispose() }
+public suspend fun <T : StableRef<*>> Array<T>.disposeAll(): Unit = forEach { data -> data.dispose() }
