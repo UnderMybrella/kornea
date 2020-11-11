@@ -39,3 +39,6 @@ public actual class StdinInputFlow(location: String? = "stdin") : InputFlow, Con
 }
 
 public expect fun readFromStdin(buffer: ByteArray): Int
+public actual fun readFromStdin(buffer: ByteArray): Int {
+    TODO("Not yet implemented")
+}

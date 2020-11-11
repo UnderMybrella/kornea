@@ -10,20 +10,13 @@ import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 
 @ExperimentalUnsignedTypes
-class FileInputFlow(val fp: FilePointer, override val location: String? = null): SeekableInputFlow {
-    constructor(fp: CPointer<FILE>, location: String? = null): this(
-        FilePointer(
-            fp
-        ), location)
+public class FileInputFlow(private val fp: FilePointer, override val location: String? = null): SeekableInputFlow, BaseDataCloseable() {
+    public constructor(fp: CPointer<FILE>, location: String? = null): this(
+        FilePointer(fp), location)
 
-    override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
-
-    private var closed: Boolean = false
-    override val isClosed: Boolean
-        get() = closed
     private val size = fp.size()
 
-    private suspend fun <T> io(block: suspend () -> T): T = block()
+    private inline fun <T> io(block: () -> T): T = block()
 
     override suspend fun read(): Int? = io { fp.read() }
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? {
@@ -54,12 +47,9 @@ class FileInputFlow(val fp: FilePointer, override val location: String? = null):
         return position()
     }
 
-    override suspend fun close() {
-        super.close()
+    override suspend fun whenClosed() {
+        super.whenClosed()
 
-        if (!closed) {
-            io { fp.close() }
-            closed = true
-        }
+        io { fp.close() }
     }
 }

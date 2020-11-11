@@ -2,7 +2,7 @@ apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 //apply plugin: 'kotlinx-atomicfu'
 
-version = "4.0.1-alpha"
+version = "4.1.0-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
@@ -20,7 +20,7 @@ multiplatform {
 //            }
 //        }
 //    }
-//    linuxX64()
+    linuxX64()
 //    linuxArm64()
 
     sourceSets {
@@ -40,7 +40,7 @@ multiplatform {
         }
 
         defineSourceSet("native", dependsOn = "common")
-        defineSourceSet("nativeCoroutine", dependsOn = listOf("native", "coroutine"))
+        defineSourceSet("nativeCoroutine", dependsOn = listOf("native", "coroutine"), includedIn = listOf("linuxX64"))
         defineSourceSet("nativeWithoutCoroutine", dependsOn = "native")
 
 
