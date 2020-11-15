@@ -1,6 +1,6 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 
-version = "2.0.2-alpha"
+version = "2.0.3-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
