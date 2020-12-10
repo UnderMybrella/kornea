@@ -5,7 +5,7 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.IntFlowState.Companion.base
 import kotlin.math.min
 
@@ -46,7 +46,7 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
             backing.close()
         }
 
-        override fun locationAsUrl(): KorneaResult<Url> = backing.locationAsUrl()
+        override fun locationAsUri(): KorneaResult<Uri> = backing.locationAsUri()
     }
 
     protected var buffer: ByteArray = ByteArray(DEFAULT_BUFFER_SIZE)

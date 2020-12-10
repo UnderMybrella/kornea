@@ -4,11 +4,9 @@ import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.errors.common.KorneaResult
 import kotlinx.cinterop.CPointer
 import dev.brella.kornea.io.common.*
-import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.InputFlowState
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
-import kotlinx.cinterop.get
 import platform.posix.FILE
 import platform.posix.SEEK_CUR
 import platform.posix.SEEK_END
@@ -24,7 +22,7 @@ public class FileInputFlow(private val fp: FilePointer, override val location: S
 
     private inline fun <T> io(block: () -> T): T = block()
 
-    override fun locationAsUrl(): KorneaResult<Url> = fp.locationAsUrl()
+    override fun locationAsUri(): KorneaResult<Uri> = fp.locationAsUrl()
 
     override suspend fun read(): Int? = io { fp.read() }
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? {

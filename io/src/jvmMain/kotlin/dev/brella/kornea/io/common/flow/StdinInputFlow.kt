@@ -1,7 +1,7 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.coroutine.flow.ConflatingBufferedInputFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -33,7 +33,7 @@ public actual class StdinInputFlow(location: String? = "stdin") : InputFlow, Con
         stdinChannels.remove(channel)
     }
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 
     init {
         stdinChannels.add(channel)

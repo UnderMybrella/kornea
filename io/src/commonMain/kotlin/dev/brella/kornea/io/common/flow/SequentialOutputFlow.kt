@@ -5,7 +5,7 @@ import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 
 /**
  * An output flow that calls each [OutputFlow] function on [sequence] one after another
@@ -33,5 +33,5 @@ public class SequentialOutputFlow(private val sequence: List<OutputFlow>) : Base
         sequence.forEach { flow -> flow.close() }
     }
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 }

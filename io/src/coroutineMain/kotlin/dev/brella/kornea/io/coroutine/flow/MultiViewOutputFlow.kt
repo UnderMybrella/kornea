@@ -5,7 +5,7 @@ import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.OutputFlow
 import dev.brella.kornea.toolkit.common.accessState
 import dev.brella.kornea.toolkit.common.mutateState
@@ -42,5 +42,5 @@ public open class MultiViewOutputFlow<O : OutputFlow> protected constructor(
         }
     }
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 }

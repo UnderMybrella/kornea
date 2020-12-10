@@ -6,7 +6,7 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.InputFlowState
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.PeekableInputFlow
@@ -284,7 +284,7 @@ public class AsyncFileInputFlow private constructor(
     override suspend fun position(): ULong =
         mutex.withLock { flowFilePointer - buffer.limit() + buffer.position() }.toULong()
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.Companion.success(Url.fromUri(backing.toUri()), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.Companion.success(Uri.fromUri(backing.toUri()), null)
 
     override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong =
         mutex.withLock {

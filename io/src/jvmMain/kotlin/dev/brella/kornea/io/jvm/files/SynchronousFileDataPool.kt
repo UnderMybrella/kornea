@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.jvm.files
 
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
 import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
 import java.io.File
@@ -23,6 +24,8 @@ public class SynchronousFileDataPool(
 
     override val closeHandlers: List<DataCloseableEventHandler>
         get() = super.closeHandlers
+
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(file), null)
 
     override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean =
         super.registerCloseHandler(handler)

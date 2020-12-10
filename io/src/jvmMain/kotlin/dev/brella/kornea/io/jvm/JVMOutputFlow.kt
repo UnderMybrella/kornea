@@ -4,7 +4,7 @@ import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.OutputFlow
 import dev.brella.kornea.io.common.flow.OutputFlowState
@@ -21,7 +21,7 @@ public open class JVMOutputFlow(protected val stream: OutputStream): BaseDataClo
     override suspend fun write(b: ByteArray, off: Int, len: Int): Unit = runInterruptible(Dispatchers.IO) { stream.write(b, off, len) }
     override suspend fun flush(): Unit = runInterruptible(Dispatchers.IO) { stream.flush() }
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 
     override suspend fun whenClosed() {
         super.whenClosed()

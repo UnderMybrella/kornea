@@ -31,6 +31,8 @@ public open class WindowedDataSource(
     override val reproducibility: DataSourceReproducibility
         get() = parent.reproducibility or DataSourceReproducibility.DETERMINISTIC_MASK
 
+    override fun locationAsUri(): KorneaResult<Uri> = parent.locationAsUri()
+
     override suspend fun canOpenInputFlow(): Boolean =
         parent.canOpenInputFlow() && super.canOpenInputFlow()
 

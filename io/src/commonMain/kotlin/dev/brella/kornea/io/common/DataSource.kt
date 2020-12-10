@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.common
 
+import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.flow.InputFlow
@@ -44,6 +45,9 @@ interface DataSource<out I : InputFlow> : ObservableDataCloseable {
      * These traits *may* change between invocations, so a fresh instance should be obtained each time
      */
     public val reproducibility: DataSourceReproducibility
+
+    @AvailableSince(KorneaIO.VERSION_5_0_0_ALPHA)
+    public fun locationAsUri(): KorneaResult<Uri>
 
     public suspend fun openInputFlow(): KorneaResult<I> = openNamedInputFlow(null)
     public suspend fun openNamedInputFlow(location: String? = null): KorneaResult<I>

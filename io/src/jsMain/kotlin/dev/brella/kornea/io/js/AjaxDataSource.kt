@@ -43,6 +43,9 @@ public class AjaxDataSource(
     override val reproducibility: DataSourceReproducibility =
         DataSourceReproducibility(isStatic = true, isRandomAccess = true)
 
+    override fun locationAsUri(): KorneaResult<Uri> =
+        Uri.from(url)
+
     override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> {
         waitIfNeeded()
 

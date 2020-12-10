@@ -3,7 +3,6 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
-import dev.brella.kornea.annotations.WrongBytecodeGenerated
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.*
@@ -34,7 +33,7 @@ public interface InputFlow : ObservableDataCloseable {
     public suspend fun remaining(): ULong?
     public suspend fun size(): ULong?
 
-    public fun locationAsUrl(): KorneaResult<Url>
+    public fun locationAsUri(): KorneaResult<Uri>
 }
 
 @ExperimentalUnsignedTypes

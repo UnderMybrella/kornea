@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.js
 
+import dev.brella.kornea.errors.common.KorneaResult
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.promise
@@ -19,7 +20,6 @@ public class JsFileDataSource(
     override val maximumInstanceCount: Int? = null,
     override val location: String? = file.name
 ) : LimitedInstanceDataSource.Typed<BinaryInputFlow, JsFileDataSource>(withBareOpener(this::openBareInputFlow)) {
-
     public companion object {
         @Suppress("RedundantSuspendModifier")
         public suspend fun openBareInputFlow(
@@ -49,6 +49,8 @@ public class JsFileDataSource(
 
     override val reproducibility: DataSourceReproducibility =
         DataSourceReproducibility(isStatic = true, isRandomAccess = true)
+
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 
     override suspend fun canOpenInputFlow(): Boolean {
         waitIfNeeded()

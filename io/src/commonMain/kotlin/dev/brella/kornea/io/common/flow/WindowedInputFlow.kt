@@ -143,5 +143,5 @@ public open class WindowedInputFlow private constructor(
     override suspend fun globalOffset(): ULong = baseOffset + window.globalOffset()
     override suspend fun absPosition(): ULong = (window as? InputFlowWithBacking)?.absPosition() ?: window.position()
 
-    override fun locationAsUrl(): KorneaResult<Url> = window.locationAsUrl()
+    override fun locationAsUri(): KorneaResult<Uri> = window.locationAsUri()
 }

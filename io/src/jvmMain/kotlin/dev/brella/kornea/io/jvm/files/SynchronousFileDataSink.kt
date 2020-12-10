@@ -14,6 +14,8 @@ public class SynchronousFileDataSink(public val backing: File) : BaseDataCloseab
     DataSink<SynchronousFileOutputFlow> {
     private val openInstances: MutableList<SynchronousFileOutputFlow> = ArrayList(1)
 
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toURI()), null)
+
     override suspend fun openOutputFlow(): KorneaResult<SynchronousFileOutputFlow> =
         when {
             closed -> korneaSinkClosed()

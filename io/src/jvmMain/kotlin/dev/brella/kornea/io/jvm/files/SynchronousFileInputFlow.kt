@@ -5,7 +5,7 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
@@ -20,7 +20,7 @@ public class SynchronousFileInputFlow(
 ) : BaseDataCloseable(), InputFlow, SeekableInputFlow, InputFlowState, IntFlowState by IntFlowState.base() {
     private val channel = RandomAccessFile(backingFile, "r")
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.success(Url.fromFile(backingFile), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backingFile), null)
 
     override suspend fun read(): Int? = runInterruptible(Dispatchers.IO) { channel.read().takeIf(::readResultIsValid) }
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? =

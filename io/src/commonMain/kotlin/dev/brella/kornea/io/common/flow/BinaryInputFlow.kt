@@ -76,5 +76,5 @@ public class BinaryInputFlow(
         return position()
     }
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 }

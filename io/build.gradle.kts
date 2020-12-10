@@ -2,7 +2,7 @@ apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 //apply plugin: 'kotlinx-atomicfu'
 
-version = "5.0.0-alpha"
+version = "5.0.1-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 

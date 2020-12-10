@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.common
 
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.flow.BinaryInputFlow
 
 @ExperimentalUnsignedTypes
@@ -19,4 +20,6 @@ public class BinaryDataSource(
 
     override val reproducibility: DataSourceReproducibility =
         DataSourceReproducibility(isStatic = true, isRandomAccess = true)
+
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 }

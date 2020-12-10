@@ -2,7 +2,7 @@ package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
 
 @ExperimentalUnsignedTypes
@@ -84,5 +84,5 @@ public open class BufferedOutputFlow(protected val backing: OutputFlow) : BaseDa
         backing.close()
     }
 
-    override fun locationAsUrl(): KorneaResult<Url> = backing.locationAsUrl()
+    override fun locationAsUri(): KorneaResult<Uri> = backing.locationAsUri()
 }

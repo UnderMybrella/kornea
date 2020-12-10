@@ -4,14 +4,13 @@ import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.InputFlowState
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.readResultIsValid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
-import java.io.FileInputStream
 import java.io.InputStream
 
 @ExperimentalUnsignedTypes
@@ -45,7 +44,7 @@ public open class JVMInputFlow private constructor(
     }
 
     override suspend fun position(): ULong = stream.count.toULong()
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 
     init {
         if (stream.markSupported()) {

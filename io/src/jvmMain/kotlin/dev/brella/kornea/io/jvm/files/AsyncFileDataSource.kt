@@ -2,8 +2,10 @@ package dev.brella.kornea.io.jvm.files
 
 import dev.brella.kornea.annotations.BlockingOperation
 import dev.brella.kornea.annotations.ExperimentalKorneaIO
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.DataSourceReproducibility
 import dev.brella.kornea.io.common.LimitedInstanceDataSource
+import dev.brella.kornea.io.common.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import java.io.File
@@ -52,6 +54,8 @@ public class AsyncFileDataSource(
         initialised = true
         backingChannel ?: AsynchronousFileChannel.open(backing, StandardOpenOption.READ)
     }
+
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toUri()), null)
 
     private suspend fun getChannel(): AsynchronousFileChannel =
         if (!initialised) runInterruptible(Dispatchers.IO) { channel } else channel

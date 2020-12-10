@@ -7,6 +7,7 @@ import dev.brella.kornea.io.common.DataSink
 import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkClosed
 import dev.brella.kornea.io.common.DataSink.Companion.korneaSinkUnknown
 import dev.brella.kornea.io.common.DataSink.Companion.korneaTooManySinksOpen
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 import dev.brella.kornea.toolkit.common.closeAll
 import kotlinx.coroutines.Dispatchers
@@ -72,6 +73,8 @@ public class AsyncFileDataSink(public val backing: Path, backingChannel: Asynchr
             null
         )
     }
+
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toUri()), null)
 
     private suspend fun getChannel(): AsynchronousFileChannel =
         if (!initialised) runInterruptible(Dispatchers.IO) { channel } else channel

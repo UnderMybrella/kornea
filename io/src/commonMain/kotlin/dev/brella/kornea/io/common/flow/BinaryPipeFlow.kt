@@ -104,5 +104,5 @@ public interface BinaryPipeFlow
     public fun getData(): ByteArray
     public fun getDataSize(): ULong
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 }

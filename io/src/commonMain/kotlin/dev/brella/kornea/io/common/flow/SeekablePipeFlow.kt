@@ -6,7 +6,7 @@ import dev.brella.kornea.errors.common.switchIfEmpty
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
 
 @AvailableSince(KorneaIO.VERSION_3_2_0_ALPHA)
@@ -16,7 +16,7 @@ public interface SeekablePipeFlow<I : SeekableInputFlow, O : SeekableOutputFlow>
             Sink(input, output)
     }
 
-    public data class Sink<I : SeekableInputFlow, O : SeekableOutputFlow>(override val input: I, override val output: O, val url: Url? = null) : SeekablePipeFlow<I, O>,
+    public data class Sink<I : SeekableInputFlow, O : SeekableOutputFlow>(override val input: I, override val output: O, val uri: Uri? = null) : SeekablePipeFlow<I, O>,
         BaseDataCloseable(), SeekableInputFlow by input, SeekableOutputFlow by output {
         override val isClosed: Boolean
             get() = super<BaseDataCloseable>.isClosed
@@ -38,10 +38,10 @@ public interface SeekablePipeFlow<I : SeekableInputFlow, O : SeekableOutputFlow>
             return super<BaseDataCloseable>.registerCloseHandler(handler)
         }
 
-        override fun locationAsUrl(): KorneaResult<Url> =
-            KorneaResult.successOrEmpty(url, null)
-                .switchIfEmpty { input.locationAsUrl() }
-                .switchIfEmpty { output.locationAsUrl() }
+        override fun locationAsUri(): KorneaResult<Uri> =
+            KorneaResult.successOrEmpty(uri, null)
+                .switchIfEmpty { input.locationAsUri() }
+                .switchIfEmpty { output.locationAsUri() }
     }
 
     public val input: I

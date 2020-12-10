@@ -1,7 +1,7 @@
 package dev.brella.kornea.io.posix
 
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import kotlinx.cinterop.*
 import dev.brella.kornea.toolkit.common.DataCloseable
 import platform.posix.*
@@ -21,7 +21,7 @@ public inline class FilePointer(public val fp: CPointer<FILE>): DataCloseable {
     public fun pos(): Long = ftell(fp)
     public fun seek(off: Long, whence: Int): Int = fseek(fp, off, whence)
 
-    public fun locationAsUrl(): KorneaResult<Url> {
+    public fun locationAsUrl(): KorneaResult<Uri> {
         val fd = fileno(fp)
         if (fd < 0) return KorneaResult.empty()
 
@@ -30,7 +30,7 @@ public inline class FilePointer(public val fp: CPointer<FILE>): DataCloseable {
         if (linkLength <= 0) return KorneaResult.empty()
 
         val linkPath = buffer.toKString(endIndex = linkLength.toInt())
-        return KorneaResult.success(Url.fromFile(linkPath), null)
+        return KorneaResult.success(Uri.fromFile(linkPath), null)
     }
 
     @ExperimentalUnsignedTypes

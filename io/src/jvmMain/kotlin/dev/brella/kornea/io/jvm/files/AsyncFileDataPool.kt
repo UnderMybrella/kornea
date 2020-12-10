@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.jvm.files
 
 import dev.brella.kornea.annotations.ExperimentalKorneaIO
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
 import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
 import kotlinx.coroutines.Dispatchers
@@ -79,6 +80,8 @@ public class AsyncFileDataPool(
 
     override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean =
         super.registerCloseHandler(handler)
+
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(path.toUri()), null)
 
     override suspend fun close() {
         super.close()

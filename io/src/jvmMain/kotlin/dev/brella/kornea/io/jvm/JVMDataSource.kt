@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.jvm
 
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
 import java.io.InputStream
 
@@ -24,4 +25,6 @@ public class JVMDataSource(
      */
     override val reproducibility: DataSourceReproducibility
         get() = DataSourceReproducibility(isUnreliable = true)
+
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 }

@@ -62,6 +62,8 @@ public actual class BinaryDataPool(
     override val isClosed: Boolean
         get() = closed || outputClosed
 
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
+
     actual override suspend fun openNamedInputFlow(location: String?): KorneaResult<BinaryInputFlow> =
         if (outputClosed) korneaSinkClosed() else super.openNamedInputFlow(location)
 

@@ -1,7 +1,9 @@
 package dev.brella.kornea.io.jvm.files
 
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.DataSourceReproducibility
 import dev.brella.kornea.io.common.LimitedInstanceDataSource
+import dev.brella.kornea.io.common.Uri
 import java.io.File
 
 @ExperimentalUnsignedTypes
@@ -27,4 +29,6 @@ public class SynchronousFileDataSource(
 
     override val reproducibility: DataSourceReproducibility =
         DataSourceReproducibility(isStatic = true, isRandomAccess = true)
+
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backing), null)
 }

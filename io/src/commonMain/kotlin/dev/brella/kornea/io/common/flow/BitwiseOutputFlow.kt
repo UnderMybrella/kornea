@@ -2,7 +2,7 @@ package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 
 @ExperimentalUnsignedTypes
 public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataCloseable(), OutputFlow {
@@ -109,5 +109,5 @@ public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataClosea
     }
     override suspend fun flush() {}
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 }

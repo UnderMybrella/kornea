@@ -5,7 +5,7 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.*
 import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.flipSafe
@@ -80,7 +80,7 @@ public class AsyncFileOutputFlow(
     override val streamOffset: Long
         get() = filePointer
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.success(Url.fromUri(backing.toUri()), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toUri()), null)
 
     private suspend fun flushBuffer() {
         if (!closed && buffer.position() != 0) {

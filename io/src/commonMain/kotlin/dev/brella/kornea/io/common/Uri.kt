@@ -3,7 +3,7 @@ package dev.brella.kornea.io.common
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.toolkit.common.clearToString
 
-public data class Url(val protocol: String, val authority: Url.Authority?, val path: String, val query: String?, val fragment: String?) {
+public data class Uri(val protocol: String, val authority: Uri.Authority?, val path: String, val query: String?, val fragment: String?) {
     public companion object {
         public const val PROTOCOL_HTTP: String = "http"
         public const val PROTOCOL_HTTPS: String = "https"
@@ -21,7 +21,7 @@ public data class Url(val protocol: String, val authority: Url.Authority?, val p
         private const val STATE_QUERY = 5
         private const val STATE_FRAGMENT = 6
 
-        public fun from(spec: String): KorneaResult<Url> {
+        public fun from(spec: String): KorneaResult<Uri> {
             val builder = StringBuilder()
             var scheme: String? = null
             var userinfo: String? = null
@@ -198,10 +198,10 @@ public data class Url(val protocol: String, val authority: Url.Authority?, val p
 
             val authority = if (host != null) Authority(userinfo, host, port?.toIntOrNull()) else null
 
-            return KorneaResult.success(Url(scheme, authority, path, query, fragment), null)
+            return KorneaResult.success(Uri(scheme, authority, path, query, fragment), null)
         }
 
-        public inline fun fromFile(path: String): Url = Url(PROTOCOL_FILE, null, path, null, null)
+        public inline fun fromFile(path: String): Uri = Uri(PROTOCOL_FILE, null, path, null, null)
     }
 
     public data class Authority(val userinfo: String?, val host: String, val port: Int?)

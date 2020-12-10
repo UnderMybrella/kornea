@@ -6,7 +6,7 @@ import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.*
 import dev.brella.kornea.toolkit.coroutines.ReadWriteSemaphore
 import dev.brella.kornea.toolkit.coroutines.withWritePermit
@@ -35,5 +35,5 @@ public open class SynchronisedOutputFlow<O : OutputFlow>(
         if (closeBacking) access { output.close() }
     }
 
-    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 }
