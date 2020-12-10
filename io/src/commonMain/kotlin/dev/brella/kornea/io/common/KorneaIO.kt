@@ -3,6 +3,8 @@ package dev.brella.kornea.io.common
 import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaIO {
+    public const val VERSION_5_0_0_ALPHA: String = "5.0.0-alpha"
+
     /**
      * kornea-io 3.4.0-alpha
      * - Add a buffer to BinaryInputFlow's by default, and also support int states for odd byte number flows

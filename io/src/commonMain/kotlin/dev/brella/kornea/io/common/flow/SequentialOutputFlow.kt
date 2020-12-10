@@ -1,15 +1,20 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
 
 /**
  * An output flow that calls each [OutputFlow] function on [sequence] one after another
  */
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_1_1_0_ALPHA)
-public class SequentialOutputFlow(private val sequence: List<OutputFlow>) : BaseDataCloseable(), OutputFlow {
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
+public class SequentialOutputFlow(private val sequence: List<OutputFlow>) : BaseDataCloseable(), OutputFlow,
+    OutputFlowState, IntFlowState by IntFlowState.base() {
     override suspend fun write(byte: Int) {
         sequence.forEach { flow -> flow.write(byte) }
     }
@@ -27,4 +32,6 @@ public class SequentialOutputFlow(private val sequence: List<OutputFlow>) : Base
 
         sequence.forEach { flow -> flow.close() }
     }
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 }

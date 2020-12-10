@@ -1,5 +1,7 @@
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
 import dev.brella.kornea.toolkit.common.BinaryArrayView
 import dev.brella.kornea.toolkit.common.BinaryListView
@@ -7,31 +9,12 @@ import dev.brella.kornea.toolkit.common.BinaryView
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "BinaryInputFlow doesn't need to implement InputFlowState, since it's not going to be much more efficient")
 public class BinaryInputFlow(
     private val view: BinaryView,
     private var pos: Int = 0,
     override val location: String? = null
-) : BaseDataCloseable(), InputFlow, PeekableInputFlow, SeekableInputFlow, IntFlowState, InputFlowState<BinaryInputFlow> {
-    private val buffer: ByteArray = ByteArray(8)
-
-    override val int16Packet: Int16Packet
-        get() = Int16Packet(buffer)
-    override val int24Packet: Int24Packet
-        get() = Int24Packet(buffer)
-    override val int32Packet: Int32Packet
-        get() = Int32Packet(buffer)
-    override val int40Packet: Int40Packet
-        get() = Int40Packet(buffer)
-    override val int48Packet: Int48Packet
-        get() = Int48Packet(buffer)
-    override val int56Packet: Int56Packet
-        get() = Int56Packet(buffer)
-    override val int64Packet: Int64Packet
-        get() = Int64Packet(buffer)
-
-    override val flow: BinaryInputFlow
-        get() = this
-
+) : BaseDataCloseable(), InputFlow, PeekableInputFlow, SeekableInputFlow {
     public constructor(array: ByteArray, pos: Int = 0, location: String? = null) :
             this(BinaryArrayView(array), pos, location)
 
@@ -72,7 +55,7 @@ public class BinaryInputFlow(
         return len
     }
 
-    override suspend fun skip(n: ULong): ULong? {
+    override suspend fun skip(n: ULong): ULong {
         val k = min((view.size() - pos).toULong(), n)
         pos += k.toInt()
         return k
@@ -92,4 +75,6 @@ public class BinaryInputFlow(
 
         return position()
     }
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 }

@@ -1,17 +1,21 @@
 package dev.brella.kornea.io.native.flow
 
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
-import dev.brella.kornea.io.common.flow.BufferedInputFlow
-import dev.brella.kornea.io.common.flow.InputFlow
-import dev.brella.kornea.io.common.flow.SeekableInputFlow
-import dev.brella.kornea.io.common.flow.WindowedInputFlow
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.flow.*
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.get
 
-public class PointerInputFlow(public val pointer: CPointer<ByteVar>, override val location: String? = pointer.toString()): SeekableInputFlow, BaseDataCloseable() {
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
+public class PointerInputFlow(public val pointer: CPointer<ByteVar>, override val location: String? = pointer.toString()): SeekableInputFlow, BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
     private var offset: Int = 0
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 
     override suspend fun read(): Int = pointer[offset++].toInt()
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int {

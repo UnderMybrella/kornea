@@ -1,5 +1,7 @@
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.errors.common.KorneaResult
+import dev.brella.kornea.io.common.Url
 import dev.brella.kornea.io.coroutine.flow.ConflatingBufferedInputFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +32,8 @@ public actual class StdinInputFlow(location: String? = "stdin") : InputFlow, Con
     private val collector: Job = GlobalScope.launch {
         stdinFlow.collect(channel::send)
     }
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 
     override suspend fun whenClosed() {
         super.whenClosed()

@@ -7,7 +7,7 @@ import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.toolkit.common.PrintFlow
 
 /**
- * An output flow that calls each [OutputFlow] function on [sequence] one after another
+ * An output flow that calls each [PrintFlow] function on [sequence] one after another
  */
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_1_3_0_ALPHA)

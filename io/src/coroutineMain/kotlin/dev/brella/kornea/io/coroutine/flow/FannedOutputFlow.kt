@@ -1,9 +1,14 @@
 package dev.brella.kornea.io.coroutine.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.OutputFlow
+import dev.brella.kornea.io.common.flow.OutputFlowState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -13,7 +18,8 @@ import kotlinx.coroutines.launch
  */
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_1_1_0_ALPHA)
-public class FannedOutputFlow(private val fan: List<OutputFlow>) : BaseDataCloseable(), OutputFlow {
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
+public class FannedOutputFlow(private val fan: List<OutputFlow>) : BaseDataCloseable(), OutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
     override suspend fun write(byte: Int) {
         coroutineScope {
             fan.forEach { flow ->
@@ -47,4 +53,6 @@ public class FannedOutputFlow(private val fan: List<OutputFlow>) : BaseDataClose
             }
         }
     }
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 }

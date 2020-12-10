@@ -1,10 +1,12 @@
 package dev.brella.kornea.io.jvm.files
 
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
-import dev.brella.kornea.io.common.flow.CountingOutputFlow
-import dev.brella.kornea.io.common.flow.PrintOutputFlow
-import dev.brella.kornea.io.common.flow.SeekableOutputFlow
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.flow.*
 import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.flipSafe
 import dev.brella.kornea.io.jvm.limitSafe
@@ -21,11 +23,12 @@ import java.nio.file.StandardOpenOption
 import java.util.concurrent.ExecutorService
 
 @ExperimentalUnsignedTypes
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class AsyncFileOutputFlow(
     private val channel: AsynchronousFileChannel,
     private val isLocalChannel: Boolean,
     public val backing: Path
-) : BaseDataCloseable(), CountingOutputFlow, SeekableOutputFlow, PrintOutputFlow {
+) : BaseDataCloseable(), CountingOutputFlow, SeekableOutputFlow, PrintOutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
         public suspend fun open(
             path: Path,
@@ -76,6 +79,8 @@ public class AsyncFileOutputFlow(
 
     override val streamOffset: Long
         get() = filePointer
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.success(Url.fromUri(backing.toUri()), null)
 
     private suspend fun flushBuffer() {
         if (!closed && buffer.position() != 0) {

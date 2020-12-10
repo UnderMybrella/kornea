@@ -1,7 +1,13 @@
 package dev.brella.kornea.io.jvm.files
 
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
 import dev.brella.kornea.io.common.flow.CountingOutputFlow
+import dev.brella.kornea.io.common.flow.IntFlowState
+import dev.brella.kornea.io.common.flow.OutputFlowState
 import dev.brella.kornea.io.common.flow.PrintOutputFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
@@ -9,12 +15,15 @@ import java.io.File
 import java.io.FileOutputStream
 
 @ExperimentalUnsignedTypes
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class SynchronousFileOutputFlow(public val backing: File) : BaseDataCloseable(), CountingOutputFlow,
-    PrintOutputFlow {
+    PrintOutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
     private val stream = FileOutputStream(backing)
     private val channel = stream.channel
     override val streamOffset: Long
         get() = channel.position()
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.success(Url.fromFile(backing), null)
 
     override suspend fun write(byte: Int): Unit = runInterruptible(Dispatchers.IO) { stream.write(byte) }
     override suspend fun write(b: ByteArray, off: Int, len: Int): Unit =

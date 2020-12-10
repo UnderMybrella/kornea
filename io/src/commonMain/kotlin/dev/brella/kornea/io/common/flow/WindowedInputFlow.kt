@@ -1,16 +1,19 @@
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
 import dev.brella.kornea.toolkit.common.SuspendInit0
 import dev.brella.kornea.toolkit.common.init
 
 @ExperimentalUnsignedTypes
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public open class WindowedInputFlow private constructor(
     protected open val window: InputFlow,
     override val baseOffset: ULong,
     public val windowSize: ULong,
     override val location: String?
-) : BaseDataCloseable(), OffsetInputFlow, SuspendInit0 {
+) : BaseDataCloseable(), OffsetInputFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
         public suspend operator fun invoke(
             window: SeekableInputFlow,
@@ -139,4 +142,6 @@ public open class WindowedInputFlow private constructor(
 
     override suspend fun globalOffset(): ULong = baseOffset + window.globalOffset()
     override suspend fun absPosition(): ULong = (window as? InputFlowWithBacking)?.absPosition() ?: window.position()
+
+    override fun locationAsUrl(): KorneaResult<Url> = window.locationAsUrl()
 }

@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
 import kotlin.math.min
 
@@ -129,4 +130,6 @@ public open class BitwiseInputFlow protected constructor(protected val flow: Inp
     override suspend fun remaining(): ULong? = flow.remaining()
     override suspend fun size(): ULong? = flow.size()
     override suspend fun position(): ULong = flow.position()
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 }

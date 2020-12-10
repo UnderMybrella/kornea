@@ -1,7 +1,9 @@
 package dev.brella.kornea.io.coroutine.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
 import dev.brella.kornea.io.common.flow.BufferedInputFlow
 import dev.brella.kornea.io.common.flow.InputFlow
 import kotlinx.coroutines.*
@@ -61,4 +63,6 @@ public class FannedInputFlow(
 
     override suspend fun remaining(): ULong? = null
     override suspend fun size(): ULong? = null
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 }

@@ -33,40 +33,9 @@ public interface InputFlow : ObservableDataCloseable {
     public suspend fun available(): ULong?
     public suspend fun remaining(): ULong?
     public suspend fun size(): ULong?
-}
 
-@ExperimentalUnsignedTypes
-public interface PeekableInputFlow: InputFlow {
-    public suspend fun peek(forward: Int): Int?
-    @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-    public suspend fun peek(forward: Int, b: ByteArray): Int? = peek(forward, b, 0, b.size)
-    @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-    public suspend fun peek(forward: Int, b: ByteArray, off: Int, len: Int): Int?
+    public fun locationAsUrl(): KorneaResult<Url>
 }
-
-@ExperimentalUnsignedTypes
-public interface InputFlowWithBacking: InputFlow {
-    public suspend fun globalOffset(): ULong
-    public suspend fun absPosition(): ULong
-}
-
-@ExperimentalUnsignedTypes
-public interface OffsetInputFlow : InputFlow, InputFlowWithBacking {
-    public val baseOffset: ULong
-}
-
-@ExperimentalUnsignedTypes
-public interface SeekableInputFlow: InputFlow {
-    public suspend fun seek(pos: Long, mode: EnumSeekMode): ULong
-}
-
-@ExperimentalUnsignedTypes
-@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public suspend inline fun PeekableInputFlow.peek(): Int? = peek(1)
-@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public suspend inline fun PeekableInputFlow.peek(b: ByteArray): Int? = peek(1, b)
-@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public suspend inline fun PeekableInputFlow.peek(b: ByteArray, off: Int, len: Int): Int? = peek(1, b, off, len)
 
 @ExperimentalUnsignedTypes
 public suspend inline fun InputFlow.skip(number: Number): ULong? = skip(number.toLong().toULong())
@@ -81,14 +50,6 @@ public suspend fun InputFlow.readBytes(bufferSize: Int = 8192, dataSize: Int = I
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
 public suspend inline fun InputFlow.readPacket(packet: FlowPacket): ByteArray? = if (read(packet.buffer, 0, packet.size) == packet.size) packet.buffer else null
-
-@ExperimentalUnsignedTypes
-@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public suspend inline fun PeekableInputFlow.peekPacket(forward: Int, packet: FlowPacket): ByteArray? = if (peek(forward, packet.buffer, 0, packet.size) == packet.size) packet.buffer else null
-
-@ExperimentalUnsignedTypes
-@AvailableSince(KorneaIO.VERSION_2_0_0_ALPHA)
-public suspend inline fun PeekableInputFlow.peekPacket(packet: FlowPacket): ByteArray? = if (peek(packet.buffer, 0, packet.size) == packet.size) packet.buffer else null
 
 @ExperimentalUnsignedTypes
 public suspend fun InputFlow.readExact(count: Int): ByteArray? = readExact(ByteArray(count), 0, count)
@@ -141,37 +102,6 @@ public suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(
 }
 
 public inline fun readResultIsValid(byte: Int): Boolean = byte != -1
-
-//@ExperimentalUnsignedTypes
-//public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(block: () -> R): R = bookmark(this, block)
-@ExperimentalUnsignedTypes
-@WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("bookmarkCrossinline(t, block)", "dev.brella.kornea.io.common.flow.bookmarkCrossinline"))
-public suspend inline fun <T : SeekableInputFlow, R> bookmark(t: T, block: () -> R): R {
-//    contract {
-//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
-//    }
-
-    val position = t.position()
-    try {
-        return block()
-    } finally {
-        t.seek(position.toLong(), EnumSeekMode.FROM_BEGINNING)
-    }
-}
-
-@ExperimentalUnsignedTypes
-public suspend inline fun <T : SeekableInputFlow, R> bookmarkCrossinline(t: T, crossinline block: suspend () -> R): R {
-//    contract {
-//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
-//    }
-
-    val position = t.position()
-    try {
-        return block()
-    } finally {
-        t.seek(position.toLong(), EnumSeekMode.FROM_BEGINNING)
-    }
-}
 
 @ExperimentalUnsignedTypes
 public suspend fun InputFlow.readChunked(bufferSize: Int = BufferedInputFlow.DEFAULT_BUFFER_SIZE, operation: (buffer: ByteArray, offset: Int, length: Int) -> Unit): Long? {

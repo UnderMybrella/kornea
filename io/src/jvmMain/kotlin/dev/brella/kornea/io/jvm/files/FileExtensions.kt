@@ -90,22 +90,6 @@ public suspend fun AsynchronousFileChannel.writeAwaitOrNull(src: ByteBuffer, pos
     ) }
         .takeIf(::readResultIsValid)
 
-@ExperimentalUnsignedTypes
-@Deprecated("If you need synchronous file input, explicitly use SynchronousFileInputFlow", level = DeprecationLevel.ERROR)
-public typealias FileInputFlow= SynchronousFileInputFlow
-@ExperimentalUnsignedTypes
-@Deprecated("If you need synchronous file output, explicitly use SynchronousFileOutputFlow", level = DeprecationLevel.ERROR)
-public typealias FileOutputFlow= SynchronousFileOutputFlow
-@ExperimentalUnsignedTypes
-@Deprecated("If you need synchronous file pools, explicitly use SynchronousFileDataPools", level = DeprecationLevel.ERROR)
-public typealias FileDataPool= SynchronousFileDataPool
-@ExperimentalUnsignedTypes
-@Deprecated("If you need synchronous file sinks, explicitly use SynchronousFileDataSource", level = DeprecationLevel.ERROR)
-public typealias FileDataSink= SynchronousFileDataSink
-@ExperimentalUnsignedTypes
-@Deprecated("If you need synchronous file sources, explicitly use SynchronousFileDataSource", level = DeprecationLevel.ERROR)
-public typealias FileDataSource= SynchronousFileDataSource
-
 @BlockingOperation
 public fun openAsynchronousFileChannel(
     path: Path,

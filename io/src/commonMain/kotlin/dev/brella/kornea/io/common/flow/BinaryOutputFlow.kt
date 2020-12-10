@@ -1,8 +1,10 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
 import dev.brella.kornea.toolkit.common.BinaryView
 
 @ExperimentalUnsignedTypes
@@ -44,4 +46,6 @@ public interface BinaryOutputFlow : CountingOutputFlow, BinaryView {
 
     public fun getData(): ByteArray
     public fun getDataSize(): ULong
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 }

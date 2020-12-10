@@ -2,8 +2,10 @@
 
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.FlowPacket
+import dev.brella.kornea.io.common.Url
 import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 
 @ExperimentalUnsignedTypes
@@ -15,6 +17,8 @@ public interface OutputFlow: ObservableDataCloseable {
     public suspend fun write(b: ByteArray): Unit = write(b, 0, b.size)
     public suspend fun write(b: ByteArray, off: Int, len: Int)
     public suspend fun flush()
+
+    public fun locationAsUrl(): KorneaResult<Url>
 }
 
 public interface OutputFlowByDelegate<O: OutputFlow>: OutputFlow {

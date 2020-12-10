@@ -1,14 +1,18 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.flow.IntFlowState.Companion.base
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_4_2_0_INDEV)
-public abstract class BufferedInputFlow(override val location: String?) : BaseDataCloseable(), PeekableInputFlow {
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
+public abstract class BufferedInputFlow(override val location: String?) : BaseDataCloseable(), PeekableInputFlow, InputFlowState, IntFlowState by base() {
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
         public const val MAX_BUFFER_SIZE: Int = Int.MAX_VALUE - 8
@@ -41,6 +45,8 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
             super.whenClosed()
             backing.close()
         }
+
+        override fun locationAsUrl(): KorneaResult<Url> = backing.locationAsUrl()
     }
 
     protected var buffer: ByteArray = ByteArray(DEFAULT_BUFFER_SIZE)
@@ -165,7 +171,7 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
             n += nread
             if (n >= len)
                 return n
-            if (available() ?: 0u <= 0u)
+            if (available() <= 0u)
                 return n
         }
     }

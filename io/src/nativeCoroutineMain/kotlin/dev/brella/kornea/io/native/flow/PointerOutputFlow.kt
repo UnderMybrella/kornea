@@ -1,16 +1,25 @@
 package dev.brella.kornea.io.native.flow
 
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
 import dev.brella.kornea.io.common.flow.BufferedOutputFlow
+import dev.brella.kornea.io.common.flow.IntFlowState
+import dev.brella.kornea.io.common.flow.OutputFlowState
 import dev.brella.kornea.io.common.flow.SeekableOutputFlow
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.set
 
-public class PointerOutputFlow(public val pointer: CPointer<ByteVar>): SeekableOutputFlow, BaseDataCloseable() {
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
+public class PointerOutputFlow(public val pointer: CPointer<ByteVar>): SeekableOutputFlow, BaseDataCloseable(), OutputFlowState, IntFlowState by IntFlowState.base() {
     public var offset: Int = 0
         private set
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.empty()
 
     override suspend fun write(byte: Int) {
         pointer[offset++] = byte.toByte()

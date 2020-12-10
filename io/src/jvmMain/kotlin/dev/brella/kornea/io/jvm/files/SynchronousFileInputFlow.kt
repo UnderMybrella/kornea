@@ -1,21 +1,26 @@
 package dev.brella.kornea.io.jvm.files
 
+import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
-import dev.brella.kornea.io.common.flow.InputFlow
-import dev.brella.kornea.io.common.flow.SeekableInputFlow
-import dev.brella.kornea.io.common.flow.readResultIsValid
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.flow.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import java.io.File
 import java.io.RandomAccessFile
 
 @ExperimentalUnsignedTypes
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class SynchronousFileInputFlow(
     public val backingFile: File,
     override val location: String? = backingFile.absolutePath
-) : BaseDataCloseable(), InputFlow, SeekableInputFlow {
+) : BaseDataCloseable(), InputFlow, SeekableInputFlow, InputFlowState, IntFlowState by IntFlowState.base() {
     private val channel = RandomAccessFile(backingFile, "r")
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.success(Url.fromFile(backingFile), null)
 
     override suspend fun read(): Int? = runInterruptible(Dispatchers.IO) { channel.read().takeIf(::readResultIsValid) }
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? =

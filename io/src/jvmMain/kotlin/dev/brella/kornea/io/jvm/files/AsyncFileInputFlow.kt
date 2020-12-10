@@ -1,15 +1,18 @@
 package dev.brella.kornea.io.jvm.files
 
+import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
+import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Url
+import dev.brella.kornea.io.common.flow.InputFlowState
+import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.PeekableInputFlow
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
 import dev.brella.kornea.io.jvm.*
 import dev.brella.kornea.toolkit.common.*
-import dev.brella.kornea.toolkit.coroutines.pools.KorneaPool
-import dev.brella.kornea.toolkit.coroutines.pools.KorneaPools
-import dev.brella.kornea.toolkit.coroutines.pools.PoolableWrapper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -19,18 +22,17 @@ import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.util.concurrent.Executors
-import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KMutableProperty0
 
 @ExperimentalUnsignedTypes
 @ExperimentalKorneaToolkit
+@ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class AsyncFileInputFlow private constructor(
     private val channel: AsynchronousFileChannel,
     private val localChannel: Boolean,
     public val backing: Path,
     override val location: String?
-) : BaseDataCloseable(), PeekableInputFlow, SeekableInputFlow, SuspendInit0 {
+) : BaseDataCloseable(), PeekableInputFlow, SeekableInputFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
 
@@ -265,7 +267,7 @@ public class AsyncFileInputFlow private constructor(
 
             if (buffer.remaining() < n.toInt()) {
                 val avail = buffer.remaining()
-                buffer.positionSafe(buffer.capacity())
+                buffer.positionSafe(buffer.limit())
                 flowFilePointer += n.toInt() - avail
 
                 return@withLock n
@@ -281,6 +283,8 @@ public class AsyncFileInputFlow private constructor(
     override suspend fun size(): ULong = runInterruptible(Dispatchers.IO) { channel.size().toULong() }
     override suspend fun position(): ULong =
         mutex.withLock { flowFilePointer - buffer.limit() + buffer.position() }.toULong()
+
+    override fun locationAsUrl(): KorneaResult<Url> = KorneaResult.Companion.success(Url.fromUri(backing.toUri()), null)
 
     override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong =
         mutex.withLock {
