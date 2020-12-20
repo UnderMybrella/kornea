@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
 import kotlin.math.min
@@ -33,6 +34,13 @@ public open class BitwiseInputFlow protected constructor(protected val flow: Inp
                     flow.skip(bytesToSkip.toULong())
                 currentPos = bitsRemain % 8
             }
+        }
+    }
+    @AvailableSince(KorneaIO.VERSION_5_1_0_ALPHA)
+    public suspend fun skipRemainingBits() {
+        if (currentInt == null || currentPos > 0) {
+            currentInt = flow.read()
+            currentPos = 0
         }
     }
 

@@ -1,7 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 //apply plugin: 'kotlinx-atomicfu'
 
-version = "3.1.7-alpha"
+version = "3.2.0-alpha"
 
 multiplatform {
     jvm()
@@ -52,6 +54,8 @@ multiplatform {
 
                 implementation(project(":kornea-annotations"))
                 implementation(project(":kornea-errors"))
+
+//                implementation("dev.neontech.lumberjack:lumberjack:0.6.0")
             }
         }
 
