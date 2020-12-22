@@ -2,6 +2,9 @@ package dev.brella.kornea.img
 
 open class RgbMatrix(val width: Int, val height: Int, val rgb: IntArray) {
     constructor(width: Int, height: Int): this(width, height, IntArray(width * height))
+    constructor(width: Int, height: Int, init: (IntArray) -> Unit): this(width, height, IntArray(width * height)) {
+        init(rgb)
+    }
 
     operator fun get(x: Int, y: Int): RgbColour =
         RgbColour(rgb[x * width + y])
