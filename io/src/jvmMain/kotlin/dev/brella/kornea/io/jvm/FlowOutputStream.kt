@@ -1,12 +1,12 @@
 package dev.brella.kornea.io.jvm
 
-import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.flow.OutputFlow
 import dev.brella.kornea.toolkit.common.oneTimeMutableInline
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import java.io.BufferedOutputStream
 import java.io.OutputStream
 
@@ -104,7 +104,11 @@ public fun CoroutineScope.FlowOutputStream(flow: OutputFlow, closeFlow: Boolean,
 public suspend inline fun <T> CoroutineScope.asOutputStream(flow: OutputFlow, closeFlow: Boolean, bufferSize: Int = 8192, channelLimit: Int = bufferSize, block: (OutputStream) -> T): T {
     val stream =
         FlowOutputStream(this, flow, closeFlow, bufferSize, channelLimit)
-    val output = BufferedOutputStream(stream).use(block)
-    stream.join()
-    return output
+    BufferedOutputStream(stream).use {
+        try {
+            return block(it)
+        } finally {
+            stream.join()
+        }
+    }
 }
