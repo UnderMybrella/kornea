@@ -60,7 +60,6 @@ public class FlowOutputStream private constructor(private val flow: OutputFlow, 
         super.close()
 
         outputChannel.close()
-        job.cancel()
 
         if (closeFlow) {
             runBlocking { flow.close() }
@@ -104,11 +103,7 @@ public fun CoroutineScope.FlowOutputStream(flow: OutputFlow, closeFlow: Boolean,
 public suspend inline fun <T> CoroutineScope.asOutputStream(flow: OutputFlow, closeFlow: Boolean, bufferSize: Int = 8192, channelLimit: Int = bufferSize, block: (OutputStream) -> T): T {
     val stream =
         FlowOutputStream(this, flow, closeFlow, bufferSize, channelLimit)
-    BufferedOutputStream(stream).use {
-        try {
-            return block(it)
-        } finally {
-            stream.join()
-        }
-    }
+    val output = BufferedOutputStream(stream).use(block)
+    stream.join()
+    return output
 }
