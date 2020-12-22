@@ -30,18 +30,28 @@ public class FlowOutputStream private constructor(private val flow: OutputFlow, 
 
     private inline fun waitForOutputToClear(sizeNeeded: Int, crossinline block: suspend () -> Unit) {
         runBlocking {
-            while (isActive && buffered.value + sizeNeeded < bufferSize) {
-                updateChannel.receive()
-                yield()
-            }
+            if (sizeNeeded > bufferSize) {
+                while (isActive && !updateChannel.isEmpty) {
+                    updateChannel.receive()
+                    yield()
+                }
 
-            block()
-            buffered += sizeNeeded
+                block()
+                buffered += sizeNeeded
+            } else {
+                while (isActive && buffered.value + sizeNeeded < bufferSize) {
+                    updateChannel.receive()
+                    yield()
+                }
+
+                block()
+                buffered += sizeNeeded
+            }
         }
     }
 
     private inline fun waitAndSend(byte: Int) = waitForOutputToClear(1) { outputChannel.send(byte) }
-    private inline fun waitAndSend(buffer: ByteArray) = waitForOutputToClear(buffer.size) { outputChannel.send(buffer.size) }
+    private inline fun waitAndSend(buffer: ByteArray) = waitForOutputToClear(buffer.size) { outputChannel.send(buffer) }
 
     override fun write(b: Int) {
         if (buffered.value + 1 >= bufferSize || !outputChannel.offer(b)) {
