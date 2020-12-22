@@ -19,6 +19,8 @@ inline class RgbColour(val rgb: Int) {
 
     val blue: Int
         get() = rgb shr 0 and 0xFF
+
+    override fun toString(): String = "RgbColour($alpha, $red, $green, $blue)"
 }
 
 fun rgba(red: Int, green: Int, blue: Int, alpha: Int = 0xFF) =
