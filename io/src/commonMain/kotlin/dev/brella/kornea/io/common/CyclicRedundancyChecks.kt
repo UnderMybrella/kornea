@@ -13,6 +13,7 @@ public object CyclicRedundancyChecks {
         val name: String
     )
 
+    /** Information pulled from https://reveng.sourceforge.io/crc-catalogue/all.htm */
     public val CRC_3_GSM: CRCAlgorithm by lazy { CRCAlgorithm(3, 0x3, 0x0, false, false, 0x7, 0x4, 0x2, "CRC-3/GSM") }
     public val CRC_3_ROHC: CRCAlgorithm by lazy { CRCAlgorithm(3, 0x3, 0x7, true, true, 0x0, 0x6, 0x0, "CRC-3/ROHC") }
     public val CRC_4_G_704: CRCAlgorithm by lazy { CRCAlgorithm(4, 0x3, 0x0, true, true, 0x0, 0x7, 0x0, "CRC-4/G-704") }
@@ -68,8 +69,53 @@ public object CyclicRedundancyChecks {
             "CRC-5/USB"
         )
     }
+    public val CRC_6_CDMA2000_A: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            6, 0x27, 0x3F, false, false, 0x00, 0x0D, 0x00, "CRC-6/CDMA2000-A"
+        )
+    }
+    public val CRC_6_CDMA2000_B: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            6, 0x07, 0x3F, false, false, 0x00, 0x3B, 0x00, "CRC-6/CDMA2000-B"
+        )
+    }
+    public val CRC_6_G_704: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            6, 0x03, 0x00, true, true, 0x00, 0x06, 0x00, "CRC/G-704"
+        )
+    }
+    public val CRC_6_GSM: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            6, 0x2F, 0x00, false, false, 0x3F, 0x13, 0x3A, "CRC-6/GSM"
+        )
+    }
+    public val CRC_7_MMC: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            7, 0x09, 0x00, false, false, 0x00, 0x75, 0x00, "CRC-7/MMC"
+        )
+    }
+    public val CRC_7_ROHC: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            7, 0x4F, 0x7F, true, true, 0x00, 0x53, 0x00, "CRC-7/ROHC"
+        )
+    }
+    public val CRC_7_UMTS: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            7, 0x45, 0x00, false, false, 0x00, 0x61, 0x00, "CRC-7/UMTS"
+        )
+    }
+    public val CRC_8_AUTOSAR: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            8, 0x2F, 0xFF, false, false, 0xFF, 0xDF, 0x42, "CRC-8/AUTOSAR"
+        )
+    }
+    public val CRC_8_BLUETOOTH: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            8, 0xA7, 0x00, true, true, 0x00, 0x26, 0x00, "CRC-8/BLUETOOTH"
+        )
+    }
 
-    public val CRC_32: CRCAlgorithm by lazy {
+    public val CRC_32_ISO_HDLC: CRCAlgorithm by lazy {
         CRCAlgorithm(
             32,
             0x04C11DB7,
@@ -80,6 +126,19 @@ public object CyclicRedundancyChecks {
             0xCBF43926,
             0x00,
             "CRC-32"
+        )
+    }
+    public val CRC_32_ISCSI: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            32,
+            0x1EDC6F41,
+            0xFFFFFFFF,
+            true,
+            true,
+            0xFFFFFFFF,
+            0xE3069283,
+            0xB798B438,
+            "CRC-32/ISCSI"
         )
     }
 
@@ -149,16 +208,16 @@ public object CyclicRedundancyChecks {
     private inline fun reflect(num: ULong, width: Int): ULong {
         var i = 1uL shl (width - 1)
         var j = 1uL
-        var crcout = 0uL
+        var crcOut = 0uL
 
         while (i > 0uL) {
-            if (num and i > 0u) crcout = crcout or j
+            if (num and i > 0u) crcOut = crcOut or j
 
             j = j shl 1
             i = i shr 1
         }
 
-        return crcout
+        return crcOut
     }
 
     public fun calculateCRC(
@@ -233,4 +292,4 @@ public inline fun ByteArray.cyclicRedundancyCheck(algorithm: CyclicRedundancyChe
     CyclicRedundancyChecks.calculateCRC(this, algorithm)
 
 public fun ByteArray.crc32(): ULong =
-    CyclicRedundancyChecks.calculateCRC(this, CyclicRedundancyChecks.CRC_32)
+    CyclicRedundancyChecks.calculateCRC(this, CyclicRedundancyChecks.CRC_32_ISO_HDLC)
