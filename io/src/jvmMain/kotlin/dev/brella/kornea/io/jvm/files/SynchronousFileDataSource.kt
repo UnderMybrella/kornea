@@ -30,5 +30,9 @@ public class SynchronousFileDataSource(
     override val reproducibility: DataSourceReproducibility =
         DataSourceReproducibility(isStatic = true, isRandomAccess = true)
 
+    override suspend fun canOpenInputFlow(): Boolean {
+        return super.canOpenInputFlow() && backing.exists()
+    }
+
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backing), null)
 }

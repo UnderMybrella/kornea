@@ -57,6 +57,10 @@ public class AsyncFileDataSource(
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toUri()), null)
 
+    override suspend fun canOpenInputFlow(): Boolean {
+        return super.canOpenInputFlow() && (initialised || Files.exists(backing))
+    }
+
     private suspend fun getChannel(): AsynchronousFileChannel =
         if (!initialised) runInterruptible(Dispatchers.IO) { channel } else channel
 
