@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 //apply plugin: 'kotlinx-atomicfu'
 
-version = "3.3.0-alpha"
+version = "3.3.1-alpha"
 
 multiplatform {
     jvm()
