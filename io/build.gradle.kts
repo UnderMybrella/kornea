@@ -2,14 +2,17 @@ apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 //apply plugin: 'kotlinx-atomicfu'
 
-version = "5.2.0-alpha"
+version = "5.3.0-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
     *  To find out how to configure the targets, please follow the link:
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
-    js()
+    js(BOTH) {
+        browser()
+        nodejs()
+    }
 //    mingwX64()
 //    mingwX64() {
 //        binaries {

@@ -5,13 +5,12 @@ package dev.brella.kornea.errors.common
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.annotations.ExperimentalKorneaErrors
+import dev.brella.kornea.base.common.*
 import dev.brella.kornea.config.common.Configurable
 import dev.brella.kornea.config.common.config
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
-import kotlin.jvm.JvmName
-import kotlin.jvm.JvmOverloads
-import kotlin.jvm.JvmSynthetic
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.native.concurrent.ThreadLocal
 import kotlin.reflect.KClass
 
@@ -21,7 +20,7 @@ public interface KorneaResult<out T> {
         /**
          * Creates an instance of [KorneaResult] that indicates a successful result
          *
-         * This method attempts to retrieve and check [KorneaResultConfig.shouldInlineClasses] from the current coroutineContext to determine if the resulting instance will be an inlined class or not
+         * This method attempts to retrieve and check [KorneaResultConfig.usePooledResult] from the current coroutineContext to determine if the resulting instance will be an inlined class or not
          */
         @AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
         public suspend inline fun <T> success(value: T): KorneaResult<T> = success(value, config())
@@ -29,20 +28,21 @@ public interface KorneaResult<out T> {
         /**
          * Creates an instance of [KorneaResult] that indicates a successful result
          *
-         * This method checks [config#shouldInlineClasses][KorneaResultConfig.shouldInlineClasses] to determine if the resulting instance will be an inlined class or not
+         * This method checks [config#shouldInlineClasses][KorneaResultConfig.usePooledResult] to determine if the resulting instance will be an inlined class or not
          */
+        @OptIn(ExperimentalKorneaErrors::class)
         @ChangedSince(KorneaErrors.VERSION_2_0_0_ALPHA)
         public inline fun <T> success(value: T, config: KorneaResultConfig? = null): KorneaResult<T> =
-            success(value, (config ?: defaultConfig).shouldInlineClasses)
+            success(value, (config ?: defaultConfig).usePooledResult)
 
         /**
          * Creates an instance of [KorneaResult] that indicates a successful result
          *
-         * This method checks [useInlineClass] to determine if the resulting instance will be an inlined class or not
+         * This method checks [usePooledResult] to determine if the resulting instance will be an inlined class or not
          */
         @ExperimentalKorneaErrors
-        public inline fun <T> success(value: T, useInlineClass: Boolean): KorneaResult<T> =
-            if (useInlineClass) successInline(value)
+        public inline fun <T> success(value: T, usePooledResult: Boolean): KorneaResult<T> =
+            if (usePooledResult) successPooled(value)
             else successStable(value)
 
         public inline fun <T> successStable(value: T): KorneaResult<T> =
@@ -52,7 +52,7 @@ public interface KorneaResult<out T> {
         /**
          * Creates an instance of [KorneaResult] that indicates a successful result, or [Empty] if [value] is null
          *
-         * This method attempts to retrieve and check [KorneaResultConfig.shouldInlineClasses] from the current coroutineContext to determine if the resulting instance will be an inlined class or not
+         * This method attempts to retrieve and check [KorneaResultConfig.usePooledResult] from the current coroutineContext to determine if the resulting instance will be an inlined class or not
          */
         @AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
         public suspend inline fun <T> successOrEmpty(value: T?): KorneaResult<T> =
@@ -61,24 +61,27 @@ public interface KorneaResult<out T> {
         /**
          * Creates an instance of [KorneaResult] that indicates a successful result, or [Empty] if [value] is null
          *
-         * This method checks [config#shouldInlineClasses][KorneaResultConfig.shouldInlineClasses] to determine if the resulting instance will be an inlined class or not
+         * This method checks [config#shouldInlineClasses][KorneaResultConfig.usePooledResult] to determine if the resulting instance will be an inlined class or not
          */
+        @OptIn(ExperimentalKorneaErrors::class)
         @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
         @ChangedSince(KorneaErrors.VERSION_2_0_0_ALPHA)
         public inline fun <T> successOrEmpty(value: T?, config: KorneaResultConfig? = null): KorneaResult<T> =
-            successOrEmpty(value, (config ?: defaultConfig).shouldInlineClasses)
+            successOrEmpty(value, (config ?: defaultConfig).usePooledResult)
 
         /**
          * Creates an instance of [KorneaResult] that indicates a successful result, or [Empty] if [value] is null
          *
-         * This method checks [useInlineClass] to determine if the resulting instance will be an inlined class or not
+         * This method checks [usePooledResult] to determine if the resulting instance will be an inlined class or not
          */
         @ExperimentalKorneaErrors
         @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-        public inline fun <T> successOrEmpty(value: T?, useInlineClass: Boolean): KorneaResult<T> =
-            if (value == null) Empty.ofNull()
-            else if (useInlineClass) successInline(value)
-            else successStable(value)
+        public inline fun <T> successOrEmpty(value: T?, usePooledResult: Boolean): KorneaResult<T> =
+            when {
+                value == null -> Empty.ofNull()
+                usePooledResult -> successPooled(value)
+                else -> successStable(value)
+            }
 
         @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
         public inline fun <T> successOrEmptyStable(value: T?): KorneaResult<T> =
@@ -171,16 +174,32 @@ public interface KorneaResult<out T> {
         public suspend inline fun <T> foldingMutableListOf(): KorneaResult<MutableList<T>> =
             success(ArrayList(), config())
 
-        public suspend inline fun <T, R> fold(iterable: Iterable<T>, operation: (acc: KorneaResult<MutableList<R>>, T) -> KorneaResult<MutableList<R>>): KorneaResult<List<R>> =
+        public suspend inline fun <T, R> fold(
+            iterable: Iterable<T>,
+            operation: (acc: KorneaResult<MutableList<R>>, T) -> KorneaResult<MutableList<R>>
+        ): KorneaResult<List<R>> =
             foldTo(iterable, ArrayList(), operation)
 
-        public suspend inline fun <T, R, L: MutableList<R>> foldTo(iterable: Iterable<T>, initial: L, operation: (acc: KorneaResult<L>, T) -> KorneaResult<L>): KorneaResult<List<R>> =
+        public suspend inline fun <T, R, L : MutableList<R>> foldTo(
+            iterable: Iterable<T>,
+            initial: L,
+            operation: (acc: KorneaResult<L>, T) -> KorneaResult<L>
+        ): KorneaResult<List<R>> =
             iterable.fold(success(initial, config()), operation)
 
-        public inline fun <T, R> fold(iterable: Iterable<T>, config: KorneaResultConfig? = null, operation: (acc: KorneaResult<MutableList<R>>, T) -> KorneaResult<MutableList<R>>): KorneaResult<List<R>> =
+        public inline fun <T, R> fold(
+            iterable: Iterable<T>,
+            config: KorneaResultConfig? = null,
+            operation: (acc: KorneaResult<MutableList<R>>, T) -> KorneaResult<MutableList<R>>
+        ): KorneaResult<List<R>> =
             foldTo(iterable, ArrayList(), config, operation)
 
-        public inline fun <T, R, L: MutableList<R>> foldTo(iterable: Iterable<T>, initial: L, config: KorneaResultConfig? = null, operation: (acc: KorneaResult<L>, T) -> KorneaResult<L>): KorneaResult<List<R>> =
+        public inline fun <T, R, L : MutableList<R>> foldTo(
+            iterable: Iterable<T>,
+            initial: L,
+            config: KorneaResultConfig? = null,
+            operation: (acc: KorneaResult<L>, T) -> KorneaResult<L>
+        ): KorneaResult<List<R>> =
             iterable.fold(success(initial, config), operation)
 
         public fun dirtyImplementationString(impl: KorneaResult<*>): String =
@@ -206,20 +225,26 @@ public interface KorneaResult<out T> {
 
         private class Base<T>(private val value: T) : Success<T> {
             override fun get(): T = value
-            override fun <R> mapValue(newValue: R): Success<R> =
+            override fun <R> mapValue(newValue: R): KorneaResult<R> =
                 Base(newValue)
 
             override fun toString(): String =
                 "Success(value=$value)"
+
+            override fun dataHashCode(): Optional<Int> =
+                Optional(value.hashCode())
+
+            override fun isAvailable(dataHashCode: Int?): Boolean? =
+                if (dataHashCode?.equals(value.hashCode()) != false) true else null
+
+            override fun consume(dataHashCode: Int?) {}
         }
 
         override fun get(): T
 
         @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-        public infix fun <R> mapValue(newValue: R): Success<R>
-
-        @Deprecated("Breaking a result down to components doesn't end up actually working", ReplaceWith("get()"))
-        override operator fun component1(): T = get()
+        @ChangedSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+        public infix fun <R> mapValue(newValue: R): KorneaResult<R>
     }
 
     public interface Failure : KorneaResult<Nothing> {
@@ -235,6 +260,10 @@ public interface KorneaResult<out T> {
         private object Base : Failure {
             override fun get(): Nothing = throw IllegalStateException("(Unknown failure)")
         }
+
+        override fun dataHashCode(): Optional<Int> = Optional.empty()
+        override fun isAvailable(dataHashCode: Int?): Boolean? = null
+        override fun consume(dataHashCode: Int?) {}
     }
 
     public interface Empty : Failure {
@@ -247,6 +276,9 @@ public interface KorneaResult<out T> {
         public interface Undefined : Empty
         public interface TypeCastEmpty : Empty
         public interface BadImplementation : Empty
+
+        @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+        public interface WasClosed : Empty
 
         public companion object {
             public fun of(): Empty =
@@ -283,11 +315,17 @@ public interface KorneaResult<out T> {
 
             public fun <T> ofBadImplementation(impl: KorneaResult<*>): KorneaResult<T> =
                 BadImplementationBase(impl).asType()
+
+            @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+            public fun ofClosed(): Empty =
+                WasClosedBase
+
+            @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+            public fun <T> ofClosed(): KorneaResult<T> = WasClosedBase.asType()
         }
 
         private object Base : Empty {
             override fun get() = throw IllegalStateException("Result is empty")
-            override fun component1() = throw IllegalStateException("Result is empty")
 
             override fun toString(): String =
                 "Empty()"
@@ -296,7 +334,6 @@ public interface KorneaResult<out T> {
         private object FailedPredicateBase :
             FailedPredicate {
             override fun get() = throw IllegalStateException("Failed predicate")
-            override fun component1() = throw IllegalStateException("Failed predicate")
 
             override fun toString(): String =
                 "FailedPredicate()"
@@ -304,7 +341,6 @@ public interface KorneaResult<out T> {
 
         private object NullBase : Null {
             override fun get() = throw IllegalArgumentException("Was null")
-            override fun component1() = throw IllegalArgumentException("Was null")
 
             override fun toString(): String =
                 "Null()"
@@ -312,7 +348,6 @@ public interface KorneaResult<out T> {
 
         private object UndefinedBase : Undefined {
             override fun get() = throw IllegalArgumentException("Was undefined")
-            override fun component1() = throw IllegalArgumentException("Was undefined")
 
             override fun toString(): String =
                 "Undefined()"
@@ -321,10 +356,16 @@ public interface KorneaResult<out T> {
         private object TypeCastEmptyBase :
             TypeCastEmpty {
             override fun get() = throw IllegalStateException("Result was miscast")
-            override fun component1() = throw IllegalStateException("Result miscast")
 
             override fun toString(): String =
                 "TypeCastEmpty()"
+        }
+
+        private object WasClosedBase : WasClosed {
+            override fun get() = throw IllegalStateException("Result was closed")
+
+            override fun toString(): String =
+                "WasClosed()"
         }
 
         private class BadImplementationBase(val impl: KorneaResult<*>) : BadImplementation,
@@ -378,7 +419,6 @@ public interface KorneaResult<out T> {
         public val exception: E
 
         override fun get(): Nothing = throw exception
-        override fun component1(): Nothing = throw exception
 
         @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
         public infix fun <R : Throwable> withException(newException: R): WithException<R>
@@ -404,6 +444,7 @@ public interface KorneaResult<out T> {
     public interface WithErrorDetails : WithErrorCode,
         WithErrorMessage {
         @Suppress("NOTHING_TO_INLINE")
+        @ThreadLocal
         public companion object {
             public var DEFAULT_GENERATE_STACKTRACE_ON_CREATION: Boolean = false
             public var DEFAULT_INCLUDE_RESULT_CODE_IN_ERROR: Boolean = false
@@ -646,7 +687,6 @@ public interface KorneaResult<out T> {
                 )
 
             override fun get(): Nothing = throw exception
-            override fun component1(): Nothing = throw exception
 
             override fun toString(): String =
                 "WithErrorDetails(errorCode=$errorCode, errorMessage='$errorMessage', cause=$cause, exception=$_exception, exceptionSupplier=$_exceptionSupplier)"
@@ -664,11 +704,30 @@ public interface KorneaResult<out T> {
 
     public fun get(): T
 
-    @Deprecated(
-        "Breaking a result down to components doesn't end up actually working",
-        ReplaceWith("getOrNull()", "org.abimon.knolus.errors.common.getOrNull")
-    )
-    public operator fun component1(): T? = getOrNull()
+    /**
+     * Return a hash code for the data contained within.
+     * Allows for a single result instance to be reused, while not being consumed from mistimed calls.
+     *
+     * @return a hashCode calculation for the data within, or [Optional.EMPTY] if no data is available
+     */
+    public fun dataHashCode(): Optional<Int>
+
+    /**
+     * Determine whether the data indicated by [dataHashCode] is available within this result instance.
+     *
+     *
+     * @param dataHashCode the hashCode of the data to query, or null if we are only checking the most current data
+     * @return true if available, false if unavailable, null if [dataHashCode] does not point to this set of data
+     */
+    public fun isAvailable(dataHashCode: Int?): Boolean?
+
+    /**
+     * Consume the data indicated by [dataHashCode] and mark this instance as completed.
+     * Future calls to this result may throw an error if this instance is not reused.
+     *
+     * @param dataHashCode the data to consume, or null if we are only consuming the most current data
+     */
+    public fun consume(dataHashCode: Int?)
 }
 
 public inline fun KorneaResult<*>.hierarchy(): List<KorneaResult<*>> =
@@ -684,9 +743,14 @@ public inline fun KorneaResult<*>.hierarchyIn(list: MutableList<KorneaResult<*>>
     self?.let(list::add)
 }
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <T> KorneaResult<T>.mapFailureCause(transform: (KorneaResult.Failure?) -> KorneaResult<*>?): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.mapFailureCause(transform: (KorneaResult.Failure?) -> KorneaResult<*>?): KorneaResult<T> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithCause -> this withCause (transform(cause) as? KorneaResult.Failure)
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -696,6 +760,7 @@ public inline fun <T> KorneaResult<T>.mapFailureCause(transform: (KorneaResult.F
             )
         )
     }
+}
 
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
 public inline fun <T> KorneaResult<T>.mapFailureCause(cause: KorneaResult<*>?): KorneaResult<T> =
@@ -729,9 +794,14 @@ public inline fun <T> KorneaResult<T>.mapFailureRootCause(rootCause: KorneaResul
         )
     }
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <T, E : Throwable> KorneaResult<T>.mapFailureException(transform: (Throwable) -> E): KorneaResult<T> =
-    when (this) {
+public inline fun <T, E : Throwable> KorneaResult<T>.mapFailureException(transform: (Throwable) -> E): KorneaResult<T> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithException<*> -> this withException transform(exception)
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -741,6 +811,7 @@ public inline fun <T, E : Throwable> KorneaResult<T>.mapFailureException(transfo
             )
         )
     }
+}
 
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
 public inline fun <T, E : Throwable> KorneaResult<T>.mapFailureException(exception: E): KorneaResult<T> =
@@ -787,23 +858,40 @@ public inline fun <T, reified R> KorneaResult<T>.cast(): KorneaResult<R> =
         else -> KorneaResult.badImplementation(this)
     }
 
-public inline fun <T, R> KorneaResult<T>.map(transform: (T) -> R): KorneaResult<R> =
-    when (this) {
+@OptIn(ExperimentalContracts::class)
+public inline fun <T, R> KorneaResult<T>.map(transform: (T) -> R): KorneaResult<R> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> this mapValue transform(get())
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
-public inline fun <T, R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<R>): KorneaResult<R> =
-    when (this) {
+@OptIn(ExperimentalContracts::class)
+public inline fun <T, R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<R>): KorneaResult<R> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> transform(get())
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_3_0_INDEV)
-public inline fun <T> KorneaResult<T>.flatMapOrSelf(transform: (T) -> KorneaResult<T>?): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.flatMapOrSelf(transform: (T) -> KorneaResult<T>?): KorneaResult<T> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> when (val result = transform(get())) {
             null -> this
             else -> result
@@ -812,13 +900,19 @@ public inline fun <T> KorneaResult<T>.flatMapOrSelf(transform: (T) -> KorneaResu
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @ChangedSince(
     KorneaErrors.VERSION_3_1_0_INDEV,
     "When a filter fails, the result has a chance to control the output"
 )
-public inline fun <T> KorneaResult<T>.filter(predicate: (T) -> Boolean): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.filter(predicate: (T) -> Boolean): KorneaResult<T> {
+    contract {
+        callsInPlace(predicate, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> when {
             predicate(get()) -> this
             this is KorneaResult.Success.FailedPredicateObserver -> onFailedPredicate()
@@ -828,6 +922,7 @@ public inline fun <T> KorneaResult<T>.filter(predicate: (T) -> Boolean): KorneaR
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
 @Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
@@ -842,14 +937,20 @@ public inline fun <T> KorneaResult<T?>.filterNotNull(): KorneaResult<T> =
         else -> KorneaResult.badImplementation(this)
     }
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <R> KorneaResult<*>.filterNotNull(onEmpty: () -> KorneaResult<R>): KorneaResult<R> =
-    when (this) {
+public inline fun <R> KorneaResult<*>.filterNotNull(onEmpty: () -> KorneaResult<R>): KorneaResult<R> {
+    contract {
+        callsInPlace(onEmpty, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success -> if (get() != null) this as KorneaResult<R> else onEmpty()
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
 @Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
@@ -860,12 +961,17 @@ public inline fun <R> KorneaResult<*>.filterNotNull(default: KorneaResult<R>): K
         else -> KorneaResult.badImplementation(this)
     }
 
+@OptIn(ExperimentalContracts::class)
 @ChangedSince(
     KorneaErrors.VERSION_3_1_0_INDEV,
     "When a filter fails, the result has a chance to control the output"
 )
-public inline fun <T> KorneaResult<T>.filterTo(transform: (T) -> KorneaResult<T>?): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.filterTo(transform: (T) -> KorneaResult<T>?): KorneaResult<T> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> when (val result = transform(get())) {
             null -> {
                 if (this is KorneaResult.Success.FailedPredicateObserver) onFilterToFailed()
@@ -877,6 +983,7 @@ public inline fun <T> KorneaResult<T>.filterTo(transform: (T) -> KorneaResult<T>
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
 @Suppress("UNCHECKED_CAST")
 @ChangedSince(
@@ -909,25 +1016,37 @@ public inline fun <R : Any> KorneaResult<*>.filterToInstance(klass: KClass<R>): 
         else -> KorneaResult.badImplementation(this)
     }
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
-public inline fun <reified R> KorneaResult<*>.filterToInstance(onEmpty: () -> KorneaResult<R>): KorneaResult<R> =
-    when (this) {
+public inline fun <reified R> KorneaResult<*>.filterToInstance(onEmpty: () -> KorneaResult<R>): KorneaResult<R> {
+    contract {
+        callsInPlace(onEmpty, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success -> if (get() is R) this as KorneaResult<R> else onEmpty()
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_4_0_INDEV)
 public inline fun <R : Any> KorneaResult<*>.filterToInstance(
     klass: KClass<R>,
     onEmpty: () -> KorneaResult<R>
-): KorneaResult<R> =
-    when (this) {
+): KorneaResult<R> {
+    contract {
+        callsInPlace(onEmpty, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success -> if (klass.isInstance(get())) this as KorneaResult<R> else onEmpty()
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
 @Suppress("UNCHECKED_CAST")
 public inline fun <reified R> KorneaResult<*>.filterToInstance(default: KorneaResult<R>): KorneaResult<R> =
@@ -949,9 +1068,14 @@ public inline fun <R : Any> KorneaResult<*>.filterToInstance(
         else -> KorneaResult.badImplementation(this)
     }
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
-public inline fun <T, reified R : T> KorneaResult<T>.filterToInstance(transform: (T) -> KorneaResult<R>): KorneaResult<R> =
-    when (this) {
+public inline fun <T, reified R : T> KorneaResult<T>.filterToInstance(transform: (T) -> KorneaResult<R>): KorneaResult<R> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success -> when (val result = get()) {
             is R -> this as KorneaResult<R>
             else -> transform(result)
@@ -959,34 +1083,56 @@ public inline fun <T, reified R : T> KorneaResult<T>.filterToInstance(transform:
         is KorneaResult.Failure -> asType()
         else -> KorneaResult.badImplementation(this)
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_4_0_INDEV)
 public inline fun <T : Any, R : T> KorneaResult<T>.filterToInstance(
     klass: KClass<R>,
     transform: (T) -> KorneaResult<R>
-): KorneaResult<R> = when (this) {
-    is KorneaResult.Success -> {
-        val result = get()
-        if (klass.isInstance(result)) this as KorneaResult<R>
-        else transform(result)
+): KorneaResult<R> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
     }
-    is KorneaResult.Failure -> asType()
-    else -> KorneaResult.badImplementation(this)
+
+    return when (this) {
+        is KorneaResult.Success -> {
+            val result = get()
+            if (klass.isInstance(result)) this as KorneaResult<R>
+            else transform(result)
+        }
+        is KorneaResult.Failure -> asType()
+        else -> KorneaResult.badImplementation(this)
+    }
 }
 
 public inline fun <T> KorneaResult<T>.getOrNull(): T? = if (this is KorneaResult.Success<T>) get() else null
 public inline fun <T> KorneaResult<T>.getOrElse(default: T): T = if (this is KorneaResult.Success<T>) get() else default
 
+@AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+public inline fun <T> KorneaResult<T>.getAsOptional(): Optional<T> = if (this is KorneaResult.Success<T>) Optional.of(get()) else Optional.empty()
+
 @AvailableSince(KorneaErrors.VERSION_3_4_0_INDEV)
 public inline fun <T> KorneaResult<T>.getOrEmptyDefault(default: T): T =
     if (this is KorneaResult.Empty) default else get()
 
-public inline fun <T> KorneaResult<T>.getOrElseRun(block: () -> T): T =
-    if (this is KorneaResult.Success<T>) get() else block()
+@OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.getOrElseRun(block: () -> T): T {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
 
-public inline fun <T> KorneaResult<T>.getOrElseTransform(block: (KorneaResult.Failure) -> T): T =
-    when (this) {
+    return if (this is KorneaResult.Success<T>) get() else block()
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.getOrElseTransform(block: (KorneaResult.Failure) -> T): T {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> get()
         is KorneaResult.Failure -> block(this)
         else -> throw IllegalStateException(
@@ -995,12 +1141,18 @@ public inline fun <T> KorneaResult<T>.getOrElseTransform(block: (KorneaResult.Fa
             )
         )
     }
+}
 
 public inline fun <T> KorneaResult<T>.orElse(default: KorneaResult<T>): KorneaResult<T> =
     if (this is KorneaResult.Success<T>) this else default
 
-public inline fun <T> KorneaResult<T>.switchIfFailure(block: (KorneaResult.Failure) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+@OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.switchIfFailure(block: (KorneaResult.Failure) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> block(this)
         else -> throw IllegalStateException(
@@ -1009,10 +1161,16 @@ public inline fun <T> KorneaResult<T>.switchIfFailure(block: (KorneaResult.Failu
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @ChangedSince(KorneaErrors.VERSION_3_2_0_INDEV, "[block] now takes the empty instance")
-public inline fun <T> KorneaResult<T>.switchIfEmpty(block: (empty: KorneaResult.Empty) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.switchIfEmpty(block: (empty: KorneaResult.Empty) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Empty -> block(this)
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -1022,13 +1180,19 @@ public inline fun <T> KorneaResult<T>.switchIfEmpty(block: (empty: KorneaResult.
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @ChangedSince(
     KorneaErrors.VERSION_3_1_0_INDEV,
     "WithErrorCode has been broken up into three separate interfaces; you may want switchIfHasErrorDetails"
 )
-public inline fun <T> KorneaResult<T>.switchIfHasErrorCode(block: (KorneaResult.WithErrorCode) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.switchIfHasErrorCode(block: (KorneaResult.WithErrorCode) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithErrorCode -> block(this)
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -1038,10 +1202,16 @@ public inline fun <T> KorneaResult<T>.switchIfHasErrorCode(block: (KorneaResult.
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <T> KorneaResult<T>.switchIfHasErrorMessage(block: (KorneaResult.WithErrorMessage) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.switchIfHasErrorMessage(block: (KorneaResult.WithErrorMessage) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithErrorMessage -> block(this)
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -1051,10 +1221,16 @@ public inline fun <T> KorneaResult<T>.switchIfHasErrorMessage(block: (KorneaResu
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <T> KorneaResult<T>.switchIfHasErrorDetails(block: (KorneaResult.WithErrorDetails) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.switchIfHasErrorDetails(block: (KorneaResult.WithErrorDetails) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithErrorDetails -> block(this)
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -1064,9 +1240,15 @@ public inline fun <T> KorneaResult<T>.switchIfHasErrorDetails(block: (KorneaResu
             )
         )
     }
+}
 
-public inline fun <T> KorneaResult<T>.switchIfHasException(block: (KorneaResult.WithException<*>) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+@OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.switchIfHasException(block: (KorneaResult.WithException<*>) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithException<*> -> block(this)
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -1076,10 +1258,16 @@ public inline fun <T> KorneaResult<T>.switchIfHasException(block: (KorneaResult.
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
-public inline fun <T, reified E : Throwable> KorneaResult<T>.switchIfHasTypedException(block: (KorneaResult.WithException<E>) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+public inline fun <T, reified E : Throwable> KorneaResult<T>.switchIfHasTypedException(block: (KorneaResult.WithException<E>) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithException<*> -> if (exception is E) block(this as KorneaResult.WithException<E>) else this
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -1089,13 +1277,19 @@ public inline fun <T, reified E : Throwable> KorneaResult<T>.switchIfHasTypedExc
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
 public inline fun <T, E : Throwable> KorneaResult<T>.switchIfHasTypedException(
     klass: KClass<E>,
     block: (KorneaResult.WithException<E>) -> KorneaResult<T>
-): KorneaResult<T> =
-    when (this) {
+): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithException<*> -> if (klass.isInstance(exception)) block(this as KorneaResult.WithException<E>) else this
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -1105,10 +1299,16 @@ public inline fun <T, E : Throwable> KorneaResult<T>.switchIfHasTypedException(
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-public inline fun <T> KorneaResult<T>.switchIfHasCause(block: (KorneaResult.WithCause) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.switchIfHasCause(block: (KorneaResult.WithCause) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithCause -> block(this)
         is KorneaResult.Success<T> -> this
         is KorneaResult.Failure -> this
@@ -1118,18 +1318,20 @@ public inline fun <T> KorneaResult<T>.switchIfHasCause(block: (KorneaResult.With
             )
         )
     }
+}
 
 /** Run when this result is any failed state */
+@OptIn(ExperimentalContracts::class)
 @ChangedSince(
     KorneaErrors.VERSION_3_0_2_INDEV,
     "doOnFailure now returns the KorneaResult after processing, and block returns a Unit rather than Nothing. Previous functionality can be achieved with getOrBreak"
 )
-@Deprecated(
-    "doOnFailure now returns the KorneaResult after processing, and block returns a Unit rather than Nothing. Previous functionality can be achieved with getOrBreak",
-    level = DeprecationLevel.WARNING
-)
-public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult.Failure) -> Unit): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult.Failure) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Failure -> {
             block(this)
             this
@@ -1140,14 +1342,20 @@ public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult.Failure) 
             KorneaResult.dirtyImplementationString(this)
         )
     }
+}
 
 /** Run when this result is specifically a known error */
+@OptIn(ExperimentalContracts::class)
 @ChangedSince(
     KorneaErrors.VERSION_3_1_0_INDEV,
     "The error code result has been broken up into three interfaces; you may want doWithErrorDetails"
 )
-public inline fun <T> KorneaResult<T>.doWithErrorCode(block: (KorneaResult.WithErrorCode) -> Unit): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.doWithErrorCode(block: (KorneaResult.WithErrorCode) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithErrorCode -> {
             block(this)
             this
@@ -1161,10 +1369,16 @@ public inline fun <T> KorneaResult<T>.doWithErrorCode(block: (KorneaResult.WithE
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <T> KorneaResult<T>.doWithErrorMessage(block: (KorneaResult.WithErrorMessage) -> Unit): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.doWithErrorMessage(block: (KorneaResult.WithErrorMessage) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithErrorMessage -> {
             block(this)
             this
@@ -1178,10 +1392,16 @@ public inline fun <T> KorneaResult<T>.doWithErrorMessage(block: (KorneaResult.Wi
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <T> KorneaResult<T>.doWithErrorDetails(block: (KorneaResult.WithErrorDetails) -> Unit): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.doWithErrorDetails(block: (KorneaResult.WithErrorDetails) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithErrorDetails -> {
             block(this)
             this
@@ -1193,10 +1413,16 @@ public inline fun <T> KorneaResult<T>.doWithErrorDetails(block: (KorneaResult.Wi
             KorneaResult.dirtyImplementationString(this)
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-public inline fun <T> KorneaResult<T>.doWithCause(block: (KorneaResult.WithCause) -> KorneaResult<T>): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.doWithCause(block: (KorneaResult.WithCause) -> KorneaResult<T>): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithCause -> {
             block(this)
             this
@@ -1208,10 +1434,16 @@ public inline fun <T> KorneaResult<T>.doWithCause(block: (KorneaResult.WithCause
             KorneaResult.dirtyImplementationString(this)
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @ChangedSince(KorneaErrors.VERSION_3_2_0_INDEV, "[block] now accepts the empty instance")
-public inline fun <T> KorneaResult<T>.doOnEmpty(block: (KorneaResult.Empty) -> Unit): KorneaResult<T> =
-    when (this) {
+public inline fun <T> KorneaResult<T>.doOnEmpty(block: (KorneaResult.Empty) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Empty -> {
             block(this)
             this
@@ -1225,9 +1457,15 @@ public inline fun <T> KorneaResult<T>.doOnEmpty(block: (KorneaResult.Empty) -> U
             )
         )
     }
+}
 
-public inline fun <T> KorneaResult<T>.doOnThrown(block: (KorneaResult.WithException<*>) -> Unit): KorneaResult<T> =
-    when (this) {
+@OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.doOnThrown(block: (KorneaResult.WithException<*>) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithException<*> -> {
             block(this)
             this
@@ -1241,10 +1479,16 @@ public inline fun <T> KorneaResult<T>.doOnThrown(block: (KorneaResult.WithExcept
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
-public inline fun <T, reified E : Throwable> KorneaResult<T>.doOnTypedThrown(block: (KorneaResult.WithException<E>) -> Unit): KorneaResult<T> =
-    when (this) {
+public inline fun <T, reified E : Throwable> KorneaResult<T>.doOnTypedThrown(block: (KorneaResult.WithException<E>) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.WithException<*> -> {
             if (exception is E) block(this as KorneaResult.WithException<E>)
             this
@@ -1258,9 +1502,15 @@ public inline fun <T, reified E : Throwable> KorneaResult<T>.doOnTypedThrown(blo
             )
         )
     }
+}
 
-public inline fun <T> KorneaResult<T>.doOnSuccess(block: (T) -> Unit): KorneaResult<T> =
-    when (this) {
+@OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.doOnSuccess(block: (T) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> {
             block(get())
 
@@ -1273,10 +1523,16 @@ public inline fun <T> KorneaResult<T>.doOnSuccess(block: (T) -> Unit): KorneaRes
             )
         )
     }
+}
 
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_1_INDEV)
-public suspend inline fun <T> KorneaResult<T>.doOnSuccessAsync(@Suppress("REDUNDANT_INLINE_SUSPEND_FUNCTION_TYPE") block: suspend (T) -> Unit): KorneaResult<T> =
-    when (this) {
+public suspend inline fun <T> KorneaResult<T>.doOnSuccessAsync(@Suppress("REDUNDANT_INLINE_SUSPEND_FUNCTION_TYPE") block: suspend (T) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> {
             block(get())
 
@@ -1289,16 +1545,21 @@ public suspend inline fun <T> KorneaResult<T>.doOnSuccessAsync(@Suppress("REDUND
             )
         )
     }
-
+}
 
 /**
  * Returns the value stored on a success, or runs [onFailure] when in a fail state.
  *
  * Fail states must not continue execution after they are called (ie: must return/shutdown/throw)
  */
+@OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_2_INDEV)
-public inline fun <T> KorneaResult<T>.getOrBreak(onFailure: (KorneaResult.Failure) -> Nothing): T =
-    when (this) {
+public inline fun <T> KorneaResult<T>.getOrBreak(onFailure: (KorneaResult.Failure) -> Nothing): T {
+    contract {
+        callsInPlace(onFailure, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
         is KorneaResult.Success<T> -> get()
         is KorneaResult.Failure -> onFailure(this)
         else -> throw IllegalStateException(
@@ -1307,6 +1568,7 @@ public inline fun <T> KorneaResult<T>.getOrBreak(onFailure: (KorneaResult.Failur
             )
         )
     }
+}
 
 @AvailableSince(KorneaErrors.VERSION_3_3_0_INDEV)
 public inline fun <T, E> List<T>.foldResults(block: (element: T) -> KorneaResult<E>): KorneaResult<List<E>> =
@@ -1314,29 +1576,133 @@ public inline fun <T, E> List<T>.foldResults(block: (element: T) -> KorneaResult
         acc.flatMapOrSelf { list -> block(element).map { list.add(it); list } }
     }
 
-//@ExperimentalContracts
-//public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>): T {
-//    contract {
-//        returns() implies (value is KorneaResult.Success<T>)
-//    }
-//
-//    when (value) {
-//        is KorneaResult.Success<T> -> return value.value
-//        is KorneaResult.Failure<T, *> -> throw value.asIllegalArgumentException()
-//        else -> throw IllegalArgumentException("(empty)")
-//    }
-//}
-//
-//@ExperimentalContracts
-//public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>, lazyMessage: () -> Any): T {
-//    contract {
-//        returns() implies (value is KorneaResult.Success<T>)
-//    }
-//
-//    if (value !is KorneaResult.Success<T>) {
-//        val message = lazyMessage()
-//        throw IllegalArgumentException(message.toString())
-//    } else {
-//        return value.value
-//    }
-//}
+@OptIn(ExperimentalContracts::class)
+public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>): T {
+    contract {
+        returns() implies (value is KorneaResult.Success<T>)
+    }
+
+    return value.get()
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <T : Any> requireSuccessful(value: KorneaResult<T>, lazyMessage: () -> Any): T {
+    contract {
+        returns() implies (value is KorneaResult.Success<T>)
+    }
+
+    if (value !is KorneaResult.Success<T>) {
+        val message = lazyMessage()
+        throw IllegalArgumentException(message.toString())
+    } else {
+        return value.get()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun KorneaResult<*>.isSuccessful(): Boolean {
+    contract {
+        returns(true) implies (this@isSuccessful is KorneaResult.Success)
+    }
+
+    return this is KorneaResult.Success
+}
+
+@OptIn(ExperimentalContracts::class)
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+public suspend inline fun <T : DataCloseable, reified R> KorneaResult<T>.useAndMap(block: (T) -> R): KorneaResult<R> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
+        is KorneaResult.Success<T> -> mapValue(get().use(block))
+        is KorneaResult.Failure -> asType()
+        else -> throw IllegalStateException(KorneaResult.dirtyImplementationString(this))
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+@ExperimentalUnsignedTypes
+@AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+public suspend inline fun <T : DataCloseable, reified R> KorneaResult<T>.useAndFlatMap(block: (T) -> KorneaResult<R>): KorneaResult<R> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
+        is KorneaResult.Success<T> -> get().use(block)
+        is KorneaResult.Failure -> asType()
+        else -> throw IllegalStateException(KorneaResult.dirtyImplementationString(this))
+    }
+}
+
+
+@AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+public inline fun <T> Optional<KorneaResult<T>>.flatten(): KorneaResult<T> =
+    getOrElse(KorneaResult.empty())
+
+@AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+public inline fun <T> KorneaResult<Optional<T>>.filter(): KorneaResult<T> =
+    when (this) {
+        is KorneaResult.Success ->
+            if (get().isPresent) this mapValue get().value
+            else KorneaResult.empty()
+        is KorneaResult.Failure -> asType()
+        else -> throw IllegalStateException(
+            KorneaResult.dirtyImplementationString(this)
+        )
+    }
+
+@OptIn(ExperimentalContracts::class)
+@AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+public inline fun <T: KorneaResult<*>, R> T.consume(block: (T) -> R): R {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+
+    var exception: Throwable? = null
+    val dataHashCode = dataHashCode()
+    try {
+        return block(this)
+    } catch (e: Throwable) {
+        exception = e
+        throw e
+    } finally {
+        dataHashCode.doOnPresent { consumeFinally(it, exception) }
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+@AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+public inline fun <T, R> KorneaResult<T>.consumeInner(block: (T) -> R): Optional<R> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    var exception: Throwable? = null
+    val dataHashCode = dataHashCode()
+    try {
+        return getAsOptional().map(block)
+    } catch (e: Throwable) {
+        exception = e
+        throw e
+    } finally {
+        dataHashCode.doOnPresent { consumeFinally(it, exception) }
+    }
+}
+
+@PublishedApi
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
+internal fun KorneaResult<*>?.consumeFinally(dataHashCode: Int?, cause: Throwable?): Unit = when {
+    this == null -> {
+    }
+    cause == null -> consume(dataHashCode)
+    else ->
+        try {
+            consume(dataHashCode)
+        } catch (closeException: Throwable) {
+            cause.addSuppressed(closeException)
+        }
+}

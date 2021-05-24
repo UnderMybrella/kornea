@@ -51,11 +51,11 @@ public abstract class ChannelBasedProgressBar(
             while (isActive && !channel.isClosedForReceive) {
                 yield()
                 if (_current == null) {
-                    _current = channel.poll()
+                    _current = channel.tryReceive().getOrNull()
 
                     update(_current ?: 0)
                 } else {
-                    val polled = channel.poll()
+                    val polled = channel.tryReceive().getOrNull()
                     if (polled != null)
                         _current = max(_current!!, polled)
 
@@ -69,7 +69,7 @@ public abstract class ChannelBasedProgressBar(
             var mark = TimeSource.Monotonic.markNow()
             while (isActive && !channel.isClosedForReceive) {
                 yield()
-                _current = max(_current ?: 0L, channel.poll() ?: continue)
+                _current = max(_current ?: 0L, channel.tryReceive().getOrNull() ?: continue)
 
                 update(_current!!)
 

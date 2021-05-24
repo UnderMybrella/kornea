@@ -1,13 +1,11 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-
 apply(plugin = KOTLIN_MULTIPLATFORM_PLUGIN)
 
-version = "1.0.5-alpha"
+version = "1.1.0-alpha"
 
 multiplatform {
     /* https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
-    js {
+    js(BOTH) {
         browser()
         nodejs()
     }

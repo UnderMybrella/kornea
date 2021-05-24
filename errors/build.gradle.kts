@@ -1,13 +1,13 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 
-version = "2.0.3-alpha"
+version = "2.1.0-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
     *  To find out how to configure the targets, please follow the link:
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
-    js {
+    js(BOTH) {
         browser()
         nodejs()
     }
@@ -52,8 +52,10 @@ multiplatform {
             dependencies {
                 implementation(project(":kornea-annotations"))
                 api(project(":kornea-config"))
+                api(project(":kornea-base"))
             }
         }
+
         all {
             languageSettings.apply {
                 enableLanguageFeature("InlineClasses")
@@ -62,4 +64,6 @@ multiplatform {
             }
         }
     }
+
+    addCompilerArgs("-Xopt-in=kotlin.RequiresOptIn")
 }

@@ -1,7 +1,7 @@
 package dev.brella.kornea.toolkit.coroutines.pools
 
 import dev.brella.kornea.annotations.AvailableSince
-import dev.brella.kornea.toolkit.common.DataCloseable
+import dev.brella.kornea.base.common.DataCloseable
 import dev.brella.kornea.toolkit.common.KorneaToolkit
 
 @ExperimentalUnsignedTypes

@@ -1,11 +1,11 @@
 package dev.brella.kornea.io.common
 
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
+import dev.brella.kornea.base.common.ObservableDataCloseable
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.flow.BinaryInputFlow
 import dev.brella.kornea.io.common.flow.BinaryOutputFlow
 import dev.brella.kornea.io.common.flow.OutputFlowByDelegate
-import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 
 @ExperimentalKorneaToolkit
 @ExperimentalUnsignedTypes

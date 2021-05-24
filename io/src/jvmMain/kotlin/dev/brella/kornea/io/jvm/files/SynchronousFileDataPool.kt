@@ -1,8 +1,8 @@
 package dev.brella.kornea.io.jvm.files
 
+import dev.brella.kornea.base.common.DataCloseableEventHandler
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
-import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
 import java.io.File
 
 @ExperimentalUnsignedTypes

@@ -1,6 +1,7 @@
 package dev.brella.kornea.toolkit.common
 
 import dev.brella.kornea.annotations.AvailableSince
+import kotlin.jvm.JvmInline
 
 @AvailableSince(KorneaToolkit.VERSION_1_0_0_ALPHA)
 public interface BinaryView {
@@ -9,7 +10,8 @@ public interface BinaryView {
     public suspend fun copyInto(dest: ByteArray, destOffset: Int, start: Int, end: Int)
 }
 
-public inline class BinaryArrayView(private val backing: ByteArray): BinaryView, Iterable<Int> {
+@JvmInline
+public value class BinaryArrayView(private val backing: ByteArray): BinaryView, Iterable<Int> {
     override suspend fun size(): Int = backing.size
     override suspend fun get(index: Int): Int = backing[index].toInt() and 0xFF
     override suspend fun copyInto(dest: ByteArray, destOffset: Int, start: Int, end: Int) {
@@ -19,7 +21,8 @@ public inline class BinaryArrayView(private val backing: ByteArray): BinaryView,
     override fun iterator(): Iterator<Int> = backing.iterator().map { it.toInt() and 0xFF }
 }
 
-public inline class BinaryListView(private val backing: List<Byte>): BinaryView, Iterable<Int> {
+@JvmInline
+public value class BinaryListView(private val backing: List<Byte>): BinaryView, Iterable<Int> {
     override suspend fun size(): Int = backing.size
     override suspend fun get(index: Int): Int = backing[index].toInt() and 0xFF
     override suspend fun copyInto(dest: ByteArray, destOffset: Int, start: Int, end: Int) {

@@ -2,12 +2,14 @@ package dev.brella.kornea.errors.common
 
 import dev.brella.kornea.config.common.Configuration
 import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.JvmInline
 
-public inline class KorneaResultConfig(public val shouldInlineClasses: Boolean = DEFAULT_INLINE_CLASSES): Configuration {
+@JvmInline
+public value class KorneaResultConfig(public val usePooledResult: Boolean = DEFAULT_INLINE_CLASSES): Configuration {
     public companion object {
-        public const val DEFAULT_INLINE_CLASSES: Boolean = false
+        public const val DEFAULT_INLINE_CLASSES: Boolean = true
 
-        public val DEFAULT: KorneaResultConfig = KorneaResultConfig(shouldInlineClasses = DEFAULT_INLINE_CLASSES)
+        public val DEFAULT: KorneaResultConfig = KorneaResultConfig(usePooledResult = DEFAULT_INLINE_CLASSES)
     }
     override val key: CoroutineContext.Key<*> get() = KorneaResult
 }

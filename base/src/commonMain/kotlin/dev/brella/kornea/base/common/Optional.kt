@@ -1,13 +1,13 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package dev.brella.kornea.errors.common
+package dev.brella.kornea.base.common
 
 import dev.brella.kornea.annotations.AvailableSince
-import dev.brella.kornea.annotations.ChangedSince
+import kotlin.jvm.JvmInline
 import kotlin.reflect.KClass
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
-public inline class Optional<out T>(@PublishedApi internal val _value: Any?) {
+@JvmInline
+public value class Optional<out T>(@PublishedApi internal val _value: Any?) {
     public companion object {
         public val EMPTY: Optional<Any?> = Optional(EMPTY_VALUE)
     }
@@ -26,27 +26,16 @@ public inline class Optional<out T>(@PublishedApi internal val _value: Any?) {
         get() = _value === EMPTY_VALUE
 }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+public inline fun <T> Optional.Companion.of(value: T): Optional<T> =
+    Optional(value)
+
+public inline fun <T> Optional.Companion.ofNullable(value: T?): Optional<T> =
+    if (value == null) empty() else Optional(value)
+
 public inline fun <T> Optional.Companion.empty(): Optional<T> =
     EMPTY as Optional<T>
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
-public inline fun <T> Optional<KorneaResult<T>>.flatten(): KorneaResult<T> =
-    if (isEmpty) _value as KorneaResult<T> else KorneaResult.empty()
-
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
-public inline fun <T> KorneaResult<Optional<T>>.filter(): KorneaResult<T> =
-    when (this) {
-        is KorneaResult.Success ->
-            if (get().isPresent) this mapValue (get()._value as T)
-            else KorneaResult.empty()
-        is KorneaResult.Failure -> asType()
-        else -> throw IllegalStateException(
-            KorneaResult.dirtyImplementationString(this)
-        )
-    }
-
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T, reified R> Optional<T>.cast(): Optional<R> =
     when (_value) {
         Optional.EMPTY_VALUE -> Optional.empty()
@@ -54,21 +43,21 @@ public inline fun <T, reified R> Optional<T>.cast(): Optional<R> =
         else -> Optional.empty()
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T, R> Optional<T>.map(transform: (T) -> R): Optional<R> =
     when (_value) {
         Optional.EMPTY_VALUE -> Optional.empty()
         else -> Optional(transform(_value as T))
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T, R> Optional<T>.flatMap(transform: (T) -> Optional<R>): Optional<R> =
     when (_value) {
         Optional.EMPTY_VALUE -> Optional.empty()
         else -> transform(_value as T)
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T>.flatMapOrSelf(transform: (T) -> Optional<T>?): Optional<T> =
     when (_value) {
         Optional.EMPTY_VALUE -> Optional.empty()
@@ -78,7 +67,7 @@ public inline fun <T> Optional<T>.flatMapOrSelf(transform: (T) -> Optional<T>?):
         }
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T>.filter(predicate: (T) -> Boolean): Optional<T> =
     when {
         _value === Optional.EMPTY_VALUE -> Optional.empty()
@@ -86,7 +75,7 @@ public inline fun <T> Optional<T>.filter(predicate: (T) -> Boolean): Optional<T>
         else -> Optional.empty()
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T?>.filterNotNull(): Optional<T> =
     when {
         _value === Optional.EMPTY_VALUE -> Optional.empty()
@@ -94,7 +83,7 @@ public inline fun <T> Optional<T?>.filterNotNull(): Optional<T> =
         else -> Optional.empty()
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T>.filterNotNull(onEmpty: () -> Optional<T>): Optional<T> =
     when {
         _value === Optional.EMPTY_VALUE -> onEmpty()
@@ -102,7 +91,7 @@ public inline fun <T> Optional<T>.filterNotNull(onEmpty: () -> Optional<T>): Opt
         else -> onEmpty()
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T>.filterNotNull(default: Optional<T>): Optional<T> =
     when {
         _value === Optional.EMPTY_VALUE -> default
@@ -110,7 +99,7 @@ public inline fun <T> Optional<T>.filterNotNull(default: Optional<T>): Optional<
         else -> default
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T>.filterTo(transform: (T) -> Optional<T>?): Optional<T> =
     when {
         _value === Optional.EMPTY_VALUE -> this
@@ -120,7 +109,7 @@ public inline fun <T> Optional<T>.filterTo(transform: (T) -> Optional<T>?): Opti
         }
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <reified R> Optional<*>.filterToInstance(): Optional<R> =
     when (_value) {
         Optional.EMPTY_VALUE -> Optional.empty()
@@ -128,7 +117,7 @@ public inline fun <reified R> Optional<*>.filterToInstance(): Optional<R> =
         else -> Optional.empty()
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <R : Any> Optional<*>.filterToInstance(klass: KClass<R>): Optional<R> =
     when {
         _value === Optional.EMPTY_VALUE -> Optional.empty()
@@ -136,7 +125,7 @@ public inline fun <R : Any> Optional<*>.filterToInstance(klass: KClass<R>): Opti
         else -> Optional.empty()
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <reified R> Optional<*>.filterToInstance(onEmpty: () -> Optional<R>): Optional<R> =
     when (_value) {
         Optional.EMPTY_VALUE -> onEmpty()
@@ -144,7 +133,7 @@ public inline fun <reified R> Optional<*>.filterToInstance(onEmpty: () -> Option
         else -> onEmpty()
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <R : Any> Optional<*>.filterToInstance(
     klass: KClass<R>,
     onEmpty: () -> Optional<R>
@@ -155,7 +144,7 @@ public inline fun <R : Any> Optional<*>.filterToInstance(
         else -> onEmpty()
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <reified R> Optional<*>.filterToInstance(default: Optional<R>): Optional<R> =
     when (_value) {
         Optional.EMPTY_VALUE -> default
@@ -164,7 +153,7 @@ public inline fun <reified R> Optional<*>.filterToInstance(default: Optional<R>)
     }
 
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <R : Any> Optional<*>.filterToInstance(
     default: Optional<R>,
     klass: KClass<R>
@@ -175,7 +164,7 @@ public inline fun <R : Any> Optional<*>.filterToInstance(
         else -> default
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T, reified R : T> Optional<T>.filterToInstance(transform: (T) -> Optional<R>): Optional<R> =
     when (_value) {
         Optional.EMPTY_VALUE -> Optional.empty()
@@ -183,7 +172,7 @@ public inline fun <T, reified R : T> Optional<T>.filterToInstance(transform: (T)
         else -> transform(_value as T)
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T : Any, R : T> Optional<T>.filterToInstance(
     klass: KClass<R>,
     transform: (T) -> Optional<R>
@@ -194,21 +183,45 @@ public inline fun <T : Any, R : T> Optional<T>.filterToInstance(
         else -> transform(_value as T)
     }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
-public inline val <T> Optional<T>.valueOrNull: T?
-    get() = if (_value === Optional.EMPTY_VALUE) null else _value as T
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
+public inline fun <T> Optional<T>.doOnPresent(block: (T) -> Unit): Optional<T> =
+    when (val value = _value) {
+        Optional.EMPTY_VALUE -> this
+        else -> {
+            block(value as T)
+            this
+        }
+    }
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
+public inline fun <T> Optional<T>.doOnEmpty(block: () -> Unit): Optional<T> =
+    when (_value) {
+        Optional.EMPTY_VALUE -> {
+            block()
+            this
+        }
+        else -> this
+    }
+
+//It's really rude, kotlin currently throws an error for this >:(
+//@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
+//public val <T> Optional<T>.valueOrNull: T?
+//    get() = if (_value === Optional.EMPTY_VALUE) null else _value as T
+
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T>.get(): T = value
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
-public inline fun <T> Optional<T>.getOrNull(): T? = valueOrNull
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
-public inline fun <T> Optional<T>.getOrElse(default: T): T = if (_value === Optional.EMPTY_VALUE) default else _value as T
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
+public inline fun <T> Optional<T>.getOrNull(): T? = if (_value === Optional.EMPTY_VALUE) null else _value as T
+
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
+public inline fun <T> Optional<T>.getOrElse(default: T): T =
+    if (_value === Optional.EMPTY_VALUE) default else _value as T
+
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T>.getOrElseRun(block: () -> T): T =
     if (_value === Optional.EMPTY_VALUE) block() else _value as T
 
-@AvailableSince(KorneaErrors.VERSION_2_0_0_ALPHA)
+@AvailableSince(KorneaBase.VERSION_1_0_0_ALPHA)
 public inline fun <T> Optional<T>.orElse(default: Optional<T>): Optional<T> =
     if (_value === Optional.EMPTY_VALUE) default else this

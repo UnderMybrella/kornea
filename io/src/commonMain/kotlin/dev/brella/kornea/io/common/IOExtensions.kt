@@ -1,17 +1,12 @@
 package dev.brella.kornea.io.common
 
 import dev.brella.kornea.annotations.AvailableSince
-import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.errors.common.asType
-import dev.brella.kornea.errors.common.flatMap
-import dev.brella.kornea.errors.common.map
+import dev.brella.kornea.base.common.closeAfter
+import dev.brella.kornea.base.common.use
+import dev.brella.kornea.errors.common.*
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
 import dev.brella.kornea.io.common.flow.bookmark
-import dev.brella.kornea.toolkit.common.DataCloseable
-import dev.brella.kornea.toolkit.common.closeAfter
-import dev.brella.kornea.toolkit.common.use
-import dev.brella.kornea.toolkit.common.useAndFlatMap
 
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)

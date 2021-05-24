@@ -3,12 +3,12 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.base.common.ObservableDataCloseable
+import dev.brella.kornea.base.common.closeAfter
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.*
 import dev.brella.kornea.io.common.flow.extensions.copyTo
-import dev.brella.kornea.toolkit.common.ObservableDataCloseable
-import dev.brella.kornea.toolkit.common.closeAfter
 
 @ExperimentalUnsignedTypes
 public interface InputFlow : ObservableDataCloseable {

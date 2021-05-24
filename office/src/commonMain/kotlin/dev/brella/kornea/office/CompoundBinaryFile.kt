@@ -3,7 +3,6 @@ package dev.brella.kornea.office
 import dev.brella.kornea.errors.common.*
 import dev.brella.kornea.io.common.*
 import dev.brella.kornea.io.common.flow.extensions.readUInt64BE
-import dev.brella.kornea.toolkit.common.useAndFlatMap
 
 class CompoundBinaryFile {
     companion object {

@@ -1,5 +1,7 @@
 package dev.brella.kornea.toolkit.common
 
+import dev.brella.kornea.base.common.DataCloseable
+
 public interface ProgressBar : DataCloseable {
     /**
      * Get the last progress value as recorded by [trackProgress]

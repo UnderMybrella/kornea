@@ -11,7 +11,7 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.0")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0")
 }
 
 kotlinDslPluginOptions {

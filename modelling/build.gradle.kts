@@ -1,13 +1,16 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 
-version = "1.0.5-alpha"
+version = "1.1.0-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
     *  To find out how to configure the targets, please follow the link:
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
-    js()
+    js(BOTH) {
+        browser()
+        nodejs()
+    }
 //    mingwX64() {
 //        binaries {
 //            sharedLib {

@@ -62,7 +62,7 @@ public suspend inline fun <T : StableRef<*>?, R> use(t: T, block: () -> R): R {
 
 @ExperimentalUnsignedTypes
 @PublishedApi
-internal suspend fun StableRef<*>?.closeFinally(cause: Throwable?) = when {
+internal suspend fun StableRef<*>?.closeFinally(cause: Throwable?): Unit = when {
     this == null -> {
     }
     cause == null -> dispose()

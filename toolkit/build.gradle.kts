@@ -1,13 +1,11 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
-//apply plugin: 'kotlinx-atomicfu'
+apply(plugin = "kotlinx-atomicfu")
 
-version = "3.3.1-alpha"
+version = "3.4.0-alpha"
 
 multiplatform {
     jvm()
-    js {
+    js(BOTH) {
         browser()
         nodejs()
     }
@@ -41,8 +39,8 @@ multiplatform {
     macosX64()
 
     /** Windows */
-    mingwX64()
     mingwX86()
+    mingwX64()
 
     /** WebAssembly */
     wasm32()
@@ -61,7 +59,7 @@ multiplatform {
 
         defineSourceSet("commonCoroutines", dependsOn = "common", includedIn = listOf("jvm", "js")) {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$KOTLINX_COROUTINES_VERSION")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
             }
         }
 
@@ -88,4 +86,8 @@ multiplatform {
             }
         }
     }
+}
+
+configure<kotlinx.atomicfu.plugin.gradle.AtomicFUPluginExtension> {
+    dependenciesVersion = null
 }

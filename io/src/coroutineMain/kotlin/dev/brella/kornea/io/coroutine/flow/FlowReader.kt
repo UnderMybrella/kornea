@@ -1,7 +1,7 @@
 package dev.brella.kornea.io.coroutine.flow
 
+import dev.brella.kornea.base.common.use
 import dev.brella.kornea.io.common.flow.FlowReader
-import dev.brella.kornea.toolkit.common.use
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce

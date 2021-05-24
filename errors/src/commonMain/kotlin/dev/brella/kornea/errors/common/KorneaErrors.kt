@@ -3,6 +3,8 @@ package dev.brella.kornea.errors.common
 import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaErrors {
+    public const val VERSION_2_1_0_ALPHA: String = "2.1.0-alpha"
+
     /**
      * kornea-errors 2.0.0-alpha
      * - Add kornea-config as a dependency, and overhaul KorneaResult methods to utilise that configuration

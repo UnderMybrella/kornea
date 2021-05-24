@@ -1,6 +1,8 @@
 package dev.brella.kornea.errors.common
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.base.common.Optional
+import dev.brella.kornea.base.common.empty
 
 @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
 public fun KorneaResult.Companion.success(): KorneaResult<StaticSuccess> =
@@ -15,5 +17,9 @@ public object StaticSuccess :
 
     override fun toString(): String = "[UnitSuccess]"
 
-    override fun <R> mapValue(newValue: R): KorneaResult.Success<R> = KorneaResult.success(newValue, null) as KorneaResult.Success<R>
+    override fun <R> mapValue(newValue: R): KorneaResult<R> = KorneaResult.success(newValue, null)
+
+    override fun dataHashCode(): Optional<Int> = Optional.empty()
+    override fun isAvailable(dataHashCode: Int?): Boolean? = null
+    override fun consume(dataHashCode: Int?) {}
 }

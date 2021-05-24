@@ -1,14 +1,12 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 
-version = "1.0.2-indev"
+version = "1.1.0-indev"
 
 multiplatform {
     /* https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
     jvm()
-    js {
+    js(BOTH) {
         browser()
         nodejs()
     }
@@ -71,7 +69,7 @@ multiplatform {
         defineSourceSet("linuxSelfAtomic", dependsOn = listOf("linux", "nativeSelfAtomic"), includedIn = listOf("linuxArm64", "linuxArm32Hfp", "linuxMips32", "linuxMipsel32"))
 
         defineSourceSet("macOS", dependsOn = listOf("native", "commonAtomicfu"), includedIn = "macosX64")
-        defineSourceSet("windows", dependsOn = "native")
+        defineSourceSet("windows", dependsOn = "native", includedIn = listOf("mingwX86", "mingwX64"))
 
         all {
             languageSettings.apply {

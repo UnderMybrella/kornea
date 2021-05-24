@@ -1,8 +1,8 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.base.common.DataCloseable
 import dev.brella.kornea.io.common.BaseDataCloseable
-import dev.brella.kornea.toolkit.common.DataCloseable
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.toolkit.common.PrintFlow
 

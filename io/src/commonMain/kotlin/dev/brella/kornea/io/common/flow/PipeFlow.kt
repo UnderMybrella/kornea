@@ -1,12 +1,12 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.base.common.DataCloseableEventHandler
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.switchIfEmpty
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
-import dev.brella.kornea.toolkit.common.DataCloseableEventHandler
 
 @AvailableSince(KorneaIO.VERSION_3_2_0_ALPHA)
 public interface PipeFlow<I : InputFlow, O : OutputFlow> : InputFlow, OutputFlowByDelegate<O> {

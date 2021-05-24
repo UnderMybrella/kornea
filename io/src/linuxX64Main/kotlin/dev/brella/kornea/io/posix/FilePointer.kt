@@ -1,12 +1,12 @@
 package dev.brella.kornea.io.posix
 
+import dev.brella.kornea.base.common.DataCloseable
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.Uri
 import kotlinx.cinterop.*
-import dev.brella.kornea.toolkit.common.DataCloseable
 import platform.posix.*
 
-public inline class FilePointer(public val fp: CPointer<FILE>): DataCloseable {
+public value class FilePointer(public val fp: CPointer<FILE>): DataCloseable {
     override val isClosed: Boolean
         get() = fp[0]._fileno == -1
 

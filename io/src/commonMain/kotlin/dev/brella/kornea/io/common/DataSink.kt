@@ -1,9 +1,9 @@
 package dev.brella.kornea.io.common
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.base.common.ObservableDataCloseable
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.flow.OutputFlow
-import dev.brella.kornea.toolkit.common.ObservableDataCloseable
 
 /**
 * An interface that loosely defines a destination for data.

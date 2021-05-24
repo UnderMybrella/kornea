@@ -1,7 +1,7 @@
 package dev.brella.kornea.io.common.flow
 
-import dev.brella.kornea.toolkit.common.ObservableDataCloseable
-import dev.brella.kornea.toolkit.common.use
+import dev.brella.kornea.base.common.ObservableDataCloseable
+import dev.brella.kornea.base.common.use
 import kotlin.properties.Delegates
 
 @ExperimentalUnsignedTypes
@@ -120,7 +120,7 @@ public open class FlowReader(protected val backing: InputFlow) : ObservableDataC
             nextChar = i
 
             if (eol) {
-                s.append(String(cb, startChar, i - startChar))
+                s.append(cb.concatToString(startChar, startChar + (i - startChar)))
 
                 val str: String = s.toString()
 

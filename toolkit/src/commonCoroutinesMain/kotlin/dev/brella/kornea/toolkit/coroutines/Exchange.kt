@@ -1,9 +1,11 @@
 package dev.brella.kornea.toolkit.coroutines
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
-import dev.brella.kornea.toolkit.common.asNull
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -81,7 +83,7 @@ public interface ExchangerScope<E> : CoroutineScope, Channel<E> {
 @ExperimentalCoroutinesApi
 @ExperimentalKorneaToolkit
 public suspend inline fun <E> ExchangeChannel<E>.cycle(block: (E) -> E) {
-    while (!isClosedForReceive) send(block(receiveOrClosed().valueOrNull ?: break))
+    while (!isClosedForReceive) send(block(receiveCatching().getOrNull() ?: break))
 }
 
 @OptIn(InternalCoroutinesApi::class)
@@ -89,7 +91,7 @@ public suspend inline fun <E> ExchangeChannel<E>.cycle(block: (E) -> E) {
 @ExperimentalKorneaToolkit
 public suspend inline fun <E> ExchangeChannel<E>.flatCycle(block: (E) -> Unit) {
     while (!isClosedForReceive) {
-        val e = receiveOrClosed().valueOrNull ?: break
+        val e = receiveCatching().getOrNull() ?: break
         block(e)
         if (!isClosedForSend) {
             send(e)
@@ -107,7 +109,7 @@ public suspend inline fun <E> ExchangeChannel<E>.flatCycle(block: (E) -> Unit) {
 public suspend inline fun <E, T> ExchangeChannel<E>.foldedCycle(initial: T, block: (T, E) -> T): T {
     var acc = initial
     while (!isClosedForReceive) {
-        val e = receiveOrClosed().valueOrNull ?: break
+        val e = receiveCatching().getOrNull() ?: break
         acc = block(acc, e)
         send(e)
     }
@@ -134,7 +136,7 @@ public data class ExchangerChannels<E>(val _input: Channel<E>, val _output: Chan
 @OptIn(InternalCoroutinesApi::class)
 @ExperimentalCoroutinesApi
 @ExperimentalKorneaToolkit
-internal class ExchangerCoroutine<E>(parentContext: CoroutineContext, private val _outputChannel: Channel<E>, private val _inputChannel: Channel<E>) : AbstractCoroutine<Unit>(parentContext, true),
+internal class ExchangerCoroutine<E>(parentContext: CoroutineContext, private val _outputChannel: Channel<E>, private val _inputChannel: Channel<E>) : AbstractCoroutine<Unit>(parentContext, true, true),
     ExchangeChannel<E>, ReceiveChannel<E> by _inputChannel, SendChannel<E> by _outputChannel {
     internal val _exchanger = ExchangerChannels(_outputChannel, _inputChannel, this)
 
@@ -148,6 +150,7 @@ internal class ExchangerCoroutine<E>(parentContext: CoroutineContext, private va
         if (cause is CancellationException) {
             _inputChannel.cancel(cause) // cancel the channel
             _outputChannel.cancel(cause)
+
         }
     }
 }

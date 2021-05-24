@@ -5,10 +5,10 @@ import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
-const val KOTLIN_VERSION = "1.4.10"
+const val KOTLIN_VERSION = "1.5.0"
 
-const val KOTLINX_ATOMICFU_VERSION = "0.14.4"
-const val KOTLINX_COROUTINES_VERSION = "1.4.1"
+const val KOTLINX_ATOMICFU_VERSION = "0.16.1"
+const val KOTLINX_COROUTINES_VERSION = "1.5.0"
 const val SHADOW_PLUGIN_VERSION = "4.0.3"
 const val JMH_PLUGIN_VERSION = "0.5.0"
 
@@ -109,5 +109,16 @@ fun KotlinMultiplatformExtension.defineSourceSet(
     }
 }
 
+fun KotlinMultiplatformExtension.addCompilerArgs(vararg compilerArgs: String) =
+    targets.all {
+        compilations.all {
+            kotlinOptions {
+                freeCompilerArgs = freeCompilerArgs + compilerArgs
+            }
+        }
+    }
+
 inline fun Project.multiplatform(noinline configuration: KotlinMultiplatformExtension.() -> Unit): Unit =
     configure(configuration)
+
+//inline fun
