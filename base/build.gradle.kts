@@ -50,7 +50,6 @@ multiplatform {
         val commonMain by getting {
             dependencies {
                 implementation(project(":kornea-annotations"))
-                implementation(project(":kornea-config"))
             }
         }
 
