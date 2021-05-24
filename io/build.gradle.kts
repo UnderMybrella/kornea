@@ -23,7 +23,7 @@ multiplatform {
 //            }
 //        }
 //    }
-//    linuxX64()
+    linuxX64()
 //    linuxArm64()
 
     sourceSets {

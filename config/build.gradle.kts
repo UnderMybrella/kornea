@@ -30,10 +30,10 @@ multiplatform {
     tvosX64()
 
     /** Linux */
-    linuxArm64()
-    linuxArm32Hfp()
-    linuxMips32()
-    linuxMipsel32()
+//    linuxArm64()
+//    linuxArm32Hfp()
+//    linuxMips32()
+//    linuxMipsel32()
     linuxX64()
 
     /** MacOS */
