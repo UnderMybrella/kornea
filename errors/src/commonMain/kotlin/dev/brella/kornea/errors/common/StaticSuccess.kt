@@ -22,4 +22,7 @@ public object StaticSuccess :
     override fun dataHashCode(): Optional<Int> = Optional.empty()
     override fun isAvailable(dataHashCode: Int?): Boolean? = null
     override fun consume(dataHashCode: Int?) {}
+
+    override fun copyOf(): KorneaResult<StaticSuccess> =
+        this
 }

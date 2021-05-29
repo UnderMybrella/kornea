@@ -238,6 +238,9 @@ public interface KorneaResult<out T> {
                 if (dataHashCode?.equals(value.hashCode()) != false) true else null
 
             override fun consume(dataHashCode: Int?) {}
+
+            override fun copyOf(): KorneaResult<T> =
+                Base(value)
         }
 
         override fun get(): T
@@ -259,6 +262,8 @@ public interface KorneaResult<out T> {
 
         private object Base : Failure {
             override fun get(): Nothing = throw IllegalStateException("(Unknown failure)")
+            override fun copyOf(): KorneaResult<Nothing> =
+                this
         }
 
         override fun dataHashCode(): Optional<Int> = Optional.empty()
@@ -278,7 +283,7 @@ public interface KorneaResult<out T> {
         public interface BadImplementation : Empty
 
         @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
-        public interface WasClosed : Empty
+        public interface WasConsumed : Empty
 
         public companion object {
             public fun of(): Empty =
@@ -318,10 +323,10 @@ public interface KorneaResult<out T> {
 
             @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
             public fun ofClosed(): Empty =
-                WasClosedBase
+                WasConsumedBase
 
             @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
-            public fun <T> ofClosed(): KorneaResult<T> = WasClosedBase.asType()
+            public fun <T> ofConsumed(): KorneaResult<T> = WasConsumedBase.asType()
         }
 
         private object Base : Empty {
@@ -329,6 +334,9 @@ public interface KorneaResult<out T> {
 
             override fun toString(): String =
                 "Empty()"
+
+            override fun copyOf(): KorneaResult<Nothing> =
+                this
         }
 
         private object FailedPredicateBase :
@@ -337,6 +345,9 @@ public interface KorneaResult<out T> {
 
             override fun toString(): String =
                 "FailedPredicate()"
+
+            override fun copyOf(): KorneaResult<Nothing> =
+                this
         }
 
         private object NullBase : Null {
@@ -344,6 +355,9 @@ public interface KorneaResult<out T> {
 
             override fun toString(): String =
                 "Null()"
+
+            override fun copyOf(): KorneaResult<Nothing> =
+                this
         }
 
         private object UndefinedBase : Undefined {
@@ -351,6 +365,9 @@ public interface KorneaResult<out T> {
 
             override fun toString(): String =
                 "Undefined()"
+
+            override fun copyOf(): KorneaResult<Nothing> =
+                this
         }
 
         private object TypeCastEmptyBase :
@@ -359,13 +376,19 @@ public interface KorneaResult<out T> {
 
             override fun toString(): String =
                 "TypeCastEmpty()"
+
+            override fun copyOf(): KorneaResult<Nothing> =
+                this
         }
 
-        private object WasClosedBase : WasClosed {
-            override fun get() = throw IllegalStateException("Result was closed")
+        private object WasConsumedBase : WasConsumed {
+            override fun get() = throw IllegalStateException("Result was consumed")
 
             override fun toString(): String =
-                "WasClosed()"
+                "WasConsumed()"
+
+            override fun copyOf(): KorneaResult<Nothing> =
+                this
         }
 
         private class BadImplementationBase(val impl: KorneaResult<*>) : BadImplementation,
@@ -386,6 +409,9 @@ public interface KorneaResult<out T> {
                     newException,
                     this
                 )
+
+            override fun copyOf(): KorneaResult<Nothing> =
+                BadImplementationBase(impl)
         }
     }
 
@@ -414,6 +440,9 @@ public interface KorneaResult<out T> {
 
             override fun <R : Throwable> withException(newException: R): WithException<R> =
                 Base(newException, cause)
+
+            override fun copyOf(): KorneaResult<Nothing> =
+                Base(exception, cause)
         }
 
         public val exception: E
@@ -688,6 +717,9 @@ public interface KorneaResult<out T> {
 
             override fun get(): Nothing = throw exception
 
+            override fun copyOf(): KorneaResult<Nothing> =
+                Base(errorCode, errorMessage, cause, _exception, _exceptionSupplier)
+
             override fun toString(): String =
                 "WithErrorDetails(errorCode=$errorCode, errorMessage='$errorMessage', cause=$cause, exception=$_exception, exceptionSupplier=$_exceptionSupplier)"
 
@@ -728,6 +760,11 @@ public interface KorneaResult<out T> {
      * @param dataHashCode the data to consume, or null if we are only consuming the most current data
      */
     public fun consume(dataHashCode: Int?)
+
+    /**
+     * Creates a copy of this result, that may be used, consumed, and closed separately
+     */
+    public fun copyOf(): KorneaResult<T>
 }
 
 public inline fun KorneaResult<*>.hierarchy(): List<KorneaResult<*>> =
@@ -1109,6 +1146,12 @@ public inline fun <T : Any, R : T> KorneaResult<T>.filterToInstance(
 
 public inline fun <T> KorneaResult<T>.getOrNull(): T? = if (this is KorneaResult.Success<T>) get() else null
 public inline fun <T> KorneaResult<T>.getOrElse(default: T): T = if (this is KorneaResult.Success<T>) get() else default
+
+public inline fun <T> KorneaResult<T>.consumeAndGetOrNull(dataHashCode: Int?): T? = consume(dataHashCode) { if (this is KorneaResult.Success<T>) get() else null }
+public inline fun <T> KorneaResult<T>.consumeAndGetOrElse(dataHashCode: Int?, default: T): T = consume(dataHashCode) { if (this is KorneaResult.Success<T>) get() else default }
+
+public inline fun <T> KorneaResult<T>.consumeAndGetOrNull(): T? = consume { if (this is KorneaResult.Success<T>) get() else null }
+public inline fun <T> KorneaResult<T>.consumeAndGetOrElse(default: T): T = consume { if (this is KorneaResult.Success<T>) get() else default }
 
 @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
 public inline fun <T> KorneaResult<T>.getAsOptional(): Optional<T> = if (this is KorneaResult.Success<T>) Optional.of(get()) else Optional.empty()
@@ -1609,6 +1652,15 @@ public inline fun KorneaResult<*>.isSuccessful(): Boolean {
 }
 
 @OptIn(ExperimentalContracts::class)
+public inline fun KorneaResult<*>.isFailure(): Boolean {
+    contract {
+        returns(true) implies (this@isFailure is KorneaResult.Failure)
+    }
+
+    return this is KorneaResult.Failure
+}
+
+@OptIn(ExperimentalContracts::class)
 @ExperimentalUnsignedTypes
 @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
 public suspend inline fun <T : DataCloseable, reified R> KorneaResult<T>.useAndMap(block: (T) -> R): KorneaResult<R> {
@@ -1671,6 +1723,24 @@ public inline fun <T: KorneaResult<*>, R> T.consume(block: (T) -> R): R {
         throw e
     } finally {
         dataHashCode.doOnPresent { consumeFinally(it, exception) }
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+@AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
+public inline fun <T: KorneaResult<*>, R> T.consume(dataHashCode: Int?, block: (T) -> R): R {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+
+    var exception: Throwable? = null
+    try {
+        return block(this)
+    } catch (e: Throwable) {
+        exception = e
+        throw e
+    } finally {
+        consumeFinally(dataHashCode, exception)
     }
 }
 

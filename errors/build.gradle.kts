@@ -1,6 +1,6 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 
-version = "2.1.0-alpha"
+version = "2.2.0-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
@@ -55,6 +55,24 @@ multiplatform {
                 api(project(":kornea-base"))
             }
         }
+
+        defineSourceSet("commonAtomicfu", dependsOn = "common", includedIn = listOf("jvm", "js", "linuxX64", "mingwX64")) {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:atomicfu:$KOTLINX_ATOMICFU_VERSION")
+            }
+        }
+
+        defineSourceSet("native", dependsOn = "common")
+        defineSourceSet("nativeSelfAtomic", dependsOn = "native", includedIn = listOf("mingwX86", "wasm32"))
+        defineSourceSet("androidNative", dependsOn = "nativeSelfAtomic", includedIn = listOf("androidNativeArm32", "androidNativeArm64"))
+        defineSourceSet("iOS", dependsOn = listOf("native", "commonAtomicfu"), includedIn = listOf("iosArm32", "iosArm64", "iosX64"))
+        defineSourceSet("watchOS", dependsOn = "nativeSelfAtomic", includedIn = listOf("watchosArm32", "watchosArm64", "watchosX86"))
+        defineSourceSet("tvOS", dependsOn = "nativeSelfAtomic", includedIn = listOf("tvosArm64", "tvosX64"))
+        defineSourceSet("linux", dependsOn = "native", includedIn = "linuxX64")
+        defineSourceSet("linuxSelfAtomic", dependsOn = listOf("linux", "nativeSelfAtomic"), includedIn = listOf("linuxArm64", "linuxArm32Hfp", "linuxMips32", "linuxMipsel32"))
+
+        defineSourceSet("macOS", dependsOn = listOf("native", "commonAtomicfu"), includedIn = "macosX64")
+        defineSourceSet("windows", dependsOn = "native", includedIn = listOf("mingwX86", "mingwX64"))
 
         all {
             languageSettings.apply {

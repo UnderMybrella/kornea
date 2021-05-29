@@ -2,7 +2,7 @@ package dev.brella.kornea.errors.common
 
 import dev.brella.kornea.base.common.*
 
-private class PooledResult<T>(private var value: Any?, private var returnTo: RingBuffer<PooledResult<Any?>>) : KorneaResult.Success<T> {
+internal class PooledResult<T>(private var value: Any?, private var returnTo: RingBuffer<PooledResult<Any?>>) : KorneaResult.Success<T> {
     private object IDLE
 
     companion object {
@@ -31,10 +31,9 @@ private class PooledResult<T>(private var value: Any?, private var returnTo: Rin
             }
         }
     }
+
+    override fun copyOf(): KorneaResult<T> =
+        PooledResult(value, returnTo)
 }
 
-public fun <T> KorneaResult.Companion.successPooled(value: T): KorneaResult<T> =
-    PooledResult.defaultPool
-        .pop()
-        .map { resting -> resting.mapValue(value) }
-        .getOrElseRun { PooledResult(value, PooledResult.defaultPool) }
+public expect fun <T> KorneaResult.Companion.successPooled(value: T): KorneaResult<T>
