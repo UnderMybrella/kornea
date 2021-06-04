@@ -1613,6 +1613,31 @@ public inline fun <T> KorneaResult<T>.getOrBreak(onFailure: (KorneaResult.Failur
     }
 }
 
+
+/**
+ * Returns the value stored on a success, or runs [onFailure] when in a fail state.
+ *
+ * Fail states must not continue execution after they are called (ie: must return/shutdown/throw)
+ */
+@OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.consumeAndGetOrBreak(onFailure: (KorneaResult.Failure) -> Nothing): T {
+    contract {
+        callsInPlace(onFailure, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return consume {
+        when (this) {
+            is KorneaResult.Success<T> -> get()
+            is KorneaResult.Failure -> onFailure(this)
+            else -> throw IllegalStateException(
+                KorneaResult.dirtyImplementationString(
+                    this
+                )
+            )
+        }
+    }
+}
+
 @AvailableSince(KorneaErrors.VERSION_3_3_0_INDEV)
 public inline fun <T, E> List<T>.foldResults(block: (element: T) -> KorneaResult<E>): KorneaResult<List<E>> =
     KorneaResult.fold(this, null) { acc, element ->
