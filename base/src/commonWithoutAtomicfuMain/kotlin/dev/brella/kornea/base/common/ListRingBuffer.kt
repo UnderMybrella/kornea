@@ -24,8 +24,10 @@ public actual class ListRingBuffer<T> public actual constructor(private val back
     override fun pop(): Optional<T> =
         if (backing.isEmpty())
             Optional.empty()
-        else
-            backing[readIndex++ % backing.size].let {
-                if (it === IDLE) Optional.empty() else Optional(it)
-            }
+        else {
+            val index = readIndex++ % backing.size
+            val optional = backing[index].let { if (it === IDLE) Optional.empty<T>() else Optional<T>(it) }
+            backing[index] = IDLE
+            optional
+        }
 }
