@@ -1147,14 +1147,23 @@ public inline fun <T : Any, R : T> KorneaResult<T>.filterToInstance(
 public inline fun <T> KorneaResult<T>.getOrNull(): T? = if (this is KorneaResult.Success<T>) get() else null
 public inline fun <T> KorneaResult<T>.getOrElse(default: T): T = if (this is KorneaResult.Success<T>) get() else default
 
-public inline fun <T> KorneaResult<T>.consumeAndGetOrNull(dataHashCode: Int?): T? = consume(dataHashCode) { if (this is KorneaResult.Success<T>) get() else null }
-public inline fun <T> KorneaResult<T>.consumeAndGetOrElse(dataHashCode: Int?, default: T): T = consume(dataHashCode) { if (this is KorneaResult.Success<T>) get() else default }
+public inline fun <T> KorneaResult<T>.consumeAndGet(dataHashCode: Int?): T = consume(dataHashCode) { get() }
 
-public inline fun <T> KorneaResult<T>.consumeAndGetOrNull(): T? = consume { if (this is KorneaResult.Success<T>) get() else null }
-public inline fun <T> KorneaResult<T>.consumeAndGetOrElse(default: T): T = consume { if (this is KorneaResult.Success<T>) get() else default }
+public inline fun <T> KorneaResult<T>.consumeAndGetOrNull(dataHashCode: Int?): T? =
+    consume(dataHashCode) { if (this is KorneaResult.Success<T>) get() else null }
+
+public inline fun <T> KorneaResult<T>.consumeAndGetOrElse(dataHashCode: Int?, default: T): T =
+    consume(dataHashCode) { if (this is KorneaResult.Success<T>) get() else default }
+
+public inline fun <T> KorneaResult<T>.consumeAndGetOrNull(): T? =
+    consume { if (this is KorneaResult.Success<T>) get() else null }
+
+public inline fun <T> KorneaResult<T>.consumeAndGetOrElse(default: T): T =
+    consume { if (this is KorneaResult.Success<T>) get() else default }
 
 @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
-public inline fun <T> KorneaResult<T>.getAsOptional(): Optional<T> = if (this is KorneaResult.Success<T>) Optional.of(get()) else Optional.empty()
+public inline fun <T> KorneaResult<T>.getAsOptional(): Optional<T> =
+    if (this is KorneaResult.Success<T>) Optional.of(get()) else Optional.empty()
 
 @AvailableSince(KorneaErrors.VERSION_3_4_0_INDEV)
 public inline fun <T> KorneaResult<T>.getOrEmptyDefault(default: T): T =
@@ -1638,6 +1647,29 @@ public inline fun <T> KorneaResult<T>.consumeAndGetOrBreak(onFailure: (KorneaRes
     }
 }
 
+
+/**
+ * Returns the value stored on a success, or runs [onFailure] when in a fail state.
+ *
+ * Fail states must not continue execution after they are called (ie: must return/shutdown/throw)
+ */
+@OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.consumeOnSuccessGetOrBreak(dataHashCode: Int? = null, onFailure: (KorneaResult.Failure) -> Nothing): T {
+    contract {
+        callsInPlace(onFailure, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (this) {
+        is KorneaResult.Success<T> -> consumeAndGet(dataHashCode)
+        is KorneaResult.Failure -> onFailure(this)
+        else -> throw IllegalStateException(
+            KorneaResult.dirtyImplementationString(
+                this
+            )
+        )
+    }
+}
+
 @AvailableSince(KorneaErrors.VERSION_3_3_0_INDEV)
 public inline fun <T, E> List<T>.foldResults(block: (element: T) -> KorneaResult<E>): KorneaResult<List<E>> =
     KorneaResult.fold(this, null) { acc, element ->
@@ -1734,7 +1766,7 @@ public inline fun <T> KorneaResult<Optional<T>>.filter(): KorneaResult<T> =
 
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
-public inline fun <T: KorneaResult<*>, R> T.consume(block: (T) -> R): R {
+public inline fun <T : KorneaResult<*>, R> T.consume(block: (T) -> R): R {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -1753,7 +1785,7 @@ public inline fun <T: KorneaResult<*>, R> T.consume(block: (T) -> R): R {
 
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
-public inline fun <T: KorneaResult<*>, R> T.consume(dataHashCode: Int?, block: (T) -> R): R {
+public inline fun <T : KorneaResult<*>, R> T.consume(dataHashCode: Int?, block: (T) -> R): R {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
