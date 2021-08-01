@@ -2,7 +2,9 @@ package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Uri
 import kotlin.math.min
 
 @ExperimentalUnsignedTypes
@@ -87,7 +89,7 @@ public open class BitwiseInputFlow protected constructor(protected val flow: Inp
         }
     }
 
-    public fun bit(): Int? = currentInt?.and(0xFF)?.shr(currentPos++)?.and(1)
+    protected fun bit(): Int? = currentInt?.and(0xFF)?.shr(currentPos++)?.and(1)
 
     public suspend fun checkBefore(needed: Int = 1) {
         if (currentInt == null || currentPos > (8 - needed)) { //hardcoded check just to make sure we don't write a 0 byte
@@ -140,4 +142,7 @@ public open class BitwiseInputFlow protected constructor(protected val flow: Inp
     override suspend fun position(): ULong = flow.position()
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
+    override suspend fun whenClosed() {
+        flow.close()
+    }
 }

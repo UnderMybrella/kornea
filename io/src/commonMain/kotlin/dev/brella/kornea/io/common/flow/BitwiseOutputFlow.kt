@@ -45,7 +45,7 @@ public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataClosea
         }
     }
 
-    public open fun bit(bit: Int) {
+    protected open fun bit(bit: Int) {
         currentInt = currentInt or (bit shl currentPos++)
     }
 
@@ -54,7 +54,8 @@ public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataClosea
     public open suspend fun int(num: Number): Unit = number(num.toLong(), 32)
     public open suspend fun long(num: Number): Unit = number(num.toLong(), 64)
 
-    public open suspend fun number(num: Long, bits: Int) {
+    public open suspend fun number(num: Number, bits: Int) {
+        val num = num.toLong()
         val availableBits = 8 - currentPos
         checkBefore(availableBits)
         for (i in 0 until availableBits)
@@ -107,7 +108,13 @@ public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataClosea
             }
         }
     }
-    override suspend fun flush() {}
+    override suspend fun flush() {
+        flow.flush()
+    }
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
+    override suspend fun whenClosed() {
+        encodeByte()
+        flow.close()
+    }
 }
