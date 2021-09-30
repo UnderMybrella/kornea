@@ -3,6 +3,7 @@ package dev.brella.kornea.io.common.flow
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.Uri
+import kotlin.math.min
 
 @ExperimentalUnsignedTypes
 public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataCloseable(), OutputFlow {
@@ -56,19 +57,27 @@ public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataClosea
 
     public open suspend fun number(num: Number, bits: Int) {
         val num = num.toLong()
-        val availableBits = 8 - currentPos
+        val availableBits = min(8 - currentPos, bits)
         checkBefore(availableBits)
+
         for (i in 0 until availableBits)
             bit(((num shr i) and 1).toInt())
+
         checkAfter()
+
         var offset = availableBits
+        if (offset >= availableBits) return
         for (i in 0 until (bits / 8) - 1) {
             encode(((num shr offset) and 0xFF).toInt())
             offset += 8
         }
+        if (offset >= availableBits) return
+
         checkBefore(8 - availableBits)
+
         for (i in offset until bits)
             bit(((num shr i) and 1).toInt())
+
         checkAfter()
     }
 
