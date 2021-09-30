@@ -66,12 +66,12 @@ public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataClosea
         checkAfter()
 
         var offset = availableBits
-        if (offset >= availableBits) return
+        if (offset >= bits) return
         for (i in 0 until (bits / 8) - 1) {
             encode(((num shr offset) and 0xFF).toInt())
             offset += 8
         }
-        if (offset >= availableBits) return
+        if (offset >= bits) return
 
         checkBefore(8 - availableBits)
 

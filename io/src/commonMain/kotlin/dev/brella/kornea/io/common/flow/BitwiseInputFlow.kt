@@ -64,7 +64,7 @@ public open class BitwiseInputFlow protected constructor(protected val flow: Inp
             result = result or ((bit() ?: return null).toLong() shl i)
 
         var offset = availableBits
-        if (offset >= availableBits) return result
+        if (offset >= bits) return result
 
         for (i in 0 until (bits / 8) - 1) {
             result = result or ((flow.read() ?: return null).toLong() shl offset)
@@ -72,7 +72,7 @@ public open class BitwiseInputFlow protected constructor(protected val flow: Inp
         }
 
         checkAfter() //This goes after the read calls so that we ensure we don't skip a byte
-        if (offset >= availableBits) return result
+        if (offset >= bits) return result
 
         //Read last x bits
         checkBefore(bits - offset)
