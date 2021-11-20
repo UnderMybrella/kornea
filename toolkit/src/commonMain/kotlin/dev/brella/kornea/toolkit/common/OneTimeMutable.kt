@@ -28,8 +28,8 @@ public class OneTimeMutableInline<T>(private var _value: Any? = UNINITIALISED_VA
     @Suppress("UNCHECKED_CAST")
     public var value: T
         get() =
-            if (_value === UNINITIALISED_VALUE) _value as T
-            else throw IllegalStateException("Value not initialised")
+            if (_value === UNINITIALISED_VALUE) throw IllegalStateException("Value not initialised")
+            else _value as T
 
         set(value) {
             if (_value === UNINITIALISED_VALUE) {
