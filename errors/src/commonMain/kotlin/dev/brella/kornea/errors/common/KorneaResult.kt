@@ -88,6 +88,20 @@ public interface KorneaResult<out T> {
             if (value == null) Empty.ofNull()
             else Success.of(value)
 
+        public suspend inline fun <T> successOrCatch(block: () -> T): KorneaResult<T> =
+            try {
+                success(block())
+            } catch (th: Throwable) {
+                thrown(th)
+            }
+
+        public inline fun <T> successOrCatch(config: KorneaResultConfig? = null, block: () -> T): KorneaResult<T> =
+            try {
+                success(block(), config)
+            } catch (th: Throwable) {
+                thrown(th)
+            }
+
         @AvailableSince(KorneaErrors.VERSION_3_4_1_INDEV)
         public inline fun <T> failure(): KorneaResult<T> =
             Failure.of<T>()
