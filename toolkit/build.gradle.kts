@@ -1,7 +1,7 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 
-version = "3.4.0-alpha"
+version = "3.4.1-alpha"
 
 multiplatform {
     jvm()

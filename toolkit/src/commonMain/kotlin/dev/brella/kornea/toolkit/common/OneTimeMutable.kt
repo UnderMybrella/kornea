@@ -4,9 +4,12 @@ import kotlin.reflect.KProperty
 
 public class OneTimeMutable<T> {
     private var _value: Any? = UNINITIALISED_VALUE
+
     @Suppress("UNCHECKED_CAST")
     public var value: T
-        get() = _value as? T ?: throw IllegalStateException("Value not initialised")
+        get() =
+            if (_value === UNINITIALISED_VALUE) throw IllegalStateException("Value not initialised")
+            else _value as T
         set(value) {
             if (_value === UNINITIALISED_VALUE) {
                 _value = value
@@ -24,7 +27,10 @@ public class OneTimeMutable<T> {
 public class OneTimeMutableInline<T>(private var _value: Any? = UNINITIALISED_VALUE) {
     @Suppress("UNCHECKED_CAST")
     public var value: T
-        get() = _value as? T ?: throw IllegalStateException("Value not initialised")
+        get() =
+            if (_value === UNINITIALISED_VALUE) _value as T
+            else throw IllegalStateException("Value not initialised")
+
         set(value) {
             if (_value === UNINITIALISED_VALUE) {
                 _value = value
