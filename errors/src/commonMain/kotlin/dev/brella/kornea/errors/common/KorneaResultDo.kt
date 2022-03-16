@@ -6,6 +6,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
 
 /** Run when this result is any failed state */
@@ -23,92 +24,63 @@ public inline fun <T> KorneaResult<T>.doOnFailure(block: (KorneaResult.Failure) 
     return this
 }
 
+@OptIn(ExperimentalContracts::class)
+@AvailableSince(KorneaErrors.VERSION_3_0_1_ALPHA)
+public inline fun <T, reified F : KorneaResult.Failure> KorneaResult<T>.doOnTypedFailure(block: (F) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    when (val failure = failureOrNull()) {
+        is F -> block(failure)
+    }
+    return this
+}
+
+@OptIn(ExperimentalContracts::class)
+@AvailableSince(KorneaErrors.VERSION_3_0_1_ALPHA)
+public inline fun <T, F : KorneaResult.Failure> KorneaResult<T>.doOnTypedFailure(klass: KClass<F>, block: (F) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    val failure = failureOrNull()
+    if (klass.isInstance(failure)) block(klass.cast(failure))
+    return this
+}
+
 /** Run when this result is specifically a known error */
 @OptIn(ExperimentalContracts::class)
 @ChangedSince(
     KorneaErrors.VERSION_3_1_0_INDEV,
     "The error code result has been broken up into three interfaces; you may want doWithErrorDetails"
 )
-public inline fun <T> KorneaResult<T>.doWithErrorCode(block: (KorneaResult.WithErrorCode) -> Unit): KorneaResult<T> {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-
-    when (val failure = failureOrNull()) {
-        is KorneaResult.WithErrorCode -> block(failure)
-    }
-
-    return this
-}
+public inline fun <T> KorneaResult<T>.doWithErrorCode(block: (KorneaResult.WithErrorCode) -> Unit): KorneaResult<T> =
+    doOnTypedFailure(block)
 
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <T> KorneaResult<T>.doWithErrorMessage(block: (KorneaResult.WithErrorMessage) -> Unit): KorneaResult<T> {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-
-    when (val failure = failureOrNull()) {
-        is KorneaResult.WithErrorMessage -> block(failure)
-    }
-
-    return this
-}
+public inline fun <T> KorneaResult<T>.doWithErrorMessage(block: (KorneaResult.WithErrorMessage) -> Unit): KorneaResult<T> =
+    doOnTypedFailure(block)
 
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
-public inline fun <T> KorneaResult<T>.doWithErrorDetails(block: (KorneaResult.WithErrorDetails) -> Unit): KorneaResult<T> {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-
-    when (val failure = failureOrNull()) {
-        is KorneaResult.WithErrorDetails -> block(failure)
-    }
-
-    return this
-}
+public inline fun <T> KorneaResult<T>.doWithErrorDetails(block: (KorneaResult.WithErrorDetails) -> Unit): KorneaResult<T> =
+    doOnTypedFailure(block)
 
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-public inline fun <T> KorneaResult<T>.doWithCause(block: (KorneaResult.WithCause) -> KorneaResult<T>): KorneaResult<T> {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-
-    when (val failure = failureOrNull()) {
-        is KorneaResult.WithCause -> block(failure)
-    }
-
-    return this
-}
+public inline fun <T> KorneaResult<T>.doWithCause(block: (KorneaResult.WithCause) -> Unit): KorneaResult<T> =
+    doOnTypedFailure(block)
 
 @OptIn(ExperimentalContracts::class)
 @ChangedSince(KorneaErrors.VERSION_3_2_0_INDEV, "[block] now accepts the empty instance")
-public inline fun <T> KorneaResult<T>.doOnEmpty(block: (KorneaResult.Empty) -> Unit): KorneaResult<T> {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-
-    when (val failure = failureOrNull()) {
-        is KorneaResult.Empty -> block(failure)
-    }
-
-    return this
-}
+public inline fun <T> KorneaResult<T>.doOnEmpty(block: (KorneaResult.Empty) -> Unit): KorneaResult<T> =
+    doOnTypedFailure(block)
 
 @OptIn(ExperimentalContracts::class)
-public inline fun <T> KorneaResult<T>.doOnThrown(block: (KorneaResult.WithException<*>) -> Unit): KorneaResult<T> {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-
-    when (val failure = failureOrNull()) {
-        is KorneaResult.WithException<*> -> block(failure)
-    }
-
-    return this
-}
+public inline fun <T> KorneaResult<T>.doOnThrown(block: (KorneaResult.WithException<*>) -> Unit): KorneaResult<T> =
+    doOnTypedFailure(block)
 
 @OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
@@ -177,6 +149,18 @@ public inline fun <T> KorneaResult<T>.doOnFailureResult(block: (KorneaResult<*>)
     if (isFailure) block(this)
     return this
 }
+
+@OptIn(ExperimentalContracts::class)
+@AvailableSince(KorneaErrors.VERSION_3_0_1_ALPHA)
+public inline fun <T, reified F: KorneaResult.Failure> KorneaResult<T>.doOnTypedFailureResult(block: (KorneaResult<*>) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    if (failureOrNull() is F) block(this)
+    return this
+}
+
 
 /** Run when this result is specifically a known error */
 @OptIn(ExperimentalContracts::class)

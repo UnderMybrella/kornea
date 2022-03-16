@@ -3,6 +3,8 @@ package dev.brella.kornea.errors.common
 import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaErrors {
+    public const val VERSION_3_0_1_ALPHA: String = "3.0.1-alpha"
+
     /**
      * kornea-errors 3.0.0-alpha
      * - Change KorneaResult to be a value class; failure is an interface required to be implemented by errors
