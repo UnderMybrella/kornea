@@ -23,10 +23,7 @@ allprojects {
 
     repositories {
         mavenCentral()
-        jcenter()
         maven(url = "https://maven.brella.dev")
-        maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
-        maven(url = "https://kotlin.bintray.com/kotlinx")
     }
 }
 
@@ -77,3 +74,8 @@ configure(subprojects) {
 //        distributionType = Wrapper.DistributionType.ALL
 //    }
 //}
+
+rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
+    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().nodeVersion = "16.0.0"
+//    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().n
+}

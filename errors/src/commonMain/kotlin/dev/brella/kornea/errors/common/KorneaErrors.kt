@@ -3,6 +3,13 @@ package dev.brella.kornea.errors.common
 import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaErrors {
+    /**
+     * kornea-errors 3.0.0-alpha
+     * - Change KorneaResult to be a value class; failure is an interface required to be implemented by errors
+     * - Remove PooledResult, consumeX methods
+     */
+    public const val VERSION_3_0_0_ALPHA: String = "3.0.0-alpha"
+
     public const val VERSION_2_1_0_ALPHA: String = "2.1.0-alpha"
 
     /**
@@ -22,7 +29,7 @@ public object KorneaErrors {
 
     /**
      * kornea-errors
-     * - Add [getOrEmptyDefault]
+     * - Add [getOrElseWhenEmpty]
      * - Add class based versions of [filterToInstance]
      * - Remove reified modifier from a lot of methods, since they don't need it
      */

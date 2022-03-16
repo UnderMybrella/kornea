@@ -14,7 +14,6 @@ import dev.brella.kornea.toolkit.coroutines.SharedStateRW
 import dev.brella.kornea.toolkit.coroutines.SynchronisedBinaryView
 
 @ExperimentalKorneaToolkit
-@ExperimentalUnsignedTypes
 public actual class BinaryDataPool(
     override val location: String? = null,
     override val maximumInstanceCount: Int? = null,

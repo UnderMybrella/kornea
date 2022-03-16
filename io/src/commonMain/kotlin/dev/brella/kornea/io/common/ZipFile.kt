@@ -2,7 +2,7 @@ package dev.brella.kornea.io.common
 
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.errors.common.cast
+import dev.brella.kornea.errors.common.asType
 import dev.brella.kornea.errors.common.getOrBreak
 import dev.brella.kornea.errors.common.korneaNotEnoughData
 import dev.brella.kornea.io.common.flow.InputFlow
@@ -256,7 +256,7 @@ public suspend fun InputFlow.readZipFile(): KorneaResult<ZipStructure> {
                 )
             }
             0x04034b50 -> {
-                val localFile = readZipLocalFileHeader(shouldReadMagic = false).getOrBreak { return it.cast() }
+                val localFile = readZipLocalFileHeader(shouldReadMagic = false).getOrBreak { return it.asType() }
                 localHeaders.add(localFile)
                 skip(localFile.compressedSize.toULong())
             }

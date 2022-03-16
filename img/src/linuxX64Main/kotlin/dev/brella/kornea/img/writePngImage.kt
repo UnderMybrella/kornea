@@ -12,7 +12,6 @@ import pointerVar
 
 data class MemEncode(var buffer: png_voidp?, var size: size_t)
 
-@ExperimentalUnsignedTypes
 actual suspend fun OutputFlow.writePngImage(img: RgbMatrix) {
     asStableReference { stableRef ->
         val pngPtr: png_structp = png_create_write_struct(PNG_LIBPNG_VER_STRING, null, null, null)
@@ -50,7 +49,6 @@ actual suspend fun OutputFlow.writePngImage(img: RgbMatrix) {
     }
 }
 
-@ExperimentalUnsignedTypes
 fun libpngWriteData(pngPtr: png_structp?, data: png_bytep?, length: png_size_t) {
     val flow = png_get_io_ptr(pngPtr)?.asStableRef<OutputFlow>()?.get() ?: return
     if (data != null) {

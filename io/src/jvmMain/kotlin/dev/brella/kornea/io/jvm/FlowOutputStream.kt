@@ -12,10 +12,20 @@ import java.io.OutputStream
 
 @ExperimentalCoroutinesApi
 @AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
-@ExperimentalUnsignedTypes
-public class FlowOutputStream private constructor(private val flow: OutputFlow, private val closeFlow: Boolean, private val bufferSize: Int = 8192, channelLimit: Int = bufferSize) : OutputStream() {
+public class FlowOutputStream private constructor(
+    private val flow: OutputFlow,
+    private val closeFlow: Boolean,
+    private val bufferSize: Int = 8192,
+    channelLimit: Int = bufferSize
+) : OutputStream() {
     public companion object {
-        public operator fun invoke(scope: CoroutineScope, flow: OutputFlow, closeFlow: Boolean, bufferSize: Int = 8192, channelLimit: Int = bufferSize): FlowOutputStream {
+        public operator fun invoke(
+            scope: CoroutineScope,
+            flow: OutputFlow,
+            closeFlow: Boolean,
+            bufferSize: Int = 8192,
+            channelLimit: Int = bufferSize
+        ): FlowOutputStream {
             val stream =
                 FlowOutputStream(flow, closeFlow, bufferSize, channelLimit)
             stream.init(scope)
@@ -50,18 +60,21 @@ public class FlowOutputStream private constructor(private val flow: OutputFlow, 
         }
     }
 
+    @Suppress("NOTHING_TO_INLINE")
     private inline fun waitAndSend(byte: Int) = waitForOutputToClear(1) { outputChannel.send(byte) }
+
+    @Suppress("NOTHING_TO_INLINE")
     private inline fun waitAndSend(buffer: ByteArray) = waitForOutputToClear(buffer.size) { outputChannel.send(buffer) }
 
     override fun write(b: Int) {
-        if (buffered.value + 1 >= bufferSize || !outputChannel.offer(b)) {
+        if (buffered.value + 1 >= bufferSize || !outputChannel.trySend(b).isSuccess) {
             waitAndSend(b)
         }
     }
 
     override fun write(b: ByteArray, off: Int, len: Int) {
         val slice = b.copyOfRange(off, off + len)
-        if (buffered.value + slice.size >= bufferSize || !outputChannel.offer(slice)) {
+        if (buffered.value + slice.size >= bufferSize || !outputChannel.trySend(slice).isSuccess) {
             waitAndSend(slice)
         }
     }
@@ -103,14 +116,23 @@ public class FlowOutputStream private constructor(private val flow: OutputFlow, 
 }
 
 @ExperimentalCoroutinesApi
-@ExperimentalUnsignedTypes
 @Suppress("FunctionName")
-public fun CoroutineScope.FlowOutputStream(flow: OutputFlow, closeFlow: Boolean, bufferSize: Int = 8192, channelLimit: Int = bufferSize): FlowOutputStream =
+public fun CoroutineScope.FlowOutputStream(
+    flow: OutputFlow,
+    closeFlow: Boolean,
+    bufferSize: Int = 8192,
+    channelLimit: Int = bufferSize
+): FlowOutputStream =
     FlowOutputStream(this, flow, closeFlow, bufferSize, channelLimit)
 
 @ExperimentalCoroutinesApi
-@ExperimentalUnsignedTypes
-public suspend inline fun <T> CoroutineScope.asOutputStream(flow: OutputFlow, closeFlow: Boolean, bufferSize: Int = 8192, channelLimit: Int = bufferSize, block: (OutputStream) -> T): T {
+public suspend inline fun <T> CoroutineScope.asOutputStream(
+    flow: OutputFlow,
+    closeFlow: Boolean,
+    bufferSize: Int = 8192,
+    channelLimit: Int = bufferSize,
+    block: (OutputStream) -> T
+): T {
     val stream =
         FlowOutputStream(this, flow, closeFlow, bufferSize, channelLimit)
     val output = BufferedOutputStream(stream).use(block)

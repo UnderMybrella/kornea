@@ -1,9 +1,12 @@
 package dev.brella.kornea.toolkit.common
 
+import kotlin.jvm.JvmInline
+
 /**
  * An immutable view of [backing] using an inline class
  */
-public inline class ImmutableListView<T>(private val backing: List<T>): List<T> {
+@JvmInline
+public value class ImmutableListView<T>(private val backing: List<T>): List<T> {
     override val size: Int
         get() = backing.size
 

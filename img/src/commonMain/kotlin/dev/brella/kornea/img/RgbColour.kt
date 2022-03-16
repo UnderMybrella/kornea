@@ -1,6 +1,9 @@
 package dev.brella.kornea.img
 
-inline class RgbColour(val rgb: Int) {
+import kotlin.jvm.JvmInline
+
+@JvmInline
+value class RgbColour(val rgb: Int) {
     companion object {
         fun rgba(red: Int, green: Int, blue: Int, alpha: Int = 0xFF) =
             RgbColour((alpha and 255 shl 24) or (red and 255 shl 16) or (green and 255 shl 8) or (blue and 255 shl 0))

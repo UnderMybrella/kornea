@@ -5,7 +5,6 @@ import dev.brella.kornea.io.common.flow.extensions.readInt16LE
 import dev.brella.kornea.io.common.flow.extensions.readInt32LE
 
 object DXT1PixelData {
-    @ExperimentalUnsignedTypes
     suspend fun read(width: Int, height: Int, flow: InputFlow): RgbMatrix {
         val matrix = RgbMatrix(width, height)
 

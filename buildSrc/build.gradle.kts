@@ -10,9 +10,5 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0")
-}
-
-kotlinDslPluginOptions {
-    experimentalWarning.set(false)
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
 }

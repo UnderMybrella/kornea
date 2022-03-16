@@ -1,9 +1,9 @@
 package dev.brella.kornea.io.common
 
 
-private val BASE64_ALPHABET: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-private val BASE64_MASK: Byte = 0x3f
-private val BASE64_PAD: Char = '='
+private const val BASE64_ALPHABET: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+private const val BASE64_MASK: Byte = 0x3f
+private const val BASE64_PAD: Char = '='
 private val BASE64_INVERSE_ALPHABET = IntArray(256) {
     BASE64_ALPHABET.indexOf(it.toChar())
 }
@@ -26,10 +26,10 @@ public object CommonBase64Encoder {
 
             for (i in 3 downTo padSize) {
                 val char = (chunk shr (6 * i)) and BASE64_MASK.toInt()
-                result.add(char.toBase64().toByte())
+                result.add(char.toBase64().code.toByte())
             }
             // Fill the pad with '='
-            repeat(padSize) { result.add(BASE64_PAD.toByte()) }
+            repeat(padSize) { result.add(BASE64_PAD.code.toByte()) }
         }
 
         return result.toByteArray()
@@ -91,16 +91,17 @@ public object CommonBase64Encoder {
                 throw IllegalArgumentException("Illegal base64 character " + src[sp - 1].toString(16))
             }
         }
-        if (shiftTo == 6) {
-            dst[dp++] = (bits shr 16).toByte()
-        } else if (shiftTo == 0) {
-            dst[dp++] = (bits shr 16).toByte()
-            dst[dp++] = (bits shr 8).toByte()
-        } else require(shiftTo != 12) { "Last unit does not have enough valid bits" }
-        do {
-            if (sp >= sl) {
-                return dp
+        when (shiftTo) {
+            6 -> dst[dp++] = (bits shr 16).toByte()
+            0 -> {
+                dst[dp++] = (bits shr 16).toByte()
+                dst[dp++] = (bits shr 8).toByte()
             }
+            else -> require(shiftTo != 12) { "Last unit does not have enough valid bits" }
+        }
+
+        do {
+            if (sp >= sl) return dp
         } while (base64[src[sp++].toInt() and 0xFF] < 0)
         throw IllegalArgumentException("Input byte array has incorrect ending byte at $sp")
     }
@@ -109,7 +110,7 @@ public object CommonBase64Encoder {
         base64.fill(-1)
 
         for (i in BASE64_ALPHABET.indices) {
-            base64[BASE64_ALPHABET[i].toInt()] = i
+            base64[BASE64_ALPHABET[i].code] = i
         }
     }
 }

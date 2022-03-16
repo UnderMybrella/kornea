@@ -33,7 +33,6 @@ public fun Number.toInt16LE(): IntArray {
 //    return String(CharArray(data.size) { data[it].toChar() })
 //}
 
-@ExperimentalUnsignedTypes
 public suspend fun InputFlow.readNumBytes(num: Int): ByteArray {
     val data = ByteArray(num)
     read(data)
@@ -95,5 +94,4 @@ public suspend fun InputFlow.readNumBytes(num: Int): ByteArray {
 //    return data.getData().decodeToString(encoding)
 //}
 
-@ExperimentalUnsignedTypes
 public suspend fun OutputFlow.copyFrom(input: InputFlow): Long = input.copyTo(this)

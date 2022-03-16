@@ -12,7 +12,6 @@ import dev.brella.kornea.toolkit.coroutines.ReadWriteSemaphore
 import dev.brella.kornea.toolkit.coroutines.withWritePermit
 
 @ExperimentalKorneaToolkit
-@ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_3_2_0_ALPHA)
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public open class SynchronisedOutputFlow<O : OutputFlow>(

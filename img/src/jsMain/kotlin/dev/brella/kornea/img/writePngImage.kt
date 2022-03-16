@@ -2,15 +2,13 @@ package dev.brella.kornea.img
 
 import dev.brella.kornea.io.common.CommonBase64Encoder
 import dev.brella.kornea.io.common.flow.OutputFlow
+import kotlinx.browser.document
 import org.khronos.webgl.set
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
-import kotlin.browser.document
 
 //TODO: idk if this actually works
 
-@ExperimentalUnsignedTypes
-@ExperimentalStdlibApi
 actual suspend fun OutputFlow.writePngImage(img: RgbMatrix) {
     val canvas = document.createElement("canvas") as HTMLCanvasElement
     canvas.width = img.width

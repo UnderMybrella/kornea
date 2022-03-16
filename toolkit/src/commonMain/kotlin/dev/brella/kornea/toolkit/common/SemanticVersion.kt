@@ -1,11 +1,14 @@
 package dev.brella.kornea.toolkit.common
 
+import kotlin.jvm.JvmInline
+
 /*
  * Copyright 2010-2018 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/APACHE_2.txt file.
  */
 
-public inline class SemanticVersion(private val version: Int) : Comparable<SemanticVersion> {
+@JvmInline
+public value class SemanticVersion(private val version: Int) : Comparable<SemanticVersion> {
     public enum class ReleaseCycle(public val representation: String?) {
         RELEASE(null),
         RELEASE_CANDIDATE("rc"),
@@ -100,7 +103,7 @@ public inline class SemanticVersion(private val version: Int) : Comparable<Seman
                 "Version string is not a valid semantic version: $string"
             }.groupValues
 
-            return SemanticVersion(match[0].toInt(), match[1].toInt(), match[2].toInt(), match?.getOrNull(3)?.let(ReleaseCycle.Companion::fromRepresentation))
+            return SemanticVersion(match[0].toInt(), match[1].toInt(), match[2].toInt(), match.getOrNull(3)?.let(ReleaseCycle.Companion::fromRepresentation))
         }
     }
 }

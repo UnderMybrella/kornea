@@ -5,7 +5,6 @@ import dev.brella.kornea.io.common.DataCloseableEventHandler
 import dev.brella.kornea.io.common.flow.CountingOutputFlow
 import platform.posix.FILE
 
-@ExperimentalUnsignedTypes
 class FileOutputFlow(val fp: FilePointer) : CountingOutputFlow {
     constructor(fp: CPointer<FILE>) : this(FilePointer(fp))
 

@@ -33,7 +33,6 @@ fun Image.asMatrixFromPng(): RgbMatrix {
     return img.asMatrixFromPng()
 }
 
-@ExperimentalUnsignedTypes
 actual suspend fun OutputFlow.writePngImage(img: RgbMatrix) {
     val baos = ByteArrayOutputStream()
     runInterruptible(Dispatchers.IO) { ImageIO.write(img.createPngImage(), "PNG", baos) }

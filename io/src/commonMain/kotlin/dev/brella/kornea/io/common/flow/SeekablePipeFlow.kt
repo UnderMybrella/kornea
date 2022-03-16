@@ -12,17 +12,23 @@ import dev.brella.kornea.io.common.Uri
 @AvailableSince(KorneaIO.VERSION_3_2_0_ALPHA)
 public interface SeekablePipeFlow<I : SeekableInputFlow, O : SeekableOutputFlow> : InputFlow, OutputFlowByDelegate<O> {
     public companion object {
-        public inline operator fun <I : SeekableInputFlow, O : SeekableOutputFlow> invoke(input: I, output: O): SeekablePipeFlow<I, O> =
+        public inline operator fun <I : SeekableInputFlow, O : SeekableOutputFlow> invoke(
+            input: I,
+            output: O
+        ): SeekablePipeFlow<I, O> =
             Sink(input, output)
     }
 
-    public data class Sink<I : SeekableInputFlow, O : SeekableOutputFlow>(override val input: I, override val output: O, val uri: Uri? = null) : SeekablePipeFlow<I, O>,
-        BaseDataCloseable(), SeekableInputFlow by input, SeekableOutputFlow by output {
+    public data class Sink<I : SeekableInputFlow, O : SeekableOutputFlow>(
+        override val input: I,
+        override val output: O,
+        val uri: Uri? = null
+    ) : SeekablePipeFlow<I, O>, BaseDataCloseable(), SeekableInputFlow by input, SeekableOutputFlow by output {
         override val isClosed: Boolean
-            get() = super<BaseDataCloseable>.isClosed
+            get() = super.isClosed
 
         override val closeHandlers: List<DataCloseableEventHandler>
-            get() = super<BaseDataCloseable>.closeHandlers
+            get() = super.closeHandlers
 
         override suspend fun close() {
             super<BaseDataCloseable>.close()
@@ -34,12 +40,11 @@ public interface SeekablePipeFlow<I : SeekableInputFlow, O : SeekableOutputFlow>
             return result
         }
 
-        override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean {
-            return super<BaseDataCloseable>.registerCloseHandler(handler)
-        }
+        override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean =
+            super.registerCloseHandler(handler)
 
         override fun locationAsUri(): KorneaResult<Uri> =
-            KorneaResult.successOrEmpty(uri, null)
+            KorneaResult.successOrEmpty(uri)
                 .switchIfEmpty { input.locationAsUri() }
                 .switchIfEmpty { output.locationAsUri() }
     }

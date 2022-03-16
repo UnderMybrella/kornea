@@ -22,7 +22,6 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.ExecutorService
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class AsyncFileOutputFlow(
     private val channel: AsynchronousFileChannel,
@@ -80,7 +79,7 @@ public class AsyncFileOutputFlow(
     override val streamOffset: Long
         get() = filePointer
 
-    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toUri()), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toUri()))
 
     private suspend fun flushBuffer() {
         if (!closed && buffer.position() != 0) {

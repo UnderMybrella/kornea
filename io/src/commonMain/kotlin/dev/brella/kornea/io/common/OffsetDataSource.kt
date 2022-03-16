@@ -5,19 +5,25 @@ import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
 import dev.brella.kornea.io.common.flow.SinkOffsetInputFlow
 
-@ExperimentalUnsignedTypes
 public open class OffsetDataSource(
     protected val parent: DataSource<*>,
     public val offset: ULong,
     override val maximumInstanceCount: Int? = (if (parent is LimitedInstanceDataSource<*, *>) parent.maximumInstanceCount else null),
     public val closeParent: Boolean = true,
-    override val location: String? = "${parent.location}+${offset.toString(16).toUpperCase()}h"
+    override val location: String? = "${parent.location}+${offset.toString(16).uppercase()}h"
 ) : LimitedInstanceDataSource.Typed<SinkOffsetInputFlow, OffsetDataSource>(withLimitedOpener(this::openLimitedInputFlow)) {
     public companion object {
         @Suppress("RedundantSuspendModifier")
-        public suspend fun openLimitedInputFlow(self: OffsetDataSource, location: String?): KorneaResult<SinkOffsetInputFlow> =
+        public suspend fun openLimitedInputFlow(
+            self: OffsetDataSource,
+            location: String?
+        ): KorneaResult<SinkOffsetInputFlow> =
             self.parent.openInputFlow().map { parentFlow ->
-                if (parentFlow is SeekableInputFlow) SinkOffsetInputFlow.Seekable(parentFlow, self.offset, location ?: self.location)
+                if (parentFlow is SeekableInputFlow) SinkOffsetInputFlow.Seekable(
+                    parentFlow,
+                    self.offset,
+                    location ?: self.location
+                )
                 else SinkOffsetInputFlow(parentFlow, self.offset, location ?: self.location)
             }
     }

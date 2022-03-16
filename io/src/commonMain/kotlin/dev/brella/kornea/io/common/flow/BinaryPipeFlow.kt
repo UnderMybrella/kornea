@@ -5,7 +5,6 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
 import kotlin.math.min
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA)
 public interface BinaryPipeFlow
     : SeekablePipeFlow<BinaryPipeFlow, BinaryPipeFlow>,

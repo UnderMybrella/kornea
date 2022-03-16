@@ -4,7 +4,6 @@ import dev.brella.kornea.base.common.ObservableDataCloseable
 import dev.brella.kornea.base.common.use
 import kotlin.properties.Delegates
 
-@ExperimentalUnsignedTypes
 public open class FlowReader(protected val backing: InputFlow) : ObservableDataCloseable by backing {
     private val cb: CharArray = CharArray(8192)
     private var nChars: Int = 0
@@ -12,9 +11,9 @@ public open class FlowReader(protected val backing: InputFlow) : ObservableDataC
     private var skipLF = false
 
     private suspend fun fill() {
-        val dest: Int = 0
+        val dest = 0
 
-        var n: Int = 0
+        var n = 0
 
         do {
             n = backing.read(cb, dest, cb.size - dest) ?: break
@@ -92,13 +91,14 @@ public open class FlowReader(protected val backing: InputFlow) : ObservableDataC
             }
 
             if (nextChar >= nChars) { /* EOF */
-                if (s.isNotEmpty()) return s.toString()
-                else return null
+                return if (s.isNotEmpty())
+                    s.toString()
+                else
+                    null
             }
 
             var eol = false
             var c by Delegates.notNull<Char>()
-            var i = 0
 
             if (omitLF && (cb[nextChar] == '\n'))
                 nextChar++
@@ -106,7 +106,7 @@ public open class FlowReader(protected val backing: InputFlow) : ObservableDataC
             skipLF = false
             omitLF = false
 
-            i = nextChar
+            var i: Int = nextChar
             charLoop@ while (i in nextChar until nChars) {
                 c = cb[i]
                 if ((c == '\n') || (c == '\r')) {
@@ -138,8 +138,9 @@ public open class FlowReader(protected val backing: InputFlow) : ObservableDataC
     }
 }
 
-@ExperimentalUnsignedTypes
 //Removed noinline from operation. If the compiler starts crashing, add it back
 public suspend inline fun FlowReader.useEachLine(operation: (String) -> Unit): Unit = use { reader ->
-    while (!isClosed) { operation(reader.readLine() ?: break) }
+    while (!isClosed) {
+        operation(reader.readLine() ?: break)
+    }
 }

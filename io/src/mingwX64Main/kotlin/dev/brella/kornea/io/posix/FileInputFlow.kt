@@ -9,7 +9,6 @@ import platform.posix.SEEK_CUR
 import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 
-@ExperimentalUnsignedTypes
 class FileInputFlow(val fp: FilePointer, override val location: String? = null): SeekableInputFlow {
     constructor(fp: CPointer<FILE>, location: String? = null): this(
         FilePointer(

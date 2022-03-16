@@ -8,10 +8,8 @@ import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.FlowPacket
 import dev.brella.kornea.io.common.Uri
 
-@ExperimentalUnsignedTypes
 public typealias OutputFlowEventHandler = suspend (flow: OutputFlow) -> Unit
 
-@ExperimentalUnsignedTypes
 public interface OutputFlow: ObservableDataCloseable {
     public suspend fun write(byte: Int)
     public suspend fun write(b: ByteArray): Unit = write(b, 0, b.size)
@@ -31,17 +29,14 @@ public interface OutputFlowByDelegate<O: OutputFlow>: OutputFlow {
 @PublishedApi
 internal class OutputFlowByDelegateImpl<O: OutputFlow>(override val output: O): OutputFlowByDelegate<O>, OutputFlow by output
 
-@ExperimentalUnsignedTypes
 public interface CountingOutputFlow: OutputFlow {
     public val streamOffset: Long
 }
 
-@ExperimentalUnsignedTypes
 public interface SeekableOutputFlow: OutputFlow {
     public suspend fun seek(pos: Long, mode: EnumSeekMode): ULong
 }
 
-@ExperimentalUnsignedTypes
 public open class SinkCountingOutputFlow(protected val sink: OutputFlow) : CountingOutputFlow, OutputFlow by sink {
     private var _count: Long = 0L
     public val count: Long
@@ -67,8 +62,6 @@ public open class SinkCountingOutputFlow(protected val sink: OutputFlow) : Count
     }
 }
 
-@ExperimentalUnsignedTypes
 public suspend fun OutputFlow.writeByte(byte: Number): Unit = write(byte.toInt())
 
-@ExperimentalUnsignedTypes
 public suspend inline fun OutputFlow.writePacket(packet: FlowPacket): Unit = write(packet.buffer, 0, packet.size)//if (read(packet.buffer) == packet.size) packet.buffer else null

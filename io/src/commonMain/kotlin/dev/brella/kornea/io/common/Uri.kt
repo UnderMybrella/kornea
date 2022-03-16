@@ -198,7 +198,7 @@ public data class Uri(val protocol: String, val authority: Uri.Authority?, val p
 
             val authority = if (host != null) Authority(userinfo, host, port?.toIntOrNull()) else null
 
-            return KorneaResult.success(Uri(scheme, authority, path, query, fragment), null)
+            return KorneaResult.success(Uri(scheme, authority, path, query, fragment))
         }
 
         public inline fun fromFile(path: String): Uri = Uri(PROTOCOL_FILE, null, path, null, null)

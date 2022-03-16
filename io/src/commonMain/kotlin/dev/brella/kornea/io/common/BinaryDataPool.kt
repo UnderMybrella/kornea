@@ -7,8 +7,6 @@ import dev.brella.kornea.io.common.flow.BinaryInputFlow
 import dev.brella.kornea.io.common.flow.BinaryOutputFlow
 import dev.brella.kornea.io.common.flow.OutputFlowByDelegate
 
-@ExperimentalKorneaToolkit
-@ExperimentalUnsignedTypes
 public expect class BinaryDataPool : DataPool<BinaryInputFlow, OutputFlowByDelegate<BinaryOutputFlow>>,
     LimitedInstanceDataSource.Typed<BinaryInputFlow, BinaryDataPool> {
     public companion object {

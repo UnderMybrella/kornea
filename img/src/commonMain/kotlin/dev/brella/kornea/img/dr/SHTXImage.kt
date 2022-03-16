@@ -1,8 +1,8 @@
 package dev.brella.kornea.img.dr
 
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.errors.common.StaticSuccess
 import dev.brella.kornea.errors.common.korneaNotEnoughData
+import dev.brella.kornea.errors.common.success
 import dev.brella.kornea.img.RgbMatrix
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.OutputFlow
@@ -294,7 +294,7 @@ public suspend fun InputFlow.readSHTXFFImage(): KorneaResult<SHTXImage.BGRA> {
     return KorneaResult.success(SHTXImage.BGRA(width, height, bgra, unk))
 }
 
-public suspend fun OutputFlow.writeSHTXImage(img: RgbMatrix, unk: Int = 4, preferBigEndian: Boolean = false): KorneaResult<StaticSuccess> {
+public suspend fun OutputFlow.writeSHTXImage(img: RgbMatrix, unk: Int = 4, preferBigEndian: Boolean = false): KorneaResult<Unit> {
     val heatmap: MutableMap<Int, Int> = HashMap()
     img.rgb.forEach { rgba -> heatmap[rgba] = heatmap[rgba]?.plus(1) ?: 1 }
 
@@ -309,7 +309,7 @@ public suspend fun OutputFlow.writeSHTXUnkImage(
     unk: Int = if (img is SHTXImage.None) img.unk else 4,
     unk2: Int = if (img is SHTXImage.None) img.unk2 else 0,
     heatmap: Map<Int, Int>? = null
-): KorneaResult<StaticSuccess> {
+): KorneaResult<Unit> {
     if (img is SHTXImage.None) {
         writeInt32LE(SHTXImage.MAGIC_NUMBER)
         writeInt16LE(img.width)
@@ -393,14 +393,14 @@ public suspend fun OutputFlow.writeSHTXUnkImage(
         }
     }
 
-    return StaticSuccess
+    return KorneaResult.success()
 }
 
 public suspend fun OutputFlow.writeSHTXFsImage(
     img: RgbMatrix,
     unk: Int = if (img is SHTXImage.None) img.unk else 4,
     heatmap: Map<Int, Int>? = null
-): KorneaResult<StaticSuccess> {
+): KorneaResult<Unit> {
     if (img is SHTXImage.ARGBPalette) {
         writeInt32LE(SHTXImage.MAGIC_NUMBER)
         writeInt16LE(SHTXImage.ARGBPalette.MAGIC_NUMBER)
@@ -435,14 +435,14 @@ public suspend fun OutputFlow.writeSHTXFsImage(
         img.rgb.forEach { rgb -> write(uniqueColours.indexOf(rgb)) }
     }
 
-    return StaticSuccess
+    return KorneaResult.success()
 }
 
 public suspend fun OutputFlow.writeSHTXFSImage(
     img: RgbMatrix,
     unk: Int = if (img is SHTXImage.None) img.unk else 4,
     heatmap: Map<Int, Int>? = null
-): KorneaResult<StaticSuccess> {
+): KorneaResult<Unit> {
     if (img is SHTXImage.BGRAPalette) {
         writeInt32LE(SHTXImage.MAGIC_NUMBER)
         writeInt16LE(SHTXImage.BGRAPalette.MAGIC_NUMBER)
@@ -476,13 +476,13 @@ public suspend fun OutputFlow.writeSHTXFSImage(
         img.rgb.forEach { rgb -> write(uniqueColours.indexOf(rgb)) }
     }
 
-    return StaticSuccess
+    return KorneaResult.success()
 }
 
 public suspend fun OutputFlow.writeSHTXFfImage(
     img: RgbMatrix,
     unk: Int = if (img is SHTXImage.None) img.unk else 4
-): KorneaResult<StaticSuccess> {
+): KorneaResult<Unit> {
     writeInt32LE(SHTXImage.MAGIC_NUMBER)
     writeInt16LE(SHTXImage.ARGB.MAGIC_NUMBER)
     writeInt16LE(img.width)
@@ -491,13 +491,13 @@ public suspend fun OutputFlow.writeSHTXFfImage(
 
     img.rgb.forEach { rgb -> writeInt32LE(rgb) }
 
-    return StaticSuccess
+    return KorneaResult.success()
 }
 
 public suspend fun OutputFlow.writeSHTXFFImage(
     img: RgbMatrix,
     unk: Int = if (img is SHTXImage.None) img.unk else 4
-): KorneaResult<StaticSuccess> {
+): KorneaResult<Unit> {
     writeInt32LE(SHTXImage.MAGIC_NUMBER)
     writeInt16LE(SHTXImage.BGRA.MAGIC_NUMBER)
     writeInt16LE(img.width)
@@ -506,5 +506,5 @@ public suspend fun OutputFlow.writeSHTXFFImage(
 
     img.rgb.forEach { rgb -> writeInt32BE(rgb) }
 
-    return StaticSuccess
+    return KorneaResult.success()
 }

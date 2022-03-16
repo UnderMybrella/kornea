@@ -14,131 +14,239 @@ public object CyclicRedundancyChecks {
     )
 
     /** Information pulled from https://reveng.sourceforge.io/crc-catalogue/all.htm */
-    public val CRC_3_GSM: CRCAlgorithm by lazy { CRCAlgorithm(3, 0x3, 0x0, false, false, 0x7, 0x4, 0x2, "CRC-3/GSM") }
-    public val CRC_3_ROHC: CRCAlgorithm by lazy { CRCAlgorithm(3, 0x3, 0x7, true, true, 0x0, 0x6, 0x0, "CRC-3/ROHC") }
-    public val CRC_4_G_704: CRCAlgorithm by lazy { CRCAlgorithm(4, 0x3, 0x0, true, true, 0x0, 0x7, 0x0, "CRC-4/G-704") }
+    public val CRC_3_GSM: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            width = 3,
+            polynomial = 0x3,
+            init = 0x0,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0x7,
+            check = 0x4,
+            residue = 0x2,
+            name = "CRC-3/GSM"
+        )
+    }
+    public val CRC_3_ROHC: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            width = 3,
+            polynomial = 0x3,
+            init = 0x7,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0x0,
+            check = 0x6,
+            residue = 0x0,
+            name = "CRC-3/ROHC"
+        )
+    }
+    public val CRC_4_G_704: CRCAlgorithm by lazy {
+        CRCAlgorithm(
+            width = 4,
+            polynomial = 0x3,
+            init = 0x0,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0x0,
+            check = 0x7,
+            residue = 0x0,
+            name = "CRC-4/G-704"
+        )
+    }
     public val CRC_4_INTERLAKEN: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            4,
-            0x3,
-            0xF,
-            false,
-            false,
-            0xF,
-            0xB,
-            0x2,
-            "CRC-4/INTERLAKEN"
+            width = 4,
+            polynomial = 0x3,
+            init = 0xF,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0xF,
+            check = 0xB,
+            residue = 0x2,
+            name = "CRC-4/INTERLAKEN"
         )
     }
     public val CRC_5_EPC_C1G2: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            5,
-            0x09,
-            0x09,
-            false,
-            false,
-            0x00,
-            0x00,
-            0x00,
-            "CRC-5/EPC-C1G2"
+            width = 5,
+            polynomial = 0x09,
+            init = 0x09,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0x00,
+            check = 0x00,
+            residue = 0x00,
+            name = "CRC-5/EPC-C1G2"
         )
     }
     public val CRC_5_G_704: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            5,
-            0x15,
-            0x00,
-            true,
-            true,
-            0x00,
-            0x07,
-            0x00,
-            "CRC-5/G-704"
+            width = 5,
+            polynomial = 0x15,
+            init = 0x00,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0x00,
+            check = 0x07,
+            residue = 0x00,
+            name = "CRC-5/G-704"
         )
     }
     public val CRC_5_USB: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            5,
-            0x05,
-            0x1F,
-            true,
-            true,
-            0x1F,
-            0x19,
-            0x06,
-            "CRC-5/USB"
+            width = 5,
+            polynomial = 0x05,
+            init = 0x1F,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0x1F,
+            check = 0x19,
+            residue = 0x06,
+            name = "CRC-5/USB"
         )
     }
     public val CRC_6_CDMA2000_A: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            6, 0x27, 0x3F, false, false, 0x00, 0x0D, 0x00, "CRC-6/CDMA2000-A"
+            width = 6,
+            polynomial = 0x27,
+            init = 0x3F,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0x00,
+            check = 0x0D,
+            residue = 0x00,
+            name = "CRC-6/CDMA2000-A"
         )
     }
     public val CRC_6_CDMA2000_B: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            6, 0x07, 0x3F, false, false, 0x00, 0x3B, 0x00, "CRC-6/CDMA2000-B"
+            width = 6,
+            polynomial = 0x07,
+            init = 0x3F,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0x00,
+            check = 0x3B,
+            residue = 0x00,
+            name = "CRC-6/CDMA2000-B"
         )
     }
     public val CRC_6_G_704: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            6, 0x03, 0x00, true, true, 0x00, 0x06, 0x00, "CRC/G-704"
+            width = 6,
+            polynomial = 0x03,
+            init = 0x00,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0x00,
+            check = 0x06,
+            residue = 0x00,
+            name = "CRC/G-704"
         )
     }
     public val CRC_6_GSM: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            6, 0x2F, 0x00, false, false, 0x3F, 0x13, 0x3A, "CRC-6/GSM"
+            width = 6,
+            polynomial = 0x2F,
+            init = 0x00,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0x3F,
+            check = 0x13,
+            residue = 0x3A,
+            name = "CRC-6/GSM"
         )
     }
     public val CRC_7_MMC: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            7, 0x09, 0x00, false, false, 0x00, 0x75, 0x00, "CRC-7/MMC"
+            width = 7,
+            polynomial = 0x09,
+            init = 0x00,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0x00,
+            check = 0x75,
+            residue = 0x00,
+            name = "CRC-7/MMC"
         )
     }
     public val CRC_7_ROHC: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            7, 0x4F, 0x7F, true, true, 0x00, 0x53, 0x00, "CRC-7/ROHC"
+            width = 7,
+            polynomial = 0x4F,
+            init = 0x7F,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0x00,
+            check = 0x53,
+            residue = 0x00,
+            name = "CRC-7/ROHC"
         )
     }
     public val CRC_7_UMTS: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            7, 0x45, 0x00, false, false, 0x00, 0x61, 0x00, "CRC-7/UMTS"
+            width = 7,
+            polynomial = 0x45,
+            init = 0x00,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0x00,
+            check = 0x61,
+            residue = 0x00,
+            name = "CRC-7/UMTS"
         )
     }
     public val CRC_8_AUTOSAR: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            8, 0x2F, 0xFF, false, false, 0xFF, 0xDF, 0x42, "CRC-8/AUTOSAR"
+            width = 8,
+            polynomial = 0x2F,
+            init = 0xFF,
+            lsb = false,
+            reflectOutput = false,
+            xorOut = 0xFF,
+            check = 0xDF,
+            residue = 0x42,
+            name = "CRC-8/AUTOSAR"
         )
     }
     public val CRC_8_BLUETOOTH: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            8, 0xA7, 0x00, true, true, 0x00, 0x26, 0x00, "CRC-8/BLUETOOTH"
+            width = 8,
+            polynomial = 0xA7,
+            init = 0x00,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0x00,
+            check = 0x26,
+            residue = 0x00,
+            name = "CRC-8/BLUETOOTH"
         )
     }
 
     public val CRC_32_ISO_HDLC: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            32,
-            0x04C11DB7,
-            0xFFFFFFFF,
-            true,
-            true,
-            0xFFFFFFFF,
-            0xCBF43926,
-            0x00,
-            "CRC-32"
+            width = 32,
+            polynomial = 0x04C11DB7,
+            init = 0xFFFFFFFF,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0xFFFFFFFF,
+            check = 0xCBF43926,
+            residue = 0x00,
+            name = "CRC-32"
         )
     }
     public val CRC_32_ISCSI: CRCAlgorithm by lazy {
         CRCAlgorithm(
-            32,
-            0x1EDC6F41,
-            0xFFFFFFFF,
-            true,
-            true,
-            0xFFFFFFFF,
-            0xE3069283,
-            0xB798B438,
-            "CRC-32/ISCSI"
+            width = 32,
+            polynomial = 0x1EDC6F41,
+            init = 0xFFFFFFFF,
+            lsb = true,
+            reflectOutput = true,
+            xorOut = 0xFFFFFFFF,
+            check = 0xE3069283,
+            residue = 0xB798B438,
+            name = "CRC-32/ISCSI"
         )
     }
 
@@ -224,41 +332,9 @@ public object CyclicRedundancyChecks {
         packet: ByteArray,
         algorithm: CRCAlgorithm
     ): ULong {
-        /**
-         * unsigned long crcbitbybitfast(unsigned char* p, unsigned long len) {
-
-        // fast bit by bit algorithm without augmented zero bytes.
-        // does not use lookup table, suited for polynom orders between 1...32.
-
-        unsigned long i, j, c, bit;
-        unsigned long crc = crcinit_direct;
-
-        for (i=0; i<len; i++) {
-
-        c = (unsigned long)*p++;
-        if (refin) c = reflect(c, 8);
-
-        for (j=0x80; j; j>>=1) {
-
-        bit = crc & crchighbit;
-        crc<<= 1;
-        if (c & j) bit^= crchighbit;
-        if (bit) crc^= polynom;
-        }
-        }
-
-        if (refout) crc=reflect(crc, order);
-        crc^= crcxor;
-        crc&= crcmask;
-
-        return(crc);
-        }
-         */
-
-        var i = 0uL
-        var j = 0uL
-        var c = 0uL
-        var bit = 0uL
+        var j: ULong
+        var c: ULong
+        var bit: ULong
 
         var crc = algorithm.init.toULong()
 
@@ -266,8 +342,10 @@ public object CyclicRedundancyChecks {
         val crcHighBit = 1uL shl (algorithm.width - 1)
 
         packet.forEach { byte ->
-            if (algorithm.lsb) c = reflect(byte.toULong(), 8)
-            else c = byte.toULong()
+            c = if (algorithm.lsb)
+                reflect(byte.toULong(), 8)
+            else
+                byte.toULong()
 
             j = 0x80uL
             while (j > 0u) {

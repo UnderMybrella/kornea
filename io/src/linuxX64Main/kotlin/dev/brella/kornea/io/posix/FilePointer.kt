@@ -30,10 +30,9 @@ public value class FilePointer(public val fp: CPointer<FILE>): DataCloseable {
         if (linkLength <= 0) return KorneaResult.empty()
 
         val linkPath = buffer.toKString(endIndex = linkLength.toInt())
-        return KorneaResult.success(Uri.fromFile(linkPath), null)
+        return KorneaResult.success(Uri.fromFile(linkPath))
     }
 
-    @ExperimentalUnsignedTypes
     public fun read(): Int? = fgetc(fp).takeUnless(::isEOF)
 
     public fun read(buffer: ByteArray, offset: Int, length: Int): ULong =

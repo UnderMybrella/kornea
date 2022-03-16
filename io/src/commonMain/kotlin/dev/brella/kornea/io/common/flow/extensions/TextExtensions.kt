@@ -6,23 +6,19 @@ import dev.brella.kornea.io.common.flow.BinaryOutputFlow
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.readExact
 
-@ExperimentalUnsignedTypes
 public suspend fun InputFlow.readString(len: Int, encoding: TextCharsets, overrideMaxLen: Boolean = false): String? {
     val data = readExact(ByteArray(if (overrideMaxLen) len.coerceAtLeast(0) else len.coerceIn(0, 1024 * 1024)))
     return data?.decodeToString(encoding)
 }
 
-@ExperimentalUnsignedTypes
 public suspend fun InputFlow.readAsciiString(len: Int, overrideMaxLen: Boolean = false): String? {
     val data = ByteArray(if (overrideMaxLen) len.coerceAtLeast(0) else len.coerceIn(0, 1024 * 1024))
     if (read(data) != data.size) return null
     return data.decodeToString()
 }
 
-@ExperimentalUnsignedTypes
 public suspend fun InputFlow.readNullTerminatedUTF8String(): String = readNullTerminatedString(encoding = TextCharsets.UTF_8)
 
-@ExperimentalUnsignedTypes
 public suspend fun InputFlow.readNullTerminatedString(maxLen: Int = 255, encoding: TextCharsets = TextCharsets.UTF_8): String {
     val data = BinaryOutputFlow()
 
@@ -65,11 +61,10 @@ public suspend fun InputFlow.readNullTerminatedString(maxLen: Int = 255, encodin
     return data.getData().decodeToString(encoding)
 }
 
-@ExperimentalUnsignedTypes
 public suspend fun InputFlow.readSingleByteNullTerminatedString(maxLen: Int = 255, encoding: TextCharsets = TextCharsets.UTF_8): String {
     val data = BinaryOutputFlow()
 
-    while (true) {
+    for (i in 0 until maxLen) {
         val read = read() ?: break
         require(read != -1) { "Uho..., it's -1 somehow" }
         if (read == 0x00)
@@ -81,11 +76,10 @@ public suspend fun InputFlow.readSingleByteNullTerminatedString(maxLen: Int = 25
     return data.getData().decodeToString(encoding)
 }
 
-@ExperimentalUnsignedTypes
 public suspend fun InputFlow.readDoubleByteNullTerminatedString(maxLen: Int = 255, encoding: TextCharsets = TextCharsets.UTF_16): String {
     val data = BinaryOutputFlow()
 
-    while (true) {
+    for (i in 0 until maxLen) {
         val read = readInt16LE() ?: break
         require(read != -1) { "Uho..., it's -1 somehow" }
         if (read == 0x00)

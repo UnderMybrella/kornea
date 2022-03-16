@@ -15,24 +15,27 @@ public interface PipeFlow<I : InputFlow, O : OutputFlow> : InputFlow, OutputFlow
             Sink(input, output)
     }
 
-    public data class Sink<I : InputFlow, O : OutputFlow>(override val input: I, override val output: O, val uri: Uri? = null) : PipeFlow<I, O>,
-        BaseDataCloseable(), InputFlow by input, OutputFlow by output {
+    public data class Sink<I : InputFlow, O : OutputFlow>(
+        override val input: I,
+        override val output: O,
+        val uri: Uri? = null
+    ) : PipeFlow<I, O>, BaseDataCloseable(), InputFlow by input, OutputFlow by output {
         override val isClosed: Boolean
-            get() = super<BaseDataCloseable>.isClosed
+            get() = super.isClosed
 
         override val closeHandlers: List<DataCloseableEventHandler>
-            get() = super<BaseDataCloseable>.closeHandlers
+            get() = super.closeHandlers
 
         override suspend fun close() {
             super<BaseDataCloseable>.close()
         }
 
         override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean {
-            return super<BaseDataCloseable>.registerCloseHandler(handler)
+            return super.registerCloseHandler(handler)
         }
 
         override fun locationAsUri(): KorneaResult<Uri> =
-            KorneaResult.successOrEmpty(uri, null)
+            KorneaResult.successOrEmpty(uri)
                 .switchIfEmpty { input.locationAsUri() }
                 .switchIfEmpty { output.locationAsUri() }
     }

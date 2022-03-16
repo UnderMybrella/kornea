@@ -192,7 +192,6 @@ class DirectDrawSurfaceImage(
 ) : RgbMatrix(header.width, header.height, rgb)
 
 @Suppress("NAME_SHADOWING")
-@ExperimentalUnsignedTypes
 suspend fun InputFlow.readDDSImage(): KorneaResult<DirectDrawSurfaceImage> {
     var magic = readInt32LE() ?: return korneaNotEnoughData()
     if (magic == DDS1_MAGIC_NUMBER_LE)

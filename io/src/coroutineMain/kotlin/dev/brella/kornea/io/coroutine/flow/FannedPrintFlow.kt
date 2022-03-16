@@ -12,7 +12,6 @@ import kotlinx.coroutines.supervisorScope
  * A print flow that calls each [PrintFlow] function on [fan] in parallel
  * Note: If any fan flow fails, any fan flows that haven't yet completed will be cancelled
  */
-@ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_1_3_0_ALPHA)
 public class FannedPrintFlow(private val fan: List<PrintFlow>) : BaseDataCloseable(), PrintFlow {
     override suspend fun print(value: Char): FannedPrintFlow {

@@ -4,7 +4,6 @@ import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.base.common.DataCloseable
 import dev.brella.kornea.toolkit.common.KorneaToolkit
 
-@ExperimentalUnsignedTypes
 @AvailableSince(KorneaToolkit.VERSION_2_3_0_ALPHA)
 public interface Poolable<out T>: DataCloseable {
     public fun get(): T

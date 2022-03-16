@@ -3,13 +3,18 @@ package dev.brella.kornea.toolkit.coroutines.ascii
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.toolkit.common.*
 import dev.brella.kornea.toolkit.coroutines.ChannelBasedProgressBar
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
-import kotlin.math.*
+import kotlin.math.ceil
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
-import kotlin.time.milliseconds
 
 @AvailableSince(KorneaToolkit.VERSION_3_0_0_ALPHA)
 public fun interface AsciiProgressBarStyle {

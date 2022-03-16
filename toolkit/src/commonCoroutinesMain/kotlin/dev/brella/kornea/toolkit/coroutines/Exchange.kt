@@ -133,6 +133,7 @@ public data class ExchangerChannels<E>(val _input: Channel<E>, val _output: Chan
     }
 }
 
+@Suppress("DELEGATED_MEMBER_HIDES_SUPERTYPE_OVERRIDE")
 @OptIn(InternalCoroutinesApi::class)
 @ExperimentalCoroutinesApi
 @ExperimentalKorneaToolkit
@@ -150,7 +151,6 @@ internal class ExchangerCoroutine<E>(parentContext: CoroutineContext, private va
         if (cause is CancellationException) {
             _inputChannel.cancel(cause) // cancel the channel
             _outputChannel.cancel(cause)
-
         }
     }
 }

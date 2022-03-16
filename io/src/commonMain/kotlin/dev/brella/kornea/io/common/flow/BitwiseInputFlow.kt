@@ -7,7 +7,6 @@ import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
 import kotlin.math.min
 
-@ExperimentalUnsignedTypes
 public open class BitwiseInputFlow protected constructor(protected val flow: InputFlow, override val location: String? = null) : BaseDataCloseable(), InputFlow {
     public companion object {
         public fun subflow(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = BitwiseInputFlow(flow, location)

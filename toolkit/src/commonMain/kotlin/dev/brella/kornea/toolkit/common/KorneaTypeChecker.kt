@@ -16,9 +16,7 @@ public interface KorneaTypeChecker<out T> {
         public val typeClass: KClass<T>
 
         override fun isInstance(instance: Any?): Boolean = typeClass.isInstance(instance)
-        @ExperimentalStdlibApi
         override fun asInstance(instance: Any?): T = typeClass.cast(instance)
-        @ExperimentalStdlibApi
         override fun asInstanceSafe(instance: Any?): T? = typeClass.safeCast(instance)
     }
 

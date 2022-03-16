@@ -2,7 +2,7 @@ apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 //apply plugin: 'kotlinx-atomicfu'
 
-version = "5.4.3-alpha"
+version = "5.5.0-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
@@ -50,7 +50,6 @@ multiplatform {
         all {
             languageSettings.apply {
                 enableLanguageFeature("InlineClasses")
-                useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
                 explicitApi()
             }
         }

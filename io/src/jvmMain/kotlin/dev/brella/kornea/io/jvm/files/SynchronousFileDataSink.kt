@@ -11,12 +11,11 @@ import dev.brella.kornea.io.common.DataSink.Companion.korneaTooManySinksOpen
 import dev.brella.kornea.io.common.Uri
 import java.io.File
 
-@ExperimentalUnsignedTypes
 public class SynchronousFileDataSink(public val backing: File) : BaseDataCloseable(),
     DataSink<SynchronousFileOutputFlow> {
     private val openInstances: MutableList<SynchronousFileOutputFlow> = ArrayList(1)
 
-    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toURI()), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toURI()))
 
     override suspend fun openOutputFlow(): KorneaResult<SynchronousFileOutputFlow> =
         when {

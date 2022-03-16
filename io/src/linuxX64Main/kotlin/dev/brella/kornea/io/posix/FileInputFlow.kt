@@ -2,21 +2,25 @@ package dev.brella.kornea.io.posix
 
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.errors.common.KorneaResult
-import kotlinx.cinterop.CPointer
-import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.EnumSeekMode
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.InputFlowState
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
+import kotlinx.cinterop.CPointer
 import platform.posix.FILE
 import platform.posix.SEEK_CUR
 import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class FileInputFlow(private val fp: FilePointer, override val location: String? = null): SeekableInputFlow, BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
-    public constructor(fp: CPointer<FILE>, location: String? = null): this(
-        FilePointer(fp), location)
+public class FileInputFlow(private val fp: FilePointer, override val location: String? = null) : SeekableInputFlow,
+    BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
+    public constructor(fp: CPointer<FILE>, location: String? = null) : this(
+        FilePointer(fp), location
+    )
 
     private val size = fp.size()
 

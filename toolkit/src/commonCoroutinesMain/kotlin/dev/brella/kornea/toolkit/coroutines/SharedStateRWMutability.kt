@@ -5,6 +5,7 @@ import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
 import dev.brella.kornea.toolkit.common.ImmutableListView
 import dev.brella.kornea.toolkit.common.KorneaToolkit
 import dev.brella.kornea.toolkit.common.SharedState
+import kotlin.jvm.JvmInline
 
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
 public interface KorneaMutability<M, I> {
@@ -39,15 +40,17 @@ public class SharedStateRWMutability<T: KorneaMutability<M, I>, M, I>(private va
     override suspend fun read(): I = semaphore.withReadPermit { state.asImmutable() }
 }
 
+@JvmInline
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
-public inline class KorneaMutableList<T>(private val list: MutableList<T>):
+public value class KorneaMutableList<T>(private val list: MutableList<T>):
     KorneaMutability<MutableList<T>, ImmutableListView<T>> {
     override suspend fun asMutable(): MutableList<T> = list
     override suspend fun asImmutable(): ImmutableListView<T> = ImmutableListView(list)
 }
 
+@JvmInline
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
-public inline class KorneaStringBuilder(private val builder: StringBuilder): KorneaMutability<StringBuilder, String> {
+public value class KorneaStringBuilder(private val builder: StringBuilder): KorneaMutability<StringBuilder, String> {
     override suspend fun asMutable(): StringBuilder = builder
     override suspend fun asImmutable(): String = builder.toString()
 }

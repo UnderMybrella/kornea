@@ -21,6 +21,7 @@ import kotlin.coroutines.suspendCoroutine
  * @see [relativePathFrom]
  */
 public infix fun File.relativePathTo(to: File): String = to.name + absolutePath.replace(to.absolutePath, "")
+
 /**
  * Get the relative path from parent directory [to] to this file
  * Path will ***not*** start with the name of [to]
@@ -44,7 +45,7 @@ public val File.absoluteParentFile: File?
     get(): File? = absoluteFile.parentFile
 
 /** JDK 7 Compat */
-public class ContinuationCompletionHandler<V>: CompletionHandler<V, Continuation<V>> {
+public class ContinuationCompletionHandler<V> : CompletionHandler<V, Continuation<V>> {
     override fun completed(result: V, attachment: Continuation<V>) {
         attachment.resume(result)
     }
@@ -54,7 +55,7 @@ public class ContinuationCompletionHandler<V>: CompletionHandler<V, Continuation
     }
 }
 
-public class NullableContinuationCompletionHandler<V>: CompletionHandler<V, Continuation<V?>> {
+public class NullableContinuationCompletionHandler<V> : CompletionHandler<V, Continuation<V?>> {
     override fun completed(result: V, attachment: Continuation<V?>) {
         attachment.resume(result)
     }
@@ -70,24 +71,36 @@ public val INT_NULLABLE_CONTINUATION_COMPLETION_HANDLER: NullableContinuationCom
     NullableContinuationCompletionHandler()
 
 public suspend fun AsynchronousFileChannel.readAwait(dst: ByteBuffer, position: Long): Int =
-    suspendCoroutine<Int> { cont -> read(dst, position, cont,
-        INT_CONTINUATION_COMPLETION_HANDLER
-    ) }
+    suspendCoroutine<Int> { cont ->
+        read(
+            dst, position, cont,
+            INT_CONTINUATION_COMPLETION_HANDLER
+        )
+    }
 
 public suspend fun AsynchronousFileChannel.readAwaitOrNull(dst: ByteBuffer, position: Long): Int? =
-    suspendCoroutine<Int> { cont -> read(dst, position, cont,
-        INT_CONTINUATION_COMPLETION_HANDLER
-    ) }.takeIf(::readResultIsValid)
+    suspendCoroutine<Int> { cont ->
+        read(
+            dst, position, cont,
+            INT_CONTINUATION_COMPLETION_HANDLER
+        )
+    }.takeIf(::readResultIsValid)
 
 public suspend fun AsynchronousFileChannel.writeAwait(src: ByteBuffer, position: Long): Int =
-    suspendCoroutine<Int> { cont -> write(src, position, cont,
-        INT_CONTINUATION_COMPLETION_HANDLER
-    ) }
+    suspendCoroutine { cont ->
+        write(
+            src, position, cont,
+            INT_CONTINUATION_COMPLETION_HANDLER
+        )
+    }
 
 public suspend fun AsynchronousFileChannel.writeAwaitOrNull(src: ByteBuffer, position: Long): Int? =
-    suspendCoroutine<Int> { cont -> write(src, position, cont,
-        INT_CONTINUATION_COMPLETION_HANDLER
-    ) }
+    suspendCoroutine<Int> { cont ->
+        write(
+            src, position, cont,
+            INT_CONTINUATION_COMPLETION_HANDLER
+        )
+    }
         .takeIf(::readResultIsValid)
 
 @BlockingOperation

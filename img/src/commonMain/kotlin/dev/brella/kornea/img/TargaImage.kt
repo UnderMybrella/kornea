@@ -1,13 +1,13 @@
 package dev.brella.kornea.img
 
 import dev.brella.kornea.errors.common.KorneaResult
+import dev.brella.kornea.errors.common.cast
 import dev.brella.kornea.errors.common.getOrBreak
 import dev.brella.kornea.errors.common.korneaNotEnoughData
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.flow.BinaryPipeFlow
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.extensions.*
-import dev.brella.kornea.io.common.flow.extensions.readInt16LE
 import dev.brella.kornea.io.common.flow.readBytes
 import dev.brella.kornea.io.common.flow.readExact
 
@@ -72,14 +72,14 @@ sealed class EnumTargaAttributesType(open val id: Int, val keepAlpha: Boolean) {
     data class UNASSIGNED(override val id: Int) : EnumTargaAttributesType(id, false)
 }
 
-inline fun InputFlow.createRLERefill(
+fun InputFlow.createRLERefill(
     heap: BinaryPipeFlow,
     pixelDepth: Int,
     colourMapped: Boolean
 ): KorneaResult<suspend (buffer: ByteArray) -> ByteArray?> {
     if (colourMapped) {
         when (pixelDepth) {
-            8 -> return KorneaResult.success(refill@{ buffer ->
+            8 -> return KorneaResult.success refill@{ buffer ->
                 val startPos = heap.position()
                 while ((heap.size()!! - startPos).toInt() < buffer.size) {
                     val packetHeader = read() ?: return@refill null
@@ -98,8 +98,8 @@ inline fun InputFlow.createRLERefill(
 
                 heap.seek(startPos.toLong(), EnumSeekMode.FROM_BEGINNING)
                 heap.readExact(buffer)
-            }, null)
-            16 -> return KorneaResult.success(refill@{ buffer ->
+            }
+            16 -> return KorneaResult.success refill@{ buffer ->
                 val startPos = heap.position()
                 while ((heap.size()!! - startPos).toInt() < buffer.size) {
                     val packetHeader = read() ?: return@refill null
@@ -118,12 +118,12 @@ inline fun InputFlow.createRLERefill(
 
                 heap.seek(startPos.toLong(), EnumSeekMode.FROM_BEGINNING)
                 heap.readExact(buffer)
-            }, null)
+            }
             else -> return KorneaResult.errorAsIllegalArgument(-1, "Invalid pixel depth $pixelDepth")
         }
     } else {
         when (pixelDepth) {
-            8 -> return KorneaResult.success(refill@{ buffer ->
+            8 -> return KorneaResult.success refill@{ buffer ->
                 val startPos = heap.position()
                 while ((heap.size()!! - startPos).toInt() < buffer.size) {
                     val packetHeader = read() ?: return@refill null
@@ -142,8 +142,8 @@ inline fun InputFlow.createRLERefill(
 
                 heap.seek(startPos.toLong(), EnumSeekMode.FROM_BEGINNING)
                 heap.readExact(buffer)
-            }, null)
-            16 -> return KorneaResult.success(refill@{ buffer ->
+            }
+            16 -> return KorneaResult.success refill@{ buffer ->
                 val startPos = heap.position()
                 while ((heap.size()!! - startPos).toInt() < buffer.size) {
                     val packetHeader = read() ?: return@refill null
@@ -162,8 +162,8 @@ inline fun InputFlow.createRLERefill(
 
                 heap.seek(startPos.toLong(), EnumSeekMode.FROM_BEGINNING)
                 heap.readExact(buffer)
-            }, null)
-            24 -> return KorneaResult.success(refill@{ buffer ->
+            }
+            24 -> return KorneaResult.success refill@{ buffer ->
                 val startPos = heap.position()
                 while ((heap.size()!! - startPos).toInt() < buffer.size) {
                     val packetHeader = read() ?: return@refill null
@@ -182,8 +182,8 @@ inline fun InputFlow.createRLERefill(
 
                 heap.seek(startPos.toLong(), EnumSeekMode.FROM_BEGINNING)
                 heap.readExact(buffer)
-            }, null)
-            32 -> return KorneaResult.success(refill@{ buffer ->
+            }
+            32 -> return KorneaResult.success refill@{ buffer ->
                 val startPos = heap.position()
                 while ((heap.size()!! - startPos).toInt() < buffer.size) {
                     val packetHeader = read() ?: return@refill null
@@ -202,7 +202,7 @@ inline fun InputFlow.createRLERefill(
 
                 heap.seek(startPos.toLong(), EnumSeekMode.FROM_BEGINNING)
                 heap.readExact(buffer)
-            }, null)
+            }
             else -> return KorneaResult.errorAsIllegalArgument(-1, "Invalid pixel depth $pixelDepth")
         }
     }
@@ -254,7 +254,7 @@ suspend fun InputFlow.readTargaImage(): KorneaResult<TargaImage> {
             BinaryPipeFlow(),
             pixelDepth,
             colourMap != null
-        ).getOrBreak { return it }
+        ).getOrBreak { return it.cast() }
         else this::readExact
 
     when (imageTypeEncoding) {
@@ -386,7 +386,7 @@ suspend fun InputFlow.readTargaImage(): KorneaResult<TargaImage> {
             val softwareID = remainingData.copyOfRange(extensionIndex + 0x1AA, extensionIndex + 0x1D3).decodeToString()
                 .trim('\u0000')
             val softwareVersion = remainingData.readInt16LE(extensionIndex + 0x1D3) ?: return korneaNotEnoughData()
-            val softwareVersionTag = remainingData[extensionIndex + 0x1D5].toChar()
+            val softwareVersionTag = remainingData[extensionIndex + 0x1D5].toInt().toChar()
 
             val keyColour = remainingData.readInt32LE(extensionIndex + 0x1D6) ?: return korneaNotEnoughData()
 

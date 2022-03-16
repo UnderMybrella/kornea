@@ -14,14 +14,12 @@ import dev.brella.kornea.toolkit.common.KorneaTypeChecker
 import dev.brella.kornea.toolkit.common.inline
 import kotlin.reflect.KClass
 
-@ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
 public abstract class LimitedInstanceDataSource<I : InputFlow, S : Any>(public val opener: LimitedInstanceOpenerHolder<I, S>) :
     BaseDataCloseable(), DataSource<I>, KorneaTypeChecker<I> {
 
     public abstract class Typed<I : InputFlow, S : Any>(
-        private val typeChecker: KorneaTypeChecker<I>,
-        opener: LimitedInstanceOpenerHolder<I, S>
+        private val typeChecker: KorneaTypeChecker<I>, opener: LimitedInstanceOpenerHolder<I, S>
     ) : LimitedInstanceDataSource<I, S>(opener), KorneaTypeChecker<I> by typeChecker {
         public companion object {
             public inline fun <reified I : InputFlow> withType(): KorneaTypeChecker<I> =
@@ -40,20 +38,24 @@ public abstract class LimitedInstanceDataSource<I : InputFlow, S : Any>(public v
                 )
 
             public inline fun <reified LI : LimitedFlowOpener<I, S>, reified S : Any, reified I : InputFlow> LI.withLimitedOpener(): Pair<KorneaTypeChecker<I>, LimitedInstanceOpenerHolder<I, S>> =
-                Pair(KorneaTypeChecker.ClassBased.inline(I::class), LimitedInstanceOpenerHolder.openLimitedInputFlow(this, S::class))
+                Pair(
+                    KorneaTypeChecker.ClassBased.inline(I::class),
+                    LimitedInstanceOpenerHolder.openLimitedInputFlow(this, S::class)
+                )
 
             public inline fun <reified LI : BareFlowOpener<I, S>, reified S : Any, reified I : InputFlow> LI.withBareOpener(): Pair<KorneaTypeChecker<I>, LimitedInstanceOpenerHolder<I, S>> =
-                Pair(KorneaTypeChecker.ClassBased.inline(I::class), LimitedInstanceOpenerHolder.openBareInputFlow(this, S::class))
+                Pair(
+                    KorneaTypeChecker.ClassBased.inline(I::class),
+                    LimitedInstanceOpenerHolder.openBareInputFlow(this, S::class)
+                )
         }
 
         public constructor(pair: Pair<KorneaTypeChecker<I>, LimitedInstanceOpenerHolder<I, S>>) : this(
-            pair.first,
-            pair.second
+            pair.first, pair.second
         )
 
         public constructor(
-            typeClass: KClass<I>,
-            opener: LimitedInstanceOpenerHolder<I, S>
+            typeClass: KClass<I>, opener: LimitedInstanceOpenerHolder<I, S>
         ) : this(KorneaTypeChecker.ClassBased.inline(typeClass), opener)
     }
 
@@ -77,19 +79,18 @@ public abstract class LimitedInstanceDataSource<I : InputFlow, S : Any>(public v
         openInstances.add(flow)
     }
 
-    override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean = mutableCloseHandlers.add(handler)
+    override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean =
+        mutableCloseHandlers.add(handler)
 
-    override suspend fun openNamedInputFlow(location: String?): KorneaResult<I> =
-        when {
-            closed -> korneaSourceClosed()
-            openInstances.size == maximumInstanceCount -> korneaTooManySourcesOpen(maximumInstanceCount)
-            canOpenInputFlow() -> opener.openLimitedInputFlow(opener.asInstance(this), location)
-                .doOnSuccessAsync(this::registerInputFlow)
-            else -> korneaSourceUnknown()
-        }
+    override suspend fun openNamedInputFlow(location: String?): KorneaResult<I> = when {
+        closed -> korneaSourceClosed()
+        openInstances.size == maximumInstanceCount -> korneaTooManySourcesOpen(maximumInstanceCount)
+        canOpenInputFlow() -> opener.openLimitedInputFlow(opener.asInstance(this), location)
+            .doOnSuccessAsync(this::registerInputFlow)
+        else -> korneaSourceUnknown()
+    }
 
-    override suspend fun canOpenInputFlow(): Boolean =
-        !closed && (openInstances.size != maximumInstanceCount)
+    override suspend fun canOpenInputFlow(): Boolean = !closed && (openInstances.size != maximumInstanceCount)
 
     @Suppress("RedundantSuspendModifier")
     protected suspend fun instanceClosed(closeable: ObservableDataCloseable) {

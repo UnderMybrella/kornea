@@ -6,7 +6,6 @@ import dev.brella.kornea.io.common.*
 import dev.brella.kornea.toolkit.common.SuspendInit0
 import dev.brella.kornea.toolkit.common.init
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public open class SinkOffsetInputFlow private constructor(
     protected open val backing: InputFlow,
@@ -19,7 +18,7 @@ public open class SinkOffsetInputFlow private constructor(
             backing: SeekableInputFlow,
             offset: ULong,
             location: String? = "${backing.location}+${offset.toString(16)}h"
-        ): Seekable  = Seekable(backing, offset, location)
+        ): Seekable = Seekable(backing, offset, location)
 
         public suspend operator fun invoke(
             backing: InputFlow,

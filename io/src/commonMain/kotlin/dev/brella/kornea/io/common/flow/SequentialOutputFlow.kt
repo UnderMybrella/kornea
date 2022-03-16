@@ -10,7 +10,6 @@ import dev.brella.kornea.io.common.Uri
 /**
  * An output flow that calls each [OutputFlow] function on [sequence] one after another
  */
-@ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_1_1_0_ALPHA)
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class SequentialOutputFlow(private val sequence: List<OutputFlow>) : BaseDataCloseable(), OutputFlow,

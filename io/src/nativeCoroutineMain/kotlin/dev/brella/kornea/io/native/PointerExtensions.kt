@@ -191,7 +191,6 @@ public fun CPointer<ByteVar>.readInt64BE(index: Int): Long? {
             (e shl 24) or (f shl 16) or (g shl 8) or h
 }
 
-@ExperimentalUnsignedTypes
 public fun CPointer<ByteVar>.readUInt64LE(index: Int): ULong? {
     val a = this[index].toULong() and 0xFFu
     val b = this[index + 1].toULong() and 0xFFu
@@ -205,7 +204,6 @@ public fun CPointer<ByteVar>.readUInt64LE(index: Int): ULong? {
     return (h shl 56) or (g shl 48) or (f shl 40) or (e shl 32) or
             (d shl 24) or (c shl 16) or (b shl 8) or a
 }
-@ExperimentalUnsignedTypes
 public fun CPointer<ByteVar>.readUInt64BE(index: Int): ULong? {
     val a = this[index].toULong() and 0xFFu
     val b = this[index + 1].toULong() and 0xFFu
@@ -288,7 +286,6 @@ public fun CPointer<ByteVar>.readInt32BE(index: Int): Int? {
     return (a shl 24) or (b shl 16) or (c shl 8) or d
 }
 
-@ExperimentalUnsignedTypes
 public fun CPointer<ByteVar>.readUInt32LE(index: Int): UInt? {
     val a = this[index].toUInt() and 0xFFu
     val b = this[index + 1].toUInt() and 0xFFu
@@ -297,7 +294,6 @@ public fun CPointer<ByteVar>.readUInt32LE(index: Int): UInt? {
 
     return ((d shl 24) or (c shl 16) or (b shl 8) or a)
 }
-@ExperimentalUnsignedTypes
 public fun CPointer<ByteVar>.readUInt32BE(index: Int): UInt? {
     val a = this[index].toUInt() and 0xFFu
     val b = this[index + 1].toUInt() and 0xFFu
@@ -384,22 +380,14 @@ public fun CPointer<ByteVar>.writeInt64BE(num: Number): Number? {
     return long
 }
 
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64LE(num: ULong): Number? = writeUInt64LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64LE(num: UInt): Number? = writeUInt64LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64LE(num: UShort): Number? = writeUInt64LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64LE(num: UByte): Number? = writeUInt64LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64BE(num: ULong): Number? = writeUInt64BE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64BE(num: UInt): Number? = writeUInt64BE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64BE(num: UShort): Number? = writeUInt64BE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64BE(num: UByte): Number? = writeUInt64BE(num.toByte())
 
 public inline fun CPointer<ByteVar>.writeUInt64LE(num: Number): Number? = writeInt64LE(num)
@@ -501,22 +489,14 @@ public fun CPointer<ByteVar>.writeInt32BE(num: Number): Number? {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32LE(num: ULong): Number? = writeUInt32LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32LE(num: UInt): Number? = writeUInt32LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32LE(num: UShort): Number? = writeUInt32LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32LE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32BE(num: ULong): Number? = writeUInt32LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32BE(num: UInt): Number? = writeUInt32LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32BE(num: UShort): Number? = writeUInt32LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32BE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
 
@@ -615,22 +595,14 @@ public fun CPointer<ByteVar>.writeInt64BE(index: Int, num: Number): Number? {
     return long
 }
 
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64LE(index: Int, num: ULong): Number? = writeInt64LE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64LE(index: Int, num: UInt): Number? = writeInt64LE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64LE(index: Int, num: UShort): Number? = writeInt64LE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64LE(index: Int, num: UByte): Number? = writeInt64LE(index, num.toByte())
 public inline fun CPointer<ByteVar>.writeUInt64LE(index: Int, num: Number): Number? = writeInt64LE(index, num)
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64BE(index: Int, num: ULong): Number? = writeInt64BE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64BE(index: Int, num: UInt): Number? = writeInt64BE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64BE(index: Int, num: UShort): Number? = writeInt64BE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt64BE(index: Int, num: UByte): Number? = writeInt64BE(index, num.toByte())
 public inline fun CPointer<ByteVar>.writeUInt64BE(index: Int, num: Number): Number? = writeInt64BE(index, num)
 
@@ -730,23 +702,15 @@ public fun CPointer<ByteVar>.writeInt32BE(index: Int, num: Number): Number? {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32LE(index: Int, num: ULong): Number? = writeUInt32LE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32LE(index: Int, num: UInt): Number? = writeUInt32LE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32LE(index: Int, num: UShort): Number? = writeUInt32LE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32LE(index: Int, num: UByte): Number? = writeUInt32LE(index, num.toByte())
 public inline fun CPointer<ByteVar>.writeUInt32LE(index: Int, num: Number): Number? = writeInt32LE(index, num)
 
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32BE(index: Int, num: ULong): Number? = writeUInt32BE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32BE(index: Int, num: UInt): Number? = writeUInt32BE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32BE(index: Int, num: UShort): Number? = writeUInt32BE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun CPointer<ByteVar>.writeUInt32BE(index: Int, num: UByte): Number? = writeUInt32BE(index, num.toByte())
 public inline fun CPointer<ByteVar>.writeUInt32BE(index: Int, num: Number): Number? = writeInt32BE(index, num)
 

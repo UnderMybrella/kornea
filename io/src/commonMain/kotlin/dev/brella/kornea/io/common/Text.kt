@@ -25,7 +25,7 @@ public inline fun ByteArray.decodeToUTF16BEString(): String = decodeToString(Tex
 
 internal fun manuallyDecode(array: ByteArray, charset: TextCharsets): String {
     when (charset) {
-        TextCharsets.ASCII -> return CharArray(array.size) { array[it].toChar() }.concatToString()
+        TextCharsets.ASCII -> return CharArray(array.size) { array[it].toInt().toChar() }.concatToString()
         TextCharsets.UTF_8 -> return array.decodeToString()
         TextCharsets.UTF_16 -> {
             if (array.size < 2)
@@ -71,10 +71,9 @@ public inline fun String.encodeToUTF16ByteArray(): ByteArray = encodeToByteArray
 public inline fun String.encodeToUTF16LEByteArray(): ByteArray = encodeToByteArray(TextCharsets.UTF_16LE)
 public inline fun String.encodeToUTF16BEByteArray(): ByteArray = encodeToByteArray(TextCharsets.UTF_16BE)
 
-@ExperimentalUnsignedTypes
 internal fun manuallyEncode(text: String, charset: TextCharsets, includeByteOrderMarker: Boolean = true): ByteArray {
     when (charset) {
-        TextCharsets.ASCII -> return ByteArray(text.length) { text[it].toByte() }
+        TextCharsets.ASCII -> return ByteArray(text.length) { text[it].code.toByte() }
         TextCharsets.UTF_8 -> return text.encodeToByteArray()
         TextCharsets.UTF_16 -> return manuallyEncode(text, TextCharsets.UTF_16LE, includeByteOrderMarker)
         TextCharsets.UTF_16LE -> {
@@ -83,7 +82,7 @@ internal fun manuallyEncode(text: String, charset: TextCharsets, includeByteOrde
             if (includeByteOrderMarker)
                 output.addInt16LE(TextCharsets.UTF_16_BOM)
 
-            text.forEach { character -> output.addInt16LE(character.toInt()) }
+            text.forEach { character -> output.addInt16LE(character.code) }
 
             return output.toByteArray()
         }
@@ -93,7 +92,7 @@ internal fun manuallyEncode(text: String, charset: TextCharsets, includeByteOrde
             if (includeByteOrderMarker)
                 output.addInt16BE(TextCharsets.UTF_16_BOM)
 
-            text.forEach { character -> output.addInt16BE(character.toInt()) }
+            text.forEach { character -> output.addInt16BE(character.code) }
 
             return output.toByteArray()
         }

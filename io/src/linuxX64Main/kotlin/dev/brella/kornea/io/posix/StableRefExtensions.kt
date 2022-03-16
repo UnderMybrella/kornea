@@ -2,7 +2,6 @@ package dev.brella.kornea.io.posix
 
 import kotlinx.cinterop.StableRef
 
-@ExperimentalUnsignedTypes
 public suspend inline fun <T : Any, R> T.asStableReference(noinline block: suspend (StableRef<T>) -> R): R {
     val ref = StableRef.create(this)
     var exception: Throwable? = null
@@ -16,7 +15,6 @@ public suspend inline fun <T : Any, R> T.asStableReference(noinline block: suspe
     }
 }
 
-@ExperimentalUnsignedTypes
 public suspend inline fun <T : StableRef<*>?, R> T.use(noinline block: suspend (T) -> R): R {
     var exception: Throwable? = null
     try {
@@ -29,7 +27,6 @@ public suspend inline fun <T : StableRef<*>?, R> T.use(noinline block: suspend (
     }
 }
 
-@ExperimentalUnsignedTypes
 public suspend inline fun <T : StableRef<*>?, R> T.useBlock(block: (T) -> R): R {
     var exception: Throwable? = null
     try {
@@ -43,7 +40,6 @@ public suspend inline fun <T : StableRef<*>?, R> T.useBlock(block: (T) -> R): R 
 }
 
 //@ExperimentalContracts
-@ExperimentalUnsignedTypes
 public suspend inline fun <T : StableRef<*>?, R> use(t: T, block: () -> R): R {
 //    contract {
 //        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
@@ -60,7 +56,6 @@ public suspend inline fun <T : StableRef<*>?, R> use(t: T, block: () -> R): R {
     }
 }
 
-@ExperimentalUnsignedTypes
 @PublishedApi
 internal suspend fun StableRef<*>?.closeFinally(cause: Throwable?): Unit = when {
     this == null -> {

@@ -1,6 +1,5 @@
 package dev.brella.kornea.io.jvm.files
 
-import dev.brella.kornea.annotations.ExperimentalKorneaIO
 import dev.brella.kornea.base.common.ObservableDataCloseable
 import dev.brella.kornea.base.common.closeAll
 import dev.brella.kornea.errors.common.KorneaResult
@@ -18,8 +17,6 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.ExecutorService
 
-@ExperimentalUnsignedTypes
-@ExperimentalKorneaIO
 public class AsyncFileDataSink(public val backing: Path, backingChannel: AsynchronousFileChannel? = null, append: Boolean = false) :
     BaseDataCloseable(), DataSink<AsyncFileOutputFlow> {
     public companion object {
@@ -74,7 +71,7 @@ public class AsyncFileDataSink(public val backing: Path, backingChannel: Asynchr
         )
     }
 
-    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toUri()), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(backing.toUri()))
 
     private suspend fun getChannel(): AsynchronousFileChannel =
         if (!initialised) runInterruptible(Dispatchers.IO) { channel } else channel

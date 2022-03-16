@@ -6,15 +6,12 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-@ExperimentalUnsignedTypes
 public interface SeekableInputFlow: InputFlow {
     public suspend fun seek(pos: Long, mode: EnumSeekMode): ULong
 }
 
-//@ExperimentalUnsignedTypes
 //public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(block: () -> R): R = bookmark(this, block)
 @OptIn(ExperimentalContracts::class)
-@ExperimentalUnsignedTypes
 @WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("bookmarkCrossinline(t, block)", "dev.brella.kornea.io.common.flow.bookmarkCrossinline"))
 public suspend inline fun <T : SeekableInputFlow, R> bookmark(t: T, block: () -> R): R {
     contract {
@@ -33,7 +30,6 @@ public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(seeking: ULong, 
     bookmark(seeking.toLong(), EnumSeekMode.FROM_BEGINNING, block)
 
 @OptIn(ExperimentalContracts::class)
-@ExperimentalUnsignedTypes
 @WrongBytecodeGenerated(WrongBytecodeGenerated.STACK_SHOULD_BE_SPILLED, ReplaceWith("bookmarkCrossinline(t, block)", "dev.brella.kornea.io.common.flow.bookmarkCrossinline"))
 public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(seeking: Long, mode: EnumSeekMode, block: T.() -> R): R {
     contract {
@@ -49,7 +45,6 @@ public suspend inline fun <T : SeekableInputFlow, R> T.bookmark(seeking: Long, m
     }
 }
 
-@ExperimentalUnsignedTypes
 public suspend inline fun <T : SeekableInputFlow, R> bookmarkCrossinline(t: T, crossinline block: suspend () -> R): R {
 //    contract {
 //        callsInPlace(block, InvocationKind.EXACTLY_ONCE)

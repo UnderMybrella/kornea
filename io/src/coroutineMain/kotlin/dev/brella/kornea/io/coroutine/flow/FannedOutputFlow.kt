@@ -16,10 +16,10 @@ import kotlinx.coroutines.launch
  * An output flow that calls each [OutputFlow] function on [fan] in parallel
  * Note: If any fan flow fails, any fan flows that haven't yet completed will be cancelled
  */
-@ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_1_1_0_ALPHA)
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class FannedOutputFlow(private val fan: List<OutputFlow>) : BaseDataCloseable(), OutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
+public class FannedOutputFlow(private val fan: List<OutputFlow>) : BaseDataCloseable(), OutputFlow, OutputFlowState,
+    IntFlowState by IntFlowState.base() {
     override suspend fun write(byte: Int) {
         coroutineScope {
             fan.forEach { flow ->

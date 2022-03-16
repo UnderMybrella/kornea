@@ -16,7 +16,6 @@ inline class FilePointer(val fp: CPointer<FILE>): DataCloseable {
     fun pos(): Long = ftello64(fp)
     fun seek(off: Long, whence: Int): Int = fseeko64(fp, off, whence)
 
-    @ExperimentalUnsignedTypes
     fun read() = fgetc(fp).takeUnless(::isEOF)
 
     fun read(buffer: ByteArray, offset: Int, length: Int) =

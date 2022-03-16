@@ -1,7 +1,7 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 
-version = "3.4.2-alpha"
+version = "3.5.0-alpha"
 
 multiplatform {
     jvm()
@@ -59,7 +59,7 @@ multiplatform {
 
         defineSourceSet("commonCoroutines", dependsOn = "common", includedIn = listOf("jvm", "js")) {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$KOTLINX_COROUTINES_VERSION")
             }
         }
 

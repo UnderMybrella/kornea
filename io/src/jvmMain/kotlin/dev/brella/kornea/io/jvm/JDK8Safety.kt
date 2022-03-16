@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE", "UNCHECKED_CAST")
+
 package dev.brella.kornea.io.jvm
 
 import java.nio.Buffer

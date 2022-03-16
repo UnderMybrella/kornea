@@ -45,6 +45,7 @@ public abstract class ChannelBasedProgressBar(
         job.start()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun progressJob(scope: CoroutineScope) = with(scope) {
         if (shouldUpdateOnEmpty) {
             var mark = TimeSource.Monotonic.markNow()

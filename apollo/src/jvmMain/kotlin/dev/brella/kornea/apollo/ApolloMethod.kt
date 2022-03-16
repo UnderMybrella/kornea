@@ -7,7 +7,8 @@ import java.lang.reflect.Method
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-public inline class ApolloMethod0<in SELF: Any, out RET: Any>(public val method: Method) {
+@JvmInline
+public value class ApolloMethod0<in SELF: Any, out RET: Any>(public val method: Method) {
     public class Provider<RET: Any> private constructor(public val klass: KClass<RET>) {
         public companion object {
             private val INSTANCES: MutableMap<KClass<*>, Provider<*>> = HashMap()

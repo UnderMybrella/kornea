@@ -3,12 +3,12 @@ package dev.brella.kornea.toolkit.common.collections
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.toolkit.common.KorneaToolkit
-import kotlin.js.JsName
 
 @AvailableSince(KorneaToolkit.VERSION_2_1_0_ALPHA)
 public interface ChainLink<out C: ChainLink<C>>: Iterable<C> {
     public val next: C?
 
+    @Suppress("UNCHECKED_CAST")
     override fun iterator(): Iterator<C> = ChainIterator(this as C)
 }
 

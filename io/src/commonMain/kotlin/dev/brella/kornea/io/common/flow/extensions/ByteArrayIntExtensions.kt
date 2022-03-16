@@ -1,10 +1,10 @@
+@file:Suppress("DuplicatedCode")
+
 package dev.brella.kornea.io.common.flow.extensions
 
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.io.common.KorneaIO
-import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.toolkit.common.*
-import kotlin.experimental.and
 import kotlin.experimental.or
 
 /** Read from base */
@@ -22,6 +22,7 @@ public fun ByteArray.readInt64LE(): Long? {
             this[1].asLong(8) or
             this[0].asLong(0)
 }
+
 public fun ByteArray.readInt64BE(): Long? {
     if (size < 8)
         return null
@@ -49,6 +50,7 @@ public fun ByteArray.readUInt64LE(): ULong? {
             this[1].asULong(8) or
             this[0].asULong(0)
 }
+
 public fun ByteArray.readUInt64BE(): ULong? {
     if (size < 8)
         return null
@@ -75,6 +77,7 @@ public fun ByteArray.readInt56LE(): Long? {
             this[1].asLong(8) or
             this[0].asLong(0)
 }
+
 public fun ByteArray.readInt56BE(): Long? {
     if (size < 7)
         return null
@@ -99,6 +102,7 @@ public fun ByteArray.readInt48LE(): Long? {
             this[1].asLong(8) or
             this[0].asLong(0)
 }
+
 public fun ByteArray.readInt48BE(): Long? {
     if (size < 6)
         return null
@@ -121,6 +125,7 @@ public fun ByteArray.readInt40LE(): Long? {
             this[1].asLong(8) or
             this[0].asLong(0)
 }
+
 public fun ByteArray.readInt40BE(): Long? {
     if (size < 5)
         return null
@@ -141,6 +146,7 @@ public fun ByteArray.readInt32LE(): Int? {
             this[1].asInt(8) or
             this[0].asInt(0)
 }
+
 public fun ByteArray.readInt32BE(): Int? {
     if (size < 4)
         return null
@@ -160,6 +166,7 @@ public fun ByteArray.readUInt32LE(): UInt? {
             this[1].asUInt(8) or
             this[0].asUInt(0)
 }
+
 public fun ByteArray.readUInt32BE(): UInt? {
     if (size < 4)
         return null
@@ -193,6 +200,7 @@ public fun ByteArray.readInt16LE(): Int? {
 
     return this[1].asInt(8) or this[0].asInt(0)
 }
+
 public fun ByteArray.readInt16BE(): Int? {
     if (size < 2)
         return null
@@ -202,8 +210,12 @@ public fun ByteArray.readInt16BE(): Int? {
 
 @AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
 public fun ByteArray.readVariableInt16(): Int? {
+    if (isEmpty()) return null
+
     val first = this[0].asInt()
     if (first < 0x80) return first
+    else if (size < 2) return null
+
     return (first and 0x7F) or this[1].asInt(7)
 }
 
@@ -234,6 +246,7 @@ public fun ByteArray.readInt64LE(index: Int): Long? {
     return (h shl 56) or (g shl 48) or (f shl 40) or (e shl 32) or
             (d shl 24) or (c shl 16) or (b shl 8) or a
 }
+
 public fun ByteArray.readInt64BE(index: Int): Long? {
     if (size - 8 < index)
         return null
@@ -251,7 +264,6 @@ public fun ByteArray.readInt64BE(index: Int): Long? {
             (e shl 24) or (f shl 16) or (g shl 8) or h
 }
 
-@ExperimentalUnsignedTypes
 public fun ByteArray.readUInt64LE(index: Int): ULong? {
     if (size - 8 < index)
         return null
@@ -268,7 +280,7 @@ public fun ByteArray.readUInt64LE(index: Int): ULong? {
     return (h shl 56) or (g shl 48) or (f shl 40) or (e shl 32) or
             (d shl 24) or (c shl 16) or (b shl 8) or a
 }
-@ExperimentalUnsignedTypes
+
 public fun ByteArray.readUInt64BE(index: Int): ULong? {
     if (size - 8 < index)
         return null
@@ -298,6 +310,7 @@ public fun ByteArray.readInt56LE(index: Int): Long? {
             this[index + 1].asLong(8) or
             this[index + 0].asLong(0)
 }
+
 public fun ByteArray.readInt56BE(index: Int): Long? {
     if (size < 7)
         return null
@@ -322,6 +335,7 @@ public fun ByteArray.readInt48LE(index: Int): Long? {
             this[index + 1].asLong(8) or
             this[index + 0].asLong(0)
 }
+
 public fun ByteArray.readInt48BE(index: Int): Long? {
     if (size < 6)
         return null
@@ -344,6 +358,7 @@ public fun ByteArray.readInt40LE(index: Int): Long? {
             this[index + 1].asLong(8) or
             this[index + 0].asLong(0)
 }
+
 public fun ByteArray.readInt40BE(index: Int): Long? {
     if (size < 5)
         return null
@@ -366,6 +381,7 @@ public fun ByteArray.readInt32LE(index: Int): Int? {
 
     return (d shl 24) or (c shl 16) or (b shl 8) or a
 }
+
 public fun ByteArray.readInt32BE(index: Int): Int? {
     if (size - 4 < index)
         return null
@@ -378,7 +394,6 @@ public fun ByteArray.readInt32BE(index: Int): Int? {
     return (a shl 24) or (b shl 16) or (c shl 8) or d
 }
 
-@ExperimentalUnsignedTypes
 public fun ByteArray.readUInt32LE(index: Int): UInt? {
     if (size - 4 < index)
         return null
@@ -390,7 +405,7 @@ public fun ByteArray.readUInt32LE(index: Int): UInt? {
 
     return ((d shl 24) or (c shl 16) or (b shl 8) or a)
 }
-@ExperimentalUnsignedTypes
+
 public fun ByteArray.readUInt32BE(index: Int): UInt? {
     if (size - 4 < index)
         return null
@@ -434,6 +449,7 @@ public fun ByteArray.readInt16LE(index: Int): Int? {
 
     return (b shl 8) or a
 }
+
 public fun ByteArray.readInt16BE(index: Int): Int? {
     if (size - 2 < index)
         return null
@@ -466,7 +482,7 @@ public fun ByteArray.readFloat64LE(index: Int): Double? = this.readInt64LE(index
 public fun ByteArray.writeInt64LE(num: Number): Number? {
     if (size < 8)
         return null
-    
+
     val long = num.toLong()
 
     this[0] = long.asByte(0)
@@ -480,6 +496,7 @@ public fun ByteArray.writeInt64LE(num: Number): Number? {
 
     return long
 }
+
 public fun ByteArray.writeInt64BE(num: Number): Number? {
     if (size < 8)
         return null
@@ -498,22 +515,20 @@ public fun ByteArray.writeInt64BE(num: Number): Number? {
     return long
 }
 
-@ExperimentalUnsignedTypes
 public inline fun ByteArray.writeUInt64LE(num: ULong): Number? = writeUInt64LE(num.toLong())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64LE(num: UInt): Number? = writeUInt64LE(num.toInt())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64LE(num: UShort): Number? = writeUInt64LE(num.toShort())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64LE(num: UByte): Number? = writeUInt64LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun ByteArray.writeUInt64BE(num: ULong): Number? = writeUInt64BE(num.toLong())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64BE(num: UInt): Number? = writeUInt64BE(num.toInt())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64BE(num: UShort): Number? = writeUInt64BE(num.toShort())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64BE(num: UByte): Number? = writeUInt64BE(num.toByte())
 
 public inline fun ByteArray.writeUInt64LE(num: Number): Number? = writeInt64LE(num)
@@ -535,6 +550,7 @@ public fun ByteArray.writeInt56LE(num: Number): Number? {
 
     return long
 }
+
 public fun ByteArray.writeInt56BE(num: Number): Number? {
     if (size < 7)
         return null
@@ -567,6 +583,7 @@ public fun ByteArray.writeInt48LE(num: Number): Number? {
 
     return long
 }
+
 public fun ByteArray.writeInt48BE(num: Number): Number? {
     if (size < 6)
         return null
@@ -597,6 +614,7 @@ public fun ByteArray.writeInt40LE(num: Number): Number? {
 
     return long
 }
+
 public fun ByteArray.writeInt40BE(num: Number): Number? {
     if (size < 5)
         return null
@@ -625,6 +643,7 @@ public fun ByteArray.writeInt32LE(num: Number): Number? {
 
     return int
 }
+
 public fun ByteArray.writeInt32BE(num: Number): Number? {
     if (size < 4)
         return null
@@ -639,22 +658,20 @@ public fun ByteArray.writeInt32BE(num: Number): Number? {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun ByteArray.writeUInt32LE(num: ULong): Number? = writeUInt32LE(num.toLong())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32LE(num: UInt): Number? = writeUInt32LE(num.toInt())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32LE(num: UShort): Number? = writeUInt32LE(num.toShort())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32LE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun ByteArray.writeUInt32BE(num: ULong): Number? = writeUInt32LE(num.toLong())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32BE(num: UInt): Number? = writeUInt32LE(num.toInt())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32BE(num: UShort): Number? = writeUInt32LE(num.toShort())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32BE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
 
@@ -698,6 +715,7 @@ public fun ByteArray.writeInt16LE(num: Number): Number? {
 
     return short
 }
+
 public fun ByteArray.writeInt16BE(num: Number): Number? {
     if (size < 2)
         return null
@@ -710,7 +728,7 @@ public fun ByteArray.writeInt16BE(num: Number): Number? {
     return short
 }
 
-public fun ByteArray.writeVariableInt16(num: Number): Number? {
+public fun ByteArray.writeVariableInt16(num: Number): Number {
     val short = num.toShort()
 
     if (short < 0x80) {
@@ -753,6 +771,7 @@ public fun ByteArray.writeInt64LE(index: Int, num: Number): Number? {
 
     return long
 }
+
 public fun ByteArray.writeInt64BE(index: Int, num: Number): Number? {
     if (size - 8 < index)
         return null
@@ -771,22 +790,21 @@ public fun ByteArray.writeInt64BE(index: Int, num: Number): Number? {
     return long
 }
 
-@ExperimentalUnsignedTypes
 public inline fun ByteArray.writeUInt64LE(index: Int, num: ULong): Number? = writeInt64LE(index, num.toLong())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64LE(index: Int, num: UInt): Number? = writeInt64LE(index, num.toInt())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64LE(index: Int, num: UShort): Number? = writeInt64LE(index, num.toShort())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64LE(index: Int, num: UByte): Number? = writeInt64LE(index, num.toByte())
 public inline fun ByteArray.writeUInt64LE(index: Int, num: Number): Number? = writeInt64LE(index, num)
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64BE(index: Int, num: ULong): Number? = writeInt64BE(index, num.toLong())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64BE(index: Int, num: UInt): Number? = writeInt64BE(index, num.toInt())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64BE(index: Int, num: UShort): Number? = writeInt64BE(index, num.toShort())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt64BE(index: Int, num: UByte): Number? = writeInt64BE(index, num.toByte())
 public inline fun ByteArray.writeUInt64BE(index: Int, num: Number): Number? = writeInt64BE(index, num)
 
@@ -806,6 +824,7 @@ public fun ByteArray.writeInt56LE(index: Int, num: Number): Number? {
 
     return long
 }
+
 public fun ByteArray.writeInt56BE(index: Int, num: Number): Number? {
     if (size < 7)
         return null
@@ -838,6 +857,7 @@ public fun ByteArray.writeInt48LE(index: Int, num: Number): Number? {
 
     return long
 }
+
 public fun ByteArray.writeInt48BE(index: Int, num: Number): Number? {
     if (size < 6)
         return null
@@ -868,6 +888,7 @@ public fun ByteArray.writeInt40LE(index: Int, num: Number): Number? {
 
     return long
 }
+
 public fun ByteArray.writeInt40BE(index: Int, num: Number): Number? {
     if (size < 5)
         return null
@@ -896,6 +917,7 @@ public fun ByteArray.writeInt32LE(index: Int, num: Number): Number? {
 
     return int
 }
+
 public fun ByteArray.writeInt32BE(index: Int, num: Number): Number? {
     if (size - 4 < index)
         return null
@@ -910,23 +932,21 @@ public fun ByteArray.writeInt32BE(index: Int, num: Number): Number? {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun ByteArray.writeUInt32LE(index: Int, num: ULong): Number? = writeUInt32LE(index, num.toLong())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32LE(index: Int, num: UInt): Number? = writeUInt32LE(index, num.toInt())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32LE(index: Int, num: UShort): Number? = writeUInt32LE(index, num.toShort())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32LE(index: Int, num: UByte): Number? = writeUInt32LE(index, num.toByte())
 public inline fun ByteArray.writeUInt32LE(index: Int, num: Number): Number? = writeInt32LE(index, num)
 
-@ExperimentalUnsignedTypes
 public inline fun ByteArray.writeUInt32BE(index: Int, num: ULong): Number? = writeUInt32BE(index, num.toLong())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32BE(index: Int, num: UInt): Number? = writeUInt32BE(index, num.toInt())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32BE(index: Int, num: UShort): Number? = writeUInt32BE(index, num.toShort())
-@ExperimentalUnsignedTypes
+
 public inline fun ByteArray.writeUInt32BE(index: Int, num: UByte): Number? = writeUInt32BE(index, num.toByte())
 public inline fun ByteArray.writeUInt32BE(index: Int, num: Number): Number? = writeInt32BE(index, num)
 
@@ -967,6 +987,7 @@ public fun ByteArray.writeInt16LE(index: Int, num: Number): Number? {
 
     return short
 }
+
 public fun ByteArray.writeInt16BE(index: Int, num: Number): Number? {
     if (size - 2 < index)
         return null
@@ -994,11 +1015,26 @@ public fun ByteArray.writeVariableInt16(index: Int, num: Number): Number? {
     return short
 }
 
-public inline fun ByteArray.writeFloatBE(index: Int, num: Number): Number? = this.writeInt32BE(index, num.toFloat().toBits())
-public inline fun ByteArray.writeFloatLE(index: Int, num: Number): Number? = this.writeInt32LE(index, num.toFloat().toBits())
-public inline fun ByteArray.writeFloat32BE(index: Int, num: Number): Number? = this.writeInt32BE(index, num.toFloat().toBits())
-public inline fun ByteArray.writeFloat32LE(index: Int, num: Number): Number? = this.writeInt32LE(index, num.toFloat().toBits())
-public inline fun ByteArray.writeDoubleBE(index: Int, num: Number): Number? = this.writeInt64BE(index, num.toDouble().toBits())
-public inline fun ByteArray.writeDoubleLE(index: Int, num: Number): Number? = this.writeInt64LE(index, num.toDouble().toBits())
-public inline fun ByteArray.writeFloat64BE(index: Int, num: Number): Number? = this.writeInt64BE(index, num.toDouble().toBits())
-public inline fun ByteArray.writeFloat64LE(index: Int, num: Number): Number? = this.writeInt64LE(index, num.toDouble().toBits())
+public inline fun ByteArray.writeFloatBE(index: Int, num: Number): Number? =
+    this.writeInt32BE(index, num.toFloat().toBits())
+
+public inline fun ByteArray.writeFloatLE(index: Int, num: Number): Number? =
+    this.writeInt32LE(index, num.toFloat().toBits())
+
+public inline fun ByteArray.writeFloat32BE(index: Int, num: Number): Number? =
+    this.writeInt32BE(index, num.toFloat().toBits())
+
+public inline fun ByteArray.writeFloat32LE(index: Int, num: Number): Number? =
+    this.writeInt32LE(index, num.toFloat().toBits())
+
+public inline fun ByteArray.writeDoubleBE(index: Int, num: Number): Number? =
+    this.writeInt64BE(index, num.toDouble().toBits())
+
+public inline fun ByteArray.writeDoubleLE(index: Int, num: Number): Number? =
+    this.writeInt64LE(index, num.toDouble().toBits())
+
+public inline fun ByteArray.writeFloat64BE(index: Int, num: Number): Number? =
+    this.writeInt64BE(index, num.toDouble().toBits())
+
+public inline fun ByteArray.writeFloat64LE(index: Int, num: Number): Number? =
+    this.writeInt64LE(index, num.toDouble().toBits())

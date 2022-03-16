@@ -8,13 +8,11 @@ import dev.brella.kornea.io.common.flow.BufferedInputFlow
 import dev.brella.kornea.io.common.flow.InputFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.receiveOrNull
 
 /**
  * An output flow that calls each [OutputFlow] function on [fan] in parallel
  * Note: If any fan flow fails, any fan flows that haven't yet completed will be cancelled
  */
-@ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_1_1_0_ALPHA)
 public class FannedInputFlow(
     private val fan: List<InputFlow>,
@@ -45,7 +43,10 @@ public class FannedInputFlow(
                 channel.close()
             }
 
-            val read = channel.receiveOrNull() ?: return@coroutineScope null
+            val readResult = channel.receiveCatching()
+            if (readResult.isFailure) return@coroutineScope null
+            val read = readResult.getOrThrow()
+
             job.cancel()
             read.copyInto(b, off)
             read.size

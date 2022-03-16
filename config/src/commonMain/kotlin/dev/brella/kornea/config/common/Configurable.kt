@@ -16,10 +16,12 @@ public interface Configurable<C: Configuration>: CoroutineContext.Key<Configurat
 @AvailableSince(KorneaConfig.VERSION_1_0_0_INDEV)
 internal expect inline fun <C: Configuration> defaultConfig(defaultConfig: C): ReadWriteProperty<Configurable<C>, C>
 
+@Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaConfig.VERSION_1_0_0_INDEV)
 public suspend inline fun <C: Configuration> Configurable<C>.config(): C? =
     coroutineContext[this]?.let { if (it is Configuration.MISSING) null else it as C }
 
+@Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaConfig.VERSION_1_0_1_INDEV)
 public inline fun <C: Configuration> Configurable<C>.config(coroutineContext: CoroutineContext): C? =
     coroutineContext[this]?.let { if (it is Configuration.MISSING) null else it as C }
@@ -28,6 +30,8 @@ public inline fun <C: Configuration> Configurable<C>.config(coroutineContext: Co
 public suspend inline fun <C: Configuration> Configurable<C>.configure(configure: (config: C?) -> C?): CoroutineContext {
     val newConfig = configure(config())
 
-    if (newConfig == null) return coroutineContext + Configuration.MISSING(this)
-    else return coroutineContext + newConfig
+    return if (newConfig == null)
+        coroutineContext + Configuration.MISSING(this)
+    else
+        coroutineContext + newConfig
 }

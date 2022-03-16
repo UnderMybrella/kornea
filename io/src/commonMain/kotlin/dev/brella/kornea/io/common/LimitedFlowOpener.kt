@@ -17,7 +17,6 @@ public interface BareFlowOpener<I : InputFlow, S> {
     public suspend fun S.openBareInputFlow(location: String?): I
 }
 
-@ExperimentalUnsignedTypes
 public sealed class LimitedInstanceOpenerHolder<I : InputFlow, S : Any> private constructor(
     typeClass: KClass<S>
 ) : KorneaTypeChecker<S> by KorneaTypeChecker.ClassBased.inline(typeClass) {
@@ -111,7 +110,6 @@ public sealed class LimitedInstanceOpenerHolder<I : InputFlow, S : Any> private 
  * Opens an input flow after all values have been processed (source is not closed, there is available space, and we can open it).
  * The resulting input flow will be registered to open instances if successful, and will have a close handler added.
  */
-@ExperimentalUnsignedTypes
 public suspend inline fun <I : InputFlow, S> LimitedFlowOpener<I, S>.openLimitedInputFlow(
     self: S,
     location: String?
@@ -121,7 +119,6 @@ public suspend inline fun <I : InputFlow, S> LimitedFlowOpener<I, S>.openLimited
  * Opens an input flow after all values have been processed (source is not closed, there is available space, and we can open it).
  * The resulting input flow will be wrapped with a default call to [KorneaResult.success], registered to open instances, and will have a close handler added.
  */
-@ExperimentalUnsignedTypes
 public suspend inline fun <I : InputFlow, S> BareFlowOpener<I, S>.openBareInputFlow(
     self: S,
     location: String?

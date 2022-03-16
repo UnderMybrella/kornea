@@ -2,11 +2,13 @@ package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.EnumSeekMode
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.toolkit.common.SuspendInit0
 import dev.brella.kornea.toolkit.common.init
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public open class WindowedInputFlow private constructor(
     protected open val window: InputFlow,
@@ -20,9 +22,8 @@ public open class WindowedInputFlow private constructor(
             offset: ULong,
             windowSize: ULong,
             location: String? =
-                "${window.location}[${offset.toString(16).toUpperCase()}h,${
-                    offset.plus(windowSize).toString(16)
-                        .toUpperCase()
+                "${window.location}[${offset.toString(16).uppercase()}h,${
+                    offset.plus(windowSize).toString(16).uppercase()
                 }h]"
         ): WindowedInputFlow = Seekable(window, offset, windowSize, location)
 
@@ -31,9 +32,9 @@ public open class WindowedInputFlow private constructor(
             offset: ULong,
             windowSize: ULong,
             location: String? =
-                "${window.location}[${offset.toString(16).toUpperCase()}h,${
+                "${window.location}[${offset.toString(16).uppercase()}h,${
                     offset.plus(windowSize).toString(16)
-                        .toUpperCase()
+                        .uppercase()
                 }h]"
         ): WindowedInputFlow {
             if (window is SeekableInputFlow)
@@ -55,9 +56,9 @@ public open class WindowedInputFlow private constructor(
                 offset: ULong,
                 windowSize: ULong,
                 location: String? =
-                    "${window.location}[${offset.toString(16).toUpperCase()}h,${
+                    "${window.location}[${offset.toString(16).uppercase()}h,${
                         offset.plus(windowSize).toString(16)
-                            .toUpperCase()
+                            .uppercase()
                     }h]"
             ): Seekable = init(Seekable(window, offset, windowSize, location))
         }

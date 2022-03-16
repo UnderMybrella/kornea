@@ -6,21 +6,22 @@ import dev.brella.kornea.io.coroutine.flow.ConflatingBufferedInputFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlin.coroutines.CoroutineContext
 
-@ExperimentalUnsignedTypes
 public actual class StdinInputFlow(location: String? = "stdin") : InputFlow, ConflatingBufferedInputFlow(location) {
-    public companion object {
+    public companion object : CoroutineScope {
         //NOTE: The reason we use a collector rather than just reading stdin is because stdin blocks and cannot be interrupted
         //TODO: Check whether that's true of other inputstreams?
+
+        override val coroutineContext: CoroutineContext = SupervisorJob()
 
         private val _stdinFlow = MutableStateFlow(byteArrayOf())
         public val stdinFlow: StateFlow<ByteArray>
             get() = _stdinFlow
 
-        public val stdinCollector: Job = GlobalScope.launch(Dispatchers.Main) {
+        public val stdinCollector: Job = launch(Dispatchers.Main) {
             val buffer = ByteArray(8192)
-            var read = 0
+            var read: Int
 
             while (isActive) {
                 read = readFromStdin(buffer)
@@ -29,7 +30,7 @@ public actual class StdinInputFlow(location: String? = "stdin") : InputFlow, Con
         }
     }
 
-    private val collector: Job = GlobalScope.launch {
+    private val collector: Job = launch {
         stdinFlow.collect(channel::send)
     }
 

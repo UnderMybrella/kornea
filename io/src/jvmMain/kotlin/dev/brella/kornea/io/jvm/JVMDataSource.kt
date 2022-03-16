@@ -1,18 +1,18 @@
 package dev.brella.kornea.io.jvm
 
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.DataSourceReproducibility
+import dev.brella.kornea.io.common.LimitedInstanceDataSource
+import dev.brella.kornea.io.common.Uri
 import java.io.InputStream
 
-@ExperimentalUnsignedTypes
 public class JVMDataSource(
     private val func: () -> InputStream,
     override val maximumInstanceCount: Int? = null,
     override val location: String? = null
 ) : LimitedInstanceDataSource.Typed<JVMInputFlow, JVMDataSource>(withBareOpener(this::openBareInputFlow)) {
     public companion object {
-        @Suppress("RedundantSuspendModifier")
-        public suspend fun openBareInputFlow(self: JVMDataSource, location: String?): JVMInputFlow =
+        public fun openBareInputFlow(self: JVMDataSource, location: String?): JVMInputFlow =
             JVMInputFlow(self.func(), location ?: self.location)
     }
 

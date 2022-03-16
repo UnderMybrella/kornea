@@ -1,3 +1,5 @@
+@file:Suppress("DuplicatedCode")
+
 package dev.brella.kornea.io.common.flow.extensions
 
 import dev.brella.kornea.io.common.*
@@ -250,28 +252,20 @@ public fun Int64Packet.writeInt64BE(num: Number): Number? {
     return long
 }
 
-@ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64LE(num: ULong): Number? = writeUInt64LE(num.toLong())
 
-@ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64LE(num: UInt): Number? = writeUInt64LE(num.toInt())
 
-@ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64LE(num: UShort): Number? = writeUInt64LE(num.toShort())
 
-@ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64LE(num: UByte): Number? = writeUInt64LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64BE(num: ULong): Number? = writeUInt64BE(num.toLong())
 
-@ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64BE(num: UInt): Number? = writeUInt64BE(num.toInt())
 
-@ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64BE(num: UShort): Number? = writeUInt64BE(num.toShort())
 
-@ExperimentalUnsignedTypes
 public inline fun Int64Packet.writeUInt64BE(num: UByte): Number? = writeUInt64BE(num.toByte())
 
 public inline fun Int64Packet.writeUInt64LE(num: Number): Number? = writeInt64LE(num)
@@ -401,28 +395,20 @@ public fun Int32Packet.writeInt32BE(num: Number): Number? {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32LE(num: ULong): Number? = writeUInt32LE(num.toLong())
 
-@ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32LE(num: UInt): Number? = writeUInt32LE(num.toInt())
 
-@ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32LE(num: UShort): Number? = writeUInt32LE(num.toShort())
 
-@ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32LE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32BE(num: ULong): Number? = writeUInt32LE(num.toLong())
 
-@ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32BE(num: UInt): Number? = writeUInt32LE(num.toInt())
 
-@ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32BE(num: UShort): Number? = writeUInt32LE(num.toShort())
 
-@ExperimentalUnsignedTypes
 public inline fun Int32Packet.writeUInt32BE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
 

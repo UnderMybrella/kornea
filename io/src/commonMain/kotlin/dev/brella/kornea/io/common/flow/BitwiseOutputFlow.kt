@@ -5,7 +5,6 @@ import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.Uri
 import kotlin.math.min
 
-@ExperimentalUnsignedTypes
 public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataCloseable(), OutputFlow {
     private var currentInt = 0
     private var currentPos = 0

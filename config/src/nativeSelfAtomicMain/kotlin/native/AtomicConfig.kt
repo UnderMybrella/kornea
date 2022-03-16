@@ -8,7 +8,7 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 @AvailableSince(KorneaConfig.VERSION_1_0_0_INDEV)
-internal inline class AtomicConfig<T>(private val ref: FreezableAtomicReference<T>): ReadWriteProperty<Any?, T> {
+internal value class AtomicConfig<T>(private val ref: FreezableAtomicReference<T>): ReadWriteProperty<Any?, T> {
     companion object {
         /**
          * NOTE: This has to be an operator function not a constructor, otherwise we get an IR error

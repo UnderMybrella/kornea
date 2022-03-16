@@ -8,7 +8,6 @@ import dev.brella.kornea.toolkit.common.BinaryListView
 import dev.brella.kornea.toolkit.common.BinaryView
 import kotlin.math.min
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "BinaryInputFlow doesn't need to implement InputFlowState, since it's not going to be much more efficient")
 public class BinaryInputFlow(
     private val view: BinaryView,

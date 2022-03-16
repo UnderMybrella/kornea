@@ -4,7 +4,6 @@ import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.flow.BufferedInputFlow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.receiveOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -23,12 +22,13 @@ public abstract class ConflatingBufferedInputFlow(location: String? = null): Buf
             return read.size
         } else {
             mutex.withLock {
-                val next = channel.receiveOrNull()
+                val nextResult = channel.receiveCatching()
                 read.copyInto(b, off, 0, len)
 
-                if (next == null) {
+                if (nextResult.isFailure) {
                     channel.send(read.sliceArray(len until read.size))
                 } else {
+                    val next = nextResult.getOrThrow()
                     val buffer = ByteArray(read.size - len + next.size)
                     read.copyInto(buffer, 0, len)
                     next.copyInto(buffer, len)

@@ -8,29 +8,26 @@ import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.OutputFlow
 import dev.brella.kornea.io.common.flow.extensions.copyToOutputFlow
+import kotlin.jvm.JvmInline
 
-@ExperimentalUnsignedTypes
-public
 /**
  * An interface that loosely defines a source of data - usually reproducible. This data may come from anywhere
  */
-interface DataSource<out I : InputFlow> : ObservableDataCloseable {
+public interface DataSource<out I : InputFlow> : ObservableDataCloseable {
     public companion object {
         public const val ERRORS_SOURCE_CLOSED: Int = 0x1000
         public const val ERRORS_TOO_MANY_FLOWS_OPEN: Int = 0x1001
         public const val ERRORS_UNKNOWN: Int = 0x1FFF
 
-        @ExperimentalUnsignedTypes
         public inline fun <T> korneaSourceClosed(message: String = "Sink closed"): KorneaResult<T> =
             KorneaResult.errorAsIllegalState(ERRORS_SOURCE_CLOSED, message)
 
-        @ExperimentalUnsignedTypes
-        public inline fun <T> korneaTooManySourcesOpen(capacity: Int?): KorneaResult<T> = korneaTooManySourcesOpen("Too many flows open (Capacity: $capacity)")
-        @ExperimentalUnsignedTypes
+        public inline fun <T> korneaTooManySourcesOpen(capacity: Int?): KorneaResult<T> =
+            korneaTooManySourcesOpen("Too many flows open (Capacity: $capacity)")
+
         public inline fun <T> korneaTooManySourcesOpen(message: String): KorneaResult<T> =
             KorneaResult.errorAsIllegalState(ERRORS_TOO_MANY_FLOWS_OPEN, message)
 
-        @ExperimentalUnsignedTypes
         public inline fun <T> korneaSourceUnknown(message: String = "An unknown error has occurred"): KorneaResult<T> =
             KorneaResult.errorAsIllegalState(ERRORS_UNKNOWN, message)
     }
@@ -54,15 +51,14 @@ interface DataSource<out I : InputFlow> : ObservableDataCloseable {
     public suspend fun canOpenInputFlow(): Boolean
 }
 
-@ExperimentalUnsignedTypes
 public suspend fun DataSource<*>.copyToOutputFlow(sink: OutputFlow): KorneaResult<Long> =
     openInputFlow().map { flow -> flow.copyToOutputFlow(sink) }
 
-@ExperimentalUnsignedTypes
 public suspend inline fun <T : InputFlow, reified R> DataSource<T>.useInputFlow(block: (T) -> R): KorneaResult<R> =
     openInputFlow().map { flow -> flow.use(block) }
 
-public inline class DataSourceReproducibility(public val flag: Byte) {
+@JvmInline
+public value class DataSourceReproducibility(public val flag: Byte) {
     public constructor(flag: Number) : this(flag.toByte())
     public constructor(
         isStatic: Boolean = false,

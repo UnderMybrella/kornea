@@ -1,20 +1,17 @@
 package dev.brella.kornea.io.jvm
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.receiveOrNull
-import kotlinx.coroutines.channels.sendBlocking
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.toolkit.common.oneTimeMutableInline
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.trySendBlocking
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.nio.ByteBuffer
 
-@ExperimentalCoroutinesApi
 @AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
-@ExperimentalUnsignedTypes
 public class FlowInputStream private constructor(
     private val flow: InputFlow,
     private val closeFlow: Boolean,
@@ -22,6 +19,7 @@ public class FlowInputStream private constructor(
     channelLimit: Int = 4
 ) : InputStream() {
     public companion object {
+        @ExperimentalCoroutinesApi
         public operator fun invoke(
             scope: CoroutineScope,
             flow: InputFlow,
@@ -40,10 +38,10 @@ public class FlowInputStream private constructor(
     private val receiveBufferFromFlow = Channel<ByteBuffer>(channelLimit)
     private var job: Job by oneTimeMutableInline()
 
-    protected var buffer: ByteBuffer? = null
-    protected fun fill() {
-        buffer?.let { sendBufferToFlow.sendBlocking(it) }
-        buffer = receiveBufferFromFlow.poll() ?: runBlocking { receiveBufferFromFlow.receive() }
+    private var buffer: ByteBuffer? = null
+    private fun fill() {
+        buffer?.let { sendBufferToFlow.trySendBlocking(it) }
+        buffer = receiveBufferFromFlow.tryReceive().getOrNull() ?: runBlocking { receiveBufferFromFlow.receive() }
     }
 
     override fun read(): Int {
@@ -57,7 +55,7 @@ public class FlowInputStream private constructor(
         return buffer!!.get().toInt() and 0xFF
     }
 
-    protected fun read1(b: ByteArray, off: Int, len: Int): Int? {
+    private fun read1(b: ByteArray, off: Int, len: Int): Int? {
         if (buffer?.hasRemaining() != true) {
             fill()
 
@@ -111,14 +109,15 @@ public class FlowInputStream private constructor(
 
     public suspend fun join(): Unit = job.join()
 
+    @ExperimentalCoroutinesApi
     private fun init(scope: CoroutineScope) {
         job = scope.launch {
             val byteArray = ByteArray(bufferSize)
             while (isActive && !flow.isClosed && !receiveBufferFromFlow.isClosedForSend && !sendBufferToFlow.isClosedForReceive) {
-                val buffer = sendBufferToFlow.receiveOrNull() ?: break
+                val buffer = sendBufferToFlow.receiveCatching().getOrNull() ?: break
                 buffer.clearSafe()
 
-                var read = 0
+                var read: Int
                 while (buffer.hasRemaining() && flow.remaining() != null) {
                     read = flow.read(byteArray, 0, minOf(byteArray.size, buffer.remaining())) ?: break
                     buffer.put(byteArray, 0, read)
@@ -147,7 +146,6 @@ public class FlowInputStream private constructor(
 }
 
 @ExperimentalCoroutinesApi
-@ExperimentalUnsignedTypes
 @Suppress("FunctionName")
 public fun CoroutineScope.FlowInputStream(
     flow: InputFlow,
@@ -158,7 +156,6 @@ public fun CoroutineScope.FlowInputStream(
     FlowInputStream(this, flow, closeFlow, bufferSize, channelLimit)
 
 @ExperimentalCoroutinesApi
-@ExperimentalUnsignedTypes
 public suspend inline fun <T> CoroutineScope.asInputStream(
     flow: InputFlow,
     closeFlow: Boolean,

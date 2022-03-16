@@ -5,7 +5,6 @@ import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
 import dev.brella.kornea.io.common.flow.WindowedInputFlow
 
-@ExperimentalUnsignedTypes
 public open class WindowedDataSource(
     protected val parent: DataSource<*>,
     public val windowOffset: ULong,
@@ -13,14 +12,23 @@ public open class WindowedDataSource(
     override val maximumInstanceCount: Int? = (if (parent is LimitedInstanceDataSource<*, *>) parent.maximumInstanceCount else null),
     public val closeParent: Boolean = true,
     override val location: String? =
-        "${parent.location}[${windowOffset.toString(16).toUpperCase()}h,${windowOffset.plus(windowSize).toString(16)
-            .toUpperCase()}h]"
+        "${parent.location}[${windowOffset.toString(16).uppercase()}h,${
+            windowOffset.plus(windowSize).toString(16)
+                .uppercase()
+        }h]"
 ) : LimitedInstanceDataSource.Typed<WindowedInputFlow, WindowedDataSource>(withLimitedOpener(this::openLimitedInputFlow)) {
     public companion object {
-        @Suppress("RedundantSuspendModifier")
-        public suspend fun openLimitedInputFlow(self: WindowedDataSource, location: String?): KorneaResult<WindowedInputFlow> =
+        public suspend fun openLimitedInputFlow(
+            self: WindowedDataSource,
+            location: String?
+        ): KorneaResult<WindowedInputFlow> =
             self.parent.openInputFlow().map { parentFlow ->
-                if (parentFlow is SeekableInputFlow) WindowedInputFlow.Seekable(parentFlow, self.windowOffset, self.windowSize, location ?: self.location)
+                if (parentFlow is SeekableInputFlow) WindowedInputFlow.Seekable(
+                    parentFlow,
+                    self.windowOffset,
+                    self.windowSize,
+                    location ?: self.location
+                )
                 else WindowedInputFlow(parentFlow, self.windowOffset, self.windowSize, location ?: self.location)
             }
     }

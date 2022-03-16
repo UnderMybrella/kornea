@@ -12,7 +12,6 @@ import kotlinx.coroutines.runInterruptible
 import java.io.File
 import java.io.RandomAccessFile
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class SynchronousFileInputFlow(
     public val backingFile: File,
@@ -20,7 +19,7 @@ public class SynchronousFileInputFlow(
 ) : BaseDataCloseable(), InputFlow, SeekableInputFlow, InputFlowState, IntFlowState by IntFlowState.base() {
     private val channel = RandomAccessFile(backingFile, "r")
 
-    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backingFile), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backingFile))
 
     override suspend fun read(): Int? = runInterruptible(Dispatchers.IO) { channel.read().takeIf(::readResultIsValid) }
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? =

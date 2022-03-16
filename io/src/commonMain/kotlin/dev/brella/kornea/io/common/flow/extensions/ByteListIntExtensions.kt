@@ -1,3 +1,5 @@
+@file:Suppress("DuplicatedCode")
+
 package dev.brella.kornea.io.common.flow.extensions
 
 import dev.brella.kornea.annotations.AvailableSince
@@ -200,8 +202,12 @@ public fun List<Byte>.readInt16BE(): Int? {
 
 @AvailableSince(KorneaIO.VERSION_3_2_2_ALPHA)
 public fun List<Byte>.readVariableInt16(): Int? {
+    if (isEmpty()) return null
+
     val first = this[0].asInt()
     if (first < 0x80) return first
+    else if (size < 2) return null
+
     return (first and 0x7F) or this[1].asInt(7)
 }
 
@@ -249,7 +255,6 @@ public fun List<Byte>.readInt64BE(index: Int): Long? {
             (e shl 24) or (f shl 16) or (g shl 8) or h
 }
 
-@ExperimentalUnsignedTypes
 public fun List<Byte>.readUInt64LE(index: Int): ULong? {
     if (size - 8 < index)
         return null
@@ -266,7 +271,6 @@ public fun List<Byte>.readUInt64LE(index: Int): ULong? {
     return (h shl 56) or (g shl 48) or (f shl 40) or (e shl 32) or
             (d shl 24) or (c shl 16) or (b shl 8) or a
 }
-@ExperimentalUnsignedTypes
 public fun List<Byte>.readUInt64BE(index: Int): ULong? {
     if (size - 8 < index)
         return null
@@ -376,7 +380,6 @@ public fun List<Byte>.readInt32BE(index: Int): Int? {
     return (a shl 24) or (b shl 16) or (c shl 8) or d
 }
 
-@ExperimentalUnsignedTypes
 public fun List<Byte>.readUInt32LE(index: Int): UInt? {
     if (size - 4 < index)
         return null
@@ -388,7 +391,6 @@ public fun List<Byte>.readUInt32LE(index: Int): UInt? {
 
     return ((d shl 24) or (c shl 16) or (b shl 8) or a)
 }
-@ExperimentalUnsignedTypes
 public fun List<Byte>.readUInt32BE(index: Int): UInt? {
     if (size - 4 < index)
         return null
@@ -496,22 +498,14 @@ public fun MutableList<Byte>.writeInt64BE(num: Number): Number? {
     return long
 }
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64LE(num: ULong): Number? = writeUInt64LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64LE(num: UInt): Number? = writeUInt64LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64LE(num: UShort): Number? = writeUInt64LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64LE(num: UByte): Number? = writeUInt64LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64BE(num: ULong): Number? = writeUInt64BE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64BE(num: UInt): Number? = writeUInt64BE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64BE(num: UShort): Number? = writeUInt64BE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64BE(num: UByte): Number? = writeUInt64BE(num.toByte())
 
 public inline fun MutableList<Byte>.writeUInt64LE(num: Number): Number? = writeInt64LE(num)
@@ -637,22 +631,14 @@ public fun MutableList<Byte>.writeInt32BE(num: Number): Number? {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32LE(num: ULong): Number? = writeUInt32LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32LE(num: UInt): Number? = writeUInt32LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32LE(num: UShort): Number? = writeUInt32LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32LE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32BE(num: ULong): Number? = writeUInt32LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32BE(num: UInt): Number? = writeUInt32LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32BE(num: UShort): Number? = writeUInt32LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32BE(num: UByte): Number? = writeUInt32LE(num.toByte())
 
 
@@ -708,7 +694,7 @@ public fun MutableList<Byte>.writeInt16BE(num: Number): Number? {
     return short
 }
 
-public fun MutableList<Byte>.writeVariableInt16(num: Number): Number? {
+public fun MutableList<Byte>.writeVariableInt16(num: Number): Number {
     val short = num.toShort()
 
     if (short < 0x80) {
@@ -769,22 +755,14 @@ public fun MutableList<Byte>.writeInt64BE(index: Int, num: Number): Number? {
     return long
 }
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64LE(index: Int, num: ULong): Number? = writeInt64LE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64LE(index: Int, num: UInt): Number? = writeInt64LE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64LE(index: Int, num: UShort): Number? = writeInt64LE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64LE(index: Int, num: UByte): Number? = writeInt64LE(index, num.toByte())
 public inline fun MutableList<Byte>.writeUInt64LE(index: Int, num: Number): Number? = writeInt64LE(index, num)
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64BE(index: Int, num: ULong): Number? = writeInt64BE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64BE(index: Int, num: UInt): Number? = writeInt64BE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64BE(index: Int, num: UShort): Number? = writeInt64BE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt64BE(index: Int, num: UByte): Number? = writeInt64BE(index, num.toByte())
 public inline fun MutableList<Byte>.writeUInt64BE(index: Int, num: Number): Number? = writeInt64BE(index, num)
 
@@ -908,23 +886,15 @@ public fun MutableList<Byte>.writeInt32BE(index: Int, num: Number): Number? {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32LE(index: Int, num: ULong): Number? = writeUInt32LE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32LE(index: Int, num: UInt): Number? = writeUInt32LE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32LE(index: Int, num: UShort): Number? = writeUInt32LE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32LE(index: Int, num: UByte): Number? = writeUInt32LE(index, num.toByte())
 public inline fun MutableList<Byte>.writeUInt32LE(index: Int, num: Number): Number? = writeInt32LE(index, num)
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32BE(index: Int, num: ULong): Number? = writeUInt32BE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32BE(index: Int, num: UInt): Number? = writeUInt32BE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32BE(index: Int, num: UShort): Number? = writeUInt32BE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.writeUInt32BE(index: Int, num: UByte): Number? = writeUInt32BE(index, num.toByte())
 public inline fun MutableList<Byte>.writeUInt32BE(index: Int, num: Number): Number? = writeInt32BE(index, num)
 
@@ -1036,22 +1006,14 @@ public fun MutableList<Byte>.addInt64BE(num: Number): Number {
     return long
 }
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt64LE(num: ULong): Number = addUInt64LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt64LE(num: UInt): Number = addUInt64LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt64LE(num: UShort): Number = addUInt64LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt64LE(num: UByte): Number = addUInt64LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt64BE(num: ULong): Number = addUInt64BE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt64BE(num: UInt): Number = addUInt64BE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt64BE(num: UShort): Number = addUInt64BE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt64BE(num: UByte): Number = addUInt64BE(num.toByte())
 
 public inline fun MutableList<Byte>.addUInt64LE(num: Number): Number = addInt64LE(num)
@@ -1153,22 +1115,14 @@ public fun MutableList<Byte>.addInt32BE(num: Number): Number {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32LE(num: ULong): Number = addUInt32LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32LE(num: UInt): Number = addUInt32LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32LE(num: UShort): Number = addUInt32LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32LE(num: UByte): Number = addUInt32LE(num.toByte())
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32BE(num: ULong): Number = addUInt32LE(num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32BE(num: UInt): Number = addUInt32LE(num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32BE(num: UShort): Number = addUInt32LE(num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32BE(num: UByte): Number = addUInt32LE(num.toByte())
 
 
@@ -1225,14 +1179,14 @@ public fun MutableList<Byte>.addVariableInt16(num: Number): Number {
     return short
 }
 
-public inline fun MutableList<Byte>.addFloatBE(num: Number): Number? = this.addInt32BE(num.toFloat().toBits())
-public inline fun MutableList<Byte>.addFloatLE(num: Number): Number? = this.addInt32LE(num.toFloat().toBits())
-public inline fun MutableList<Byte>.addFloat32BE(num: Number): Number? = this.addInt32BE(num.toFloat().toBits())
-public inline fun MutableList<Byte>.addFloat32LE(num: Number): Number? = this.addInt32LE(num.toFloat().toBits())
-public inline fun MutableList<Byte>.addDoubleBE(num: Number): Number? = this.addInt64BE(num.toDouble().toBits())
-public inline fun MutableList<Byte>.addDoubleLE(num: Number): Number? = this.addInt64LE(num.toDouble().toBits())
-public inline fun MutableList<Byte>.addFloat64BE(num: Number): Number? = this.addInt64BE(num.toDouble().toBits())
-public inline fun MutableList<Byte>.addFloat64LE(num: Number): Number? = this.addInt64LE(num.toDouble().toBits())
+public inline fun MutableList<Byte>.addFloatBE(num: Number): Number = this.addInt32BE(num.toFloat().toBits())
+public inline fun MutableList<Byte>.addFloatLE(num: Number): Number = this.addInt32LE(num.toFloat().toBits())
+public inline fun MutableList<Byte>.addFloat32BE(num: Number): Number = this.addInt32BE(num.toFloat().toBits())
+public inline fun MutableList<Byte>.addFloat32LE(num: Number): Number = this.addInt32LE(num.toFloat().toBits())
+public inline fun MutableList<Byte>.addDoubleBE(num: Number): Number = this.addInt64BE(num.toDouble().toBits())
+public inline fun MutableList<Byte>.addDoubleLE(num: Number): Number = this.addInt64LE(num.toDouble().toBits())
+public inline fun MutableList<Byte>.addFloat64BE(num: Number): Number = this.addInt64BE(num.toDouble().toBits())
+public inline fun MutableList<Byte>.addFloat64LE(num: Number): Number = this.addInt64LE(num.toDouble().toBits())
 
 
 /** Read from Index */
@@ -1267,24 +1221,16 @@ public fun MutableList<Byte>.addInt64BE(index: Int, num: Number): Number {
     return long
 }
 
-@ExperimentalUnsignedTypes
-public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: ULong): Number? = addInt64LE(index, num.toLong())
-@ExperimentalUnsignedTypes
-public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: UInt): Number? = addInt64LE(index, num.toInt())
-@ExperimentalUnsignedTypes
-public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: UShort): Number? = addInt64LE(index, num.toShort())
-@ExperimentalUnsignedTypes
-public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: UByte): Number? = addInt64LE(index, num.toByte())
-public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: Number): Number? = addInt64LE(index, num)
-@ExperimentalUnsignedTypes
-public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: ULong): Number? = addInt64BE(index, num.toLong())
-@ExperimentalUnsignedTypes
-public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: UInt): Number? = addInt64BE(index, num.toInt())
-@ExperimentalUnsignedTypes
-public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: UShort): Number? = addInt64BE(index, num.toShort())
-@ExperimentalUnsignedTypes
-public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: UByte): Number? = addInt64BE(index, num.toByte())
-public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: Number): Number? = addInt64BE(index, num)
+public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: ULong): Number = addInt64LE(index, num.toLong())
+public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: UInt): Number = addInt64LE(index, num.toInt())
+public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: UShort): Number = addInt64LE(index, num.toShort())
+public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: UByte): Number = addInt64LE(index, num.toByte())
+public inline fun MutableList<Byte>.addUInt64LE(index: Int, num: Number): Number = addInt64LE(index, num)
+public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: ULong): Number = addInt64BE(index, num.toLong())
+public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: UInt): Number = addInt64BE(index, num.toInt())
+public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: UShort): Number = addInt64BE(index, num.toShort())
+public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: UByte): Number = addInt64BE(index, num.toByte())
+public inline fun MutableList<Byte>.addUInt64BE(index: Int, num: Number): Number = addInt64BE(index, num)
 
 public fun MutableList<Byte>.addInt56LE(index: Int, num: Number): Number {
     val long = num.toLong()
@@ -1382,23 +1328,15 @@ public fun MutableList<Byte>.addInt32BE(index: Int, num: Number): Number {
     return int
 }
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32LE(index: Int, num: ULong): Number = addUInt32LE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32LE(index: Int, num: UInt): Number = addUInt32LE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32LE(index: Int, num: UShort): Number = addUInt32LE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32LE(index: Int, num: UByte): Number = addUInt32LE(index, num.toByte())
 public inline fun MutableList<Byte>.addUInt32LE(index: Int, num: Number): Number = addInt32LE(index, num)
 
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32BE(index: Int, num: ULong): Number = addUInt32BE(index, num.toLong())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32BE(index: Int, num: UInt): Number = addUInt32BE(index, num.toInt())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32BE(index: Int, num: UShort): Number = addUInt32BE(index, num.toShort())
-@ExperimentalUnsignedTypes
 public inline fun MutableList<Byte>.addUInt32BE(index: Int, num: UByte): Number = addUInt32BE(index, num.toByte())
 public inline fun MutableList<Byte>.addUInt32BE(index: Int, num: Number): Number = addInt32BE(index, num)
 

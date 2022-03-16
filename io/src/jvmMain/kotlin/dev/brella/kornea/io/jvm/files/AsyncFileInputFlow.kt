@@ -1,7 +1,6 @@
 package dev.brella.kornea.io.jvm.files
 
 import dev.brella.kornea.annotations.ChangedSince
-import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
@@ -11,11 +10,19 @@ import dev.brella.kornea.io.common.flow.InputFlowState
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.PeekableInputFlow
 import dev.brella.kornea.io.common.flow.SeekableInputFlow
-import dev.brella.kornea.io.jvm.*
-import dev.brella.kornea.toolkit.common.*
-import kotlinx.coroutines.*
+import dev.brella.kornea.io.jvm.bookmark
+import dev.brella.kornea.io.jvm.clearSafe
+import dev.brella.kornea.io.jvm.limitSafe
+import dev.brella.kornea.io.jvm.positionSafe
+import dev.brella.kornea.toolkit.common.SuspendInit0
+import dev.brella.kornea.toolkit.common.asInt
+import dev.brella.kornea.toolkit.common.init
+import dev.brella.kornea.toolkit.common.loopAtMostTwice
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
 import java.io.File
 import java.lang.Integer.min
 import java.nio.ByteBuffer
@@ -24,8 +31,6 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import kotlin.reflect.KMutableProperty0
 
-@ExperimentalUnsignedTypes
-@ExperimentalKorneaToolkit
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class AsyncFileInputFlow private constructor(
     private val channel: AsynchronousFileChannel,
@@ -284,7 +289,7 @@ public class AsyncFileInputFlow private constructor(
     override suspend fun position(): ULong =
         mutex.withLock { flowFilePointer - buffer.limit() + buffer.position() }.toULong()
 
-    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.Companion.success(Uri.fromUri(backing.toUri()), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.Companion.success(Uri.fromUri(backing.toUri()))
 
     override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong =
         mutex.withLock {

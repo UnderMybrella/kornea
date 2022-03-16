@@ -7,7 +7,6 @@ import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.toolkit.common.BinaryView
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_4_1_0_INDEV, "BinaryOutputFlow is now an interface")
 @ChangedSince(KorneaIO.VERSION_1_0_0_ALPHA, "Removed getBufferView and implement BinaryView")
 public interface BinaryOutputFlow : CountingOutputFlow, BinaryView {

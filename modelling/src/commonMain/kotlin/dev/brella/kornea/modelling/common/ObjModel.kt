@@ -4,8 +4,10 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.flow.FlowReader
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.useEachLine
+import kotlin.jvm.JvmInline
 
-inline class ObjModel(val meshes: Array<Mesh>) {
+@JvmInline
+value class ObjModel(val meshes: Array<Mesh>) {
     companion object {
         const val MISSING_VERTICES = 0
         const val MISSING_UVS = 1

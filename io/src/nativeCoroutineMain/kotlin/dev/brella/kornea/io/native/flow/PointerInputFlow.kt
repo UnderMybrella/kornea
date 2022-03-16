@@ -24,7 +24,7 @@ public class PointerInputFlow(public val pointer: CPointer<ByteVar>, override va
         return len
     }
 
-    override suspend fun skip(n: ULong): ULong? {
+    override suspend fun skip(n: ULong): ULong {
         offset += n.toInt()
         return n
     }

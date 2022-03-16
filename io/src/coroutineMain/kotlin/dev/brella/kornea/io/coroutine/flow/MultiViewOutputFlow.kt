@@ -13,7 +13,6 @@ import dev.brella.kornea.toolkit.coroutines.ReadWriteSemaphore
 import dev.brella.kornea.toolkit.coroutines.SharedStateRW
 
 @ExperimentalKorneaToolkit
-@ExperimentalUnsignedTypes
 @AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
 @ChangedSince(KorneaIO.VERSION_3_2_0_ALPHA)
 public open class MultiViewOutputFlow<O : OutputFlow> protected constructor(

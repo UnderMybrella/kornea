@@ -9,7 +9,6 @@ import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.IntFlowState.Companion.base
 import kotlin.math.min
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_4_2_0_INDEV)
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public abstract class BufferedInputFlow(override val location: String?) : BaseDataCloseable(), PeekableInputFlow, InputFlowState, IntFlowState by base() {

@@ -1,8 +1,10 @@
 package dev.brella.kornea.toolkit.common
 
+import kotlin.jvm.JvmInline
 import kotlin.reflect.KClass
 
-internal inline class KorneaInlineClassBasedTypeChecker<T : Any>(override val typeClass: KClass<T>): KorneaTypeChecker.ClassBased<T> {
+@JvmInline
+internal value class KorneaInlineClassBasedTypeChecker<T : Any>(override val typeClass: KClass<T>): KorneaTypeChecker.ClassBased<T> {
     companion object {}
 }
 

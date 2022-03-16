@@ -31,19 +31,26 @@ public class SharedStateRW<T>(private var state: T, private val semaphore: ReadW
     override suspend fun read(): T = semaphore.withReadPermit { state }
 }
 
+@OptIn(ExperimentalKorneaToolkit::class)
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
 public inline fun SharedState.Companion.of(starting: Int): SharedState<Int, Int> = SharedStateRWInt(starting)
+@OptIn(ExperimentalKorneaToolkit::class)
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
 public inline fun SharedState.Companion.of(starting: Long): SharedState<Long, Long> = SharedStateRWLong(starting)
+@OptIn(ExperimentalKorneaToolkit::class)
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
 public inline fun SharedState.Companion.of(starting: Boolean): SharedState<Boolean, Boolean> = SharedStateRWBoolean(starting)
+@OptIn(ExperimentalKorneaToolkit::class)
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
 public inline fun SharedState.Companion.of(starting: String): SharedState<String, String> = SharedStateRWString(starting)
 
+@OptIn(ExperimentalKorneaToolkit::class)
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
 public inline fun <T> SharedState.Companion.of(starting: MutableList<T>): SharedState<ImmutableListView<T>, MutableList<T>> = SharedStateRWMutability(KorneaMutableList(starting))
+@OptIn(ExperimentalKorneaToolkit::class)
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
 public inline fun SharedState.Companion.of(starting: StringBuilder): SharedState<String, StringBuilder> = SharedStateRWMutability(KorneaStringBuilder(starting))
 
+@OptIn(ExperimentalKorneaToolkit::class)
 @AvailableSince(KorneaToolkit.VERSION_1_3_0_INDEV)
 public inline fun <T> SharedState.Companion.of(starting: T): SharedState<T, T> = SharedStateRW(starting)

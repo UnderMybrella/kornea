@@ -13,19 +13,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import java.io.InputStream
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public open class JVMInputFlow private constructor(
     protected val stream: CountingInputStream,
     override val location: String? = null
 ) : BaseDataCloseable(), InputFlow, InputFlowState, IntFlowState by IntFlowState.base() {
-    public constructor(stream: InputStream, location: String?) : this(
-        CountingInputStream(
-            stream
-        ), location
-    )
+    public constructor(stream: InputStream, location: String?) : this(CountingInputStream(stream), location)
 
-    override suspend fun read(): Int? = runInterruptible(Dispatchers.IO) { stream.read().takeIf(::readResultIsValid) }
+    override suspend fun read(): Int? =
+        runInterruptible(Dispatchers.IO) { stream.read().takeIf(::readResultIsValid) }
+
     override suspend fun read(b: ByteArray): Int? =
         runInterruptible(Dispatchers.IO) { stream.read(b).takeIf(::readResultIsValid) }
 

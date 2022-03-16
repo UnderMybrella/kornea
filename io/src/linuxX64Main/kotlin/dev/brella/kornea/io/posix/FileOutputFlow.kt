@@ -5,15 +5,16 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
-import kotlinx.cinterop.CPointer
 import dev.brella.kornea.io.common.flow.CountingOutputFlow
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.OutputFlowState
+import kotlinx.cinterop.CPointer
 import platform.posix.FILE
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class FileOutputFlow(private val fp: FilePointer) : CountingOutputFlow, BaseDataCloseable(), OutputFlowState, IntFlowState by IntFlowState.base() {
+public class FileOutputFlow(private val fp: FilePointer) : CountingOutputFlow, BaseDataCloseable(), OutputFlowState,
+    IntFlowState by IntFlowState.base() {
+
     public constructor(fp: CPointer<FILE>) : this(FilePointer(fp))
 
     override val streamOffset: Long

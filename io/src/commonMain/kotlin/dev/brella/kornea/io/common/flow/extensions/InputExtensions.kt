@@ -1,15 +1,11 @@
 package dev.brella.kornea.io.common.flow.extensions
 
-import dev.brella.kornea.annotations.AvailableSince
-import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.io.common.flow.OutputFlow
 
-@ExperimentalUnsignedTypes
 public suspend inline infix fun InputFlow.copyToOutputFlow(output: OutputFlow): Long = copyTo(output)
 public suspend inline infix fun InputFlow.pipeTo(output: OutputFlow): Long = copyTo(output)
 
-@ExperimentalUnsignedTypes
 public suspend fun InputFlow.copyTo(output: OutputFlow, bufferSize: Int = 8192, dataSize: Int = Int.MAX_VALUE): Long {
     var bytesCopied: Long = 0
     val buffer = ByteArray(bufferSize)

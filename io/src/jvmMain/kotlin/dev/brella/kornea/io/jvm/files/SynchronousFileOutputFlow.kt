@@ -14,7 +14,6 @@ import kotlinx.coroutines.runInterruptible
 import java.io.File
 import java.io.FileOutputStream
 
-@ExperimentalUnsignedTypes
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class SynchronousFileOutputFlow(public val backing: File) : BaseDataCloseable(), CountingOutputFlow,
     PrintOutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
@@ -23,7 +22,7 @@ public class SynchronousFileOutputFlow(public val backing: File) : BaseDataClose
     override val streamOffset: Long
         get() = channel.position()
 
-    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backing), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backing))
 
     override suspend fun write(byte: Int): Unit = runInterruptible(Dispatchers.IO) { stream.write(byte) }
     override suspend fun write(b: ByteArray, off: Int, len: Int): Unit =

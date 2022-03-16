@@ -1,6 +1,5 @@
 package dev.brella.kornea.io.jvm.files
 
-import dev.brella.kornea.annotations.ExperimentalKorneaIO
 import dev.brella.kornea.base.common.DataCloseableEventHandler
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.*
@@ -11,8 +10,6 @@ import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.Path
 import java.util.concurrent.ExecutorService
 
-@ExperimentalKorneaIO
-@ExperimentalUnsignedTypes
 public class AsyncFileDataPool(
     public val path: Path,
     private val channel: AsynchronousFileChannel? = null,
@@ -81,7 +78,7 @@ public class AsyncFileDataPool(
     override suspend fun registerCloseHandler(handler: DataCloseableEventHandler): Boolean =
         super.registerCloseHandler(handler)
 
-    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(path.toUri()), null)
+    override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromUri(path.toUri()))
 
     override suspend fun close() {
         super.close()
