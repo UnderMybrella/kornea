@@ -27,7 +27,7 @@ public class AsyncFileOutputFlow(
     private val channel: AsynchronousFileChannel,
     private val isLocalChannel: Boolean,
     public val backing: Path
-) : BaseDataCloseable(), CountingOutputFlow, SeekableOutputFlow, PrintOutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
+) : BaseDataCloseable(), CountingOutputFlow, SeekableOutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
         public suspend fun open(
             path: Path,

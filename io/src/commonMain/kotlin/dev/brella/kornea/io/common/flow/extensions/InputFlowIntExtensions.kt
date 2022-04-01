@@ -442,3 +442,36 @@ public suspend fun InputFlow.readDoubleLE(): Double? = this.readInt64LE()?.let {
 public suspend fun InputFlow.readFloat64BE(): Double? = this.readInt64BE()?.let { Double.fromBits(it) }
 
 public suspend fun InputFlow.readFloat64LE(): Double? = this.readInt64LE()?.let { Double.fromBits(it) }
+
+public suspend fun InputFlow.readUtf8Character(): Char? {
+    val a = read() ?: return null
+
+    when {
+        a and 0xF0 == 0xF0 -> {
+            val b = read() ?: return null
+            val c = read() ?: return null
+            val d = read() ?: return null
+
+            return (((a and 0xF) shl 18) or
+                    ((b and 0x3F) shl 12) or
+                    ((c and 0x3F) shl 6) or
+                    ((d and 0x3F) shl 0)).toChar()
+        }
+        a and 0xE0 == 0xE0 -> {
+            val b = read() ?: return null
+            val c = read() ?: return null
+
+            return (((a and 0xF) shl 12) or
+                    ((b and 0x3F) shl 6) or
+                    ((c and 0x3F) shl 0)).toChar()
+        }
+        a and 0xC0 == 0xC0 -> {
+            val b = read() ?: return null
+
+            return (((a and 0xF) shl 6) or
+                    ((b and 0x3F) shl 0)).toChar()
+        }
+        a and 0x80 == 0x80 -> return null
+        else -> return a.toChar()
+    }
+}

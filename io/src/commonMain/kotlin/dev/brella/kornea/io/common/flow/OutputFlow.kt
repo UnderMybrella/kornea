@@ -7,16 +7,32 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.FlowPacket
 import dev.brella.kornea.io.common.Uri
+import dev.brella.kornea.toolkit.common.PrintFlow
 
 public typealias OutputFlowEventHandler = suspend (flow: OutputFlow) -> Unit
 
-public interface OutputFlow: ObservableDataCloseable {
+public interface OutputFlow: ObservableDataCloseable, PrintFlow {
     public suspend fun write(byte: Int)
     public suspend fun write(b: ByteArray): Unit = write(b, 0, b.size)
     public suspend fun write(b: ByteArray, off: Int, len: Int)
     public suspend fun flush()
 
     public fun locationAsUri(): KorneaResult<Uri>
+
+    override suspend fun print(value: Char): OutputFlow {
+        write(value.code)
+        return this
+    }
+
+    override suspend fun print(value: CharSequence?): OutputFlow {
+        write(value.toString().encodeToByteArray())
+        return this
+    }
+
+    override suspend fun print(value: CharSequence?, startIndex: Int, endIndex: Int): OutputFlow {
+        write((value?.subSequence(startIndex, endIndex).toString()).encodeToByteArray())
+        return this
+    }
 }
 
 public interface OutputFlowByDelegate<O: OutputFlow>: OutputFlow {

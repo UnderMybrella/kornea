@@ -16,7 +16,7 @@ import java.io.FileOutputStream
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class SynchronousFileOutputFlow(public val backing: File) : BaseDataCloseable(), CountingOutputFlow,
-    PrintOutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
+    OutputFlowState, IntFlowState by IntFlowState.base() {
     private val stream = FileOutputStream(backing)
     private val channel = stream.channel
     override val streamOffset: Long

@@ -8,14 +8,13 @@ import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.OutputFlow
 import dev.brella.kornea.io.common.flow.OutputFlowState
-import dev.brella.kornea.io.common.flow.PrintOutputFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import java.io.OutputStream
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public open class JVMOutputFlow(protected val stream: OutputStream) : BaseDataCloseable(), OutputFlow, PrintOutputFlow,
-    OutputFlowState, IntFlowState by IntFlowState.base() {
+public open class JVMOutputFlow(protected val stream: OutputStream) : BaseDataCloseable(), OutputFlow, OutputFlowState,
+    IntFlowState by IntFlowState.base() {
     override suspend fun write(byte: Int): Unit = runInterruptible(Dispatchers.IO) { stream.write(byte) }
     override suspend fun write(b: ByteArray): Unit = runInterruptible(Dispatchers.IO) { stream.write(b) }
     override suspend fun write(b: ByteArray, off: Int, len: Int): Unit =

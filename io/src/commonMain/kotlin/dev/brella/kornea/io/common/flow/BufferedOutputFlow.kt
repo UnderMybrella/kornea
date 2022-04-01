@@ -6,7 +6,7 @@ import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.Uri
 
 public open class BufferedOutputFlow(protected val backing: OutputFlow) : BaseDataCloseable(), CountingOutputFlow,
-    PrintOutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
+    OutputFlowState, IntFlowState by IntFlowState.base() {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     protected var _flowCount: Long = 0L

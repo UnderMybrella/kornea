@@ -18,7 +18,7 @@ public interface BinaryPipeFlow
         private val view: MutableList<Byte>,
         private var pos: Int = 0,
         override val location: String? = null
-    ) : BaseDataCloseable(), BinaryPipeFlow, PrintOutputFlow {
+    ) : BaseDataCloseable(), BinaryPipeFlow {
         public constructor() : this(ArrayList())
 
         override val input: BinaryPipeFlow

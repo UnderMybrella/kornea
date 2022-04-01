@@ -15,7 +15,7 @@ public interface BinaryOutputFlow : CountingOutputFlow, BinaryView {
     }
 
     public open class ListBacked(private val buffer: MutableList<Byte>) :
-        BaseDataCloseable(), BinaryOutputFlow, PrintOutputFlow, BinaryView {
+        BaseDataCloseable(), BinaryOutputFlow, BinaryView {
 
         public constructor() : this(ArrayList())
 

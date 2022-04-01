@@ -18,7 +18,7 @@ public open class SynchronisedOutputFlow<O : OutputFlow>(
     override val output: O,
     protected val semaphore: ReadWriteSemaphore,
     protected val closeBacking: Boolean = true,
-) : BaseDataCloseable(), OutputFlowByDelegate<O>, PrintOutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
+) : BaseDataCloseable(), OutputFlowByDelegate<O>, OutputFlowState, IntFlowState by IntFlowState.base() {
     protected suspend inline fun <T> access(crossinline block: suspend () -> T): T =
         semaphore.withWritePermit { block() }
 

@@ -5,6 +5,7 @@ import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.toolkit.common.PrintFlow
 
 @AvailableSince(KorneaIO.VERSION_4_2_0_INDEV)
+@Deprecated("OutputFlow inherits PrintFlow by default now")
 public interface PrintOutputFlow: PrintFlow, OutputFlow {
     override suspend fun print(value: Char): PrintOutputFlow {
         write(value.code)
