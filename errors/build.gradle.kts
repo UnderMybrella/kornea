@@ -1,6 +1,6 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 
-version = "3.0.1-alpha"
+version = "3.0.2-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
@@ -71,8 +71,7 @@ multiplatform {
 
         all {
             languageSettings.apply {
-                enableLanguageFeature("InlineClasses")
-                useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
+                optIn("kotlin.RequiresOptIn")
                 explicitApi()
             }
         }

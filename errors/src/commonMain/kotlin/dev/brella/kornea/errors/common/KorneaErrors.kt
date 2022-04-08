@@ -3,6 +3,8 @@ package dev.brella.kornea.errors.common
 import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaErrors {
+    public const val VERSION_3_0_2_ALPHA: String = "3.0.2-alpha"
+
     public const val VERSION_3_0_1_ALPHA: String = "3.0.1-alpha"
 
     /**
