@@ -132,93 +132,113 @@ public value class KorneaResult<out T> @PublishedApi internal constructor(
     }
 
     public interface Failure {
-        public companion object {
-            @AvailableSince(KorneaErrors.VERSION_3_4_1_INDEV)
-            public fun of(): Failure =
-                Base
-
-            @AvailableSince(KorneaErrors.VERSION_3_4_1_INDEV)
-            public fun <T> of(): KorneaResult<T> = KorneaResult(Base)
-        }
-
-        private object Base : Failure {
+        public companion object : Failure {
             override fun asException(): Throwable =
-                throw IllegalStateException("Result failed")
+                IllegalStateException("Result failed")
 
             override fun toString(): String =
                 "Failure()"
+
+            @AvailableSince(KorneaErrors.VERSION_3_4_1_INDEV)
+            public fun of(): Failure =
+                this
+
+            @AvailableSince(KorneaErrors.VERSION_3_4_1_INDEV)
+            public fun <T> of(): KorneaResult<T> = KorneaResult(this)
         }
 
         public fun asException(): Throwable
     }
 
     public interface Empty : Failure {
-        public interface FailedPredicate : Empty
+        public interface FailedPredicate : Empty {
+            public companion object : FailedPredicate {
+                override fun asException(): Throwable =
+                    IllegalStateException("Failed predicate")
 
-        @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-        public interface Null : Empty
-
-        @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-        public interface Undefined : Empty
-        public interface TypeCastEmpty : Empty
-
-        public companion object {
-            public fun of(): Empty =
-                Base
-
-            public fun ofFailedPredicate(): Empty =
-                FailedPredicateBase
-
-            public fun ofTypeCast(): Empty =
-                TypeCastEmptyBase
-
-            @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-            public fun ofNull(): Empty =
-                NullBase
-
-            @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-            public fun ofUndefined(): Empty =
-                UndefinedBase
+                override fun toString(): String =
+                    "FailedPredicate()"
+            }
         }
 
-        private object Base : Empty {
+        @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
+        public interface Null : Empty {
+            public companion object : Null {
+                override fun asException(): Throwable =
+                    IllegalArgumentException("Was null")
+
+                override fun toString(): String =
+                    "Null()"
+            }
+        }
+
+        @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
+        public interface Undefined : Empty {
+            public companion object : Undefined {
+                override fun asException(): Throwable =
+                    IllegalArgumentException("Was undefined")
+
+                override fun toString(): String =
+                    "Undefined()"
+            }
+        }
+
+        public interface TypeCastEmpty : Empty {
+            public companion object : TypeCastEmpty {
+                override fun asException(): Throwable =
+                    IllegalStateException("Failed cast")
+
+                override fun toString(): String =
+                    "TypeCast()"
+            }
+        }
+
+        public companion object : Empty {
             override fun asException(): Throwable =
-                throw IllegalStateException("Empty Result")
+                IllegalStateException("Empty Result")
 
             override fun toString(): String =
                 "Empty()"
+
+            public fun of(): Empty =
+                this
+
+            public fun <T> of(): KorneaResult<T> =
+                KorneaResult(this)
+
+            public fun ofFailedPredicate(): Empty =
+                FailedPredicate
+
+            public fun <T> ofFailedPredicate(): KorneaResult<T> =
+                KorneaResult(FailedPredicate)
+
+            public fun ofTypeCast(): Empty =
+                TypeCastEmpty
+
+            public fun <T> ofTypeCast(): KorneaResult<T> =
+                KorneaResult(TypeCastEmpty)
+
+            @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
+            public fun ofNull(): Empty =
+                Null
+
+            public fun <T> ofNull(): KorneaResult<T> =
+                KorneaResult(Null)
+
+            @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
+            public fun ofUndefined(): Empty =
+                Undefined
+
+            public fun <T> ofUndefined(): KorneaResult<T> =
+                KorneaResult(Undefined)
         }
 
-        private object FailedPredicateBase : FailedPredicate {
+        private class Base(val message: String) : Empty {
             override fun asException(): Throwable =
-                throw IllegalStateException("Failed predicate")
+                IllegalStateException(message)
 
             override fun toString(): String =
-                "FailedPredicate()"
-        }
-
-        private object TypeCastEmptyBase : TypeCastEmpty {
-            override fun asException(): Throwable =
-                throw IllegalStateException("Failed cast")
-
-            override fun toString(): String =
-                "TypeCast()"
-        }
-
-        private object NullBase : Null {
-            override fun asException(): Throwable =
-                throw IllegalArgumentException("Was null")
-
-            override fun toString(): String =
-                "Null()"
-        }
-
-        private object UndefinedBase : Undefined {
-            override fun asException(): Throwable =
-                throw IllegalArgumentException("Was undefined")
-
-            override fun toString(): String =
-                "Undefined()"
+                "Empty(message=\"$message\")"
         }
     }
 
@@ -525,9 +545,7 @@ public value class KorneaResult<out T> @PublishedApi internal constructor(
     }
 
     @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-    public sealed interface WithPayload<T> : Failure {
-
-    }
+    public interface WithPayload<T> : Failure
 
     // discovery
 

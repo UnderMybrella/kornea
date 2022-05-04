@@ -28,7 +28,7 @@ public inline fun <T> KorneaResult<T>.filter(predicate: (T) -> Boolean): KorneaR
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_2_ALPHA)
-public inline fun <R, T : R> KorneaResult<T>.filterOrMap(
+public inline fun <T : R, R> KorneaResult<T>.filterOrMap(
     predicate: (T) -> Boolean,
     failedPredicate: (T) -> R
 ): KorneaResult<R> {
@@ -46,7 +46,7 @@ public inline fun <R, T : R> KorneaResult<T>.filterOrMap(
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_2_ALPHA)
-public inline fun <R, T : R> KorneaResult<T>.filterOrFlatMap(
+public inline fun <T : R, R> KorneaResult<T>.filterOrFlatMap(
     predicate: (T) -> Boolean,
     failedPredicate: (T) -> KorneaResult<R>
 ): KorneaResult<R> {
@@ -64,7 +64,7 @@ public inline fun <R, T : R> KorneaResult<T>.filterOrFlatMap(
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_0_ALPHA)
-public inline fun <R, T : R> KorneaResult<T>.filterWith(
+public inline fun <T : R, R> KorneaResult<T>.filterWith(
     predicate: (T) -> Boolean,
     transform: (T) -> R
 ): KorneaResult<R> {
@@ -82,7 +82,7 @@ public inline fun <R, T : R> KorneaResult<T>.filterWith(
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_2_ALPHA)
-public inline fun <R, T : R> KorneaResult<T>.filterWithOrMap(
+public inline fun <T : R, R> KorneaResult<T>.filterWithOrMap(
     predicate: (T) -> Boolean,
     transform: (T) -> R,
     failedPredicate: (T) -> R
@@ -101,7 +101,7 @@ public inline fun <R, T : R> KorneaResult<T>.filterWithOrMap(
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_2_ALPHA)
-public inline fun <R, T : R> KorneaResult<T>.filterWithOrFlatMap(
+public inline fun <T : R, R> KorneaResult<T>.filterWithOrFlatMap(
     predicate: (T) -> Boolean,
     transform: (T) -> R,
     failedPredicate: (T) -> KorneaResult<R>
@@ -122,7 +122,7 @@ public inline fun <R, T : R> KorneaResult<T>.filterWithOrFlatMap(
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_0_ALPHA)
-public inline fun <R, T : R> KorneaResult<T>.filterWithFlat(
+public inline fun <T : R, R> KorneaResult<T>.filterWithFlat(
     predicate: (T) -> Boolean,
     transform: (T) -> KorneaResult<R>
 ): KorneaResult<R> {
@@ -140,7 +140,7 @@ public inline fun <R, T : R> KorneaResult<T>.filterWithFlat(
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_0_ALPHA)
-public inline fun <R, T : R> KorneaResult<T>.filterWithFlatOrMap(
+public inline fun <T : R, R> KorneaResult<T>.filterWithFlatOrMap(
     predicate: (T) -> Boolean,
     transform: (T) -> KorneaResult<R>,
     failedPredicate: (T) -> R
@@ -159,7 +159,7 @@ public inline fun <R, T : R> KorneaResult<T>.filterWithFlatOrMap(
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_0_ALPHA)
-public inline fun <R, T : R> KorneaResult<T>.filterWithFlatOrFlatMap(
+public inline fun <T : R, R> KorneaResult<T>.filterWithFlatOrFlatMap(
     predicate: (T) -> Boolean,
     transform: (T) -> KorneaResult<R>,
     failedPredicate: (T) -> KorneaResult<R>
@@ -269,7 +269,7 @@ public inline fun <reified R> KorneaResult<*>.filterToInstance(onEmpty: (value: 
 @OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_4_0_INDEV)
-public inline fun <R : T, T : Any> KorneaResult<T>.filterToInstance(
+public inline fun <T : Any, R : T> KorneaResult<T>.filterToInstance(
     klass: KClass<R>,
     onEmpty: (T) -> KorneaResult<R>
 ): KorneaResult<R> {
@@ -306,7 +306,7 @@ public inline fun <R : Any> KorneaResult<*>.filterToInstance(
 
 @OptIn(ExperimentalContracts::class)
 @Suppress("UNCHECKED_CAST")
-public inline fun <reified R : T, T : Any> KorneaResult<T>.filterToInstanceTyped(transform: (T) -> KorneaResult<R>): KorneaResult<R> {
+public inline fun <T : Any, reified R : T> KorneaResult<T>.filterToInstanceTyped(transform: (T) -> KorneaResult<R>): KorneaResult<R> {
     contract {
         callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
     }
@@ -317,4 +317,13 @@ public inline fun <reified R : T, T : Any> KorneaResult<T>.filterToInstanceTyped
     } else {
         asType()
     }
+}
+
+public inline fun <T> Iterable<KorneaResult<T>>.filterSuccesses(): List<T> =
+    filterSuccessesTo(ArrayList())
+
+public inline fun <T, C: MutableCollection<T>> Iterable<KorneaResult<T>>.filterSuccessesTo(collection: C): C {
+    forEach { result -> result.doOnSuccess(collection::add) }
+
+    return collection
 }
