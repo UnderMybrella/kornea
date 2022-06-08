@@ -124,3 +124,41 @@ public inline fun <R, T : R> KorneaResult<T>.switchIfHasCause(block: (KorneaResu
         else -> this
     }
 }
+
+public inline fun <R, T : R> KorneaResult<T>.switchIfHasPayload(block: (KorneaResult.WithPayload<*>) -> KorneaResult<R>): KorneaResult<R> =
+    switchIfTypedFailure(block)
+
+@OptIn(ExperimentalContracts::class)
+@Suppress("UNCHECKED_CAST")
+public inline fun <R, T : R, reified P> KorneaResult<T>.switchIfHasTypedPayload(block: (KorneaResult.WithPayload<P>) -> KorneaResult<R>): KorneaResult<R> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (val failure = failureOrNull()) {
+        is KorneaResult.WithPayload<*> ->
+            if (failure.payload is P) block(failure as KorneaResult.WithPayload<P>)
+            else this
+
+        else -> this
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+@Suppress("UNCHECKED_CAST")
+public inline fun <R, T : R, P: Any> KorneaResult<T>.switchIfHasTypedPayload(
+    klass: KClass<P>,
+    block: (KorneaResult.WithPayload<P>) -> KorneaResult<R>
+): KorneaResult<R> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    return when (val failure = failureOrNull()) {
+        is KorneaResult.WithPayload<*> ->
+            if (klass.isInstance(failure.payload)) block(failure as KorneaResult.WithPayload<P>)
+            else this
+
+        else -> this
+    }
+}

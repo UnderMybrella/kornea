@@ -545,7 +545,27 @@ public value class KorneaResult<out T> @PublishedApi internal constructor(
     }
 
     @AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-    public interface WithPayload<T> : Failure
+    public interface WithPayload<out T> : Failure {
+        public val payload: T
+
+        public infix fun <R> withPayload(newPayload: R): WithPayload<R>
+
+        public companion object {
+            public fun <T> of(payload: T): WithPayload<T> =
+                Base(payload)
+
+            public fun <T, R> ofWrapped(payload: R): KorneaResult<T> =
+                KorneaResult(Base(payload))
+        }
+
+        private data class Base<T>(override val payload: T) : WithPayload<T> {
+            override fun asException(): Throwable =
+                IllegalArgumentException("Result has payload: $payload")
+
+            override fun <R> withPayload(newPayload: R): WithPayload<R> =
+                Base(newPayload)
+        }
+    }
 
     // discovery
 
@@ -557,7 +577,7 @@ public value class KorneaResult<out T> @PublishedApi internal constructor(
     public val isWithErrorCode: Boolean get() = value is WithErrorCode
     public val isWithErrorMessage: Boolean get() = value is WithErrorMessage
     public val isWithErrorDetails: Boolean get() = value is WithErrorDetails
-    public val isWithPayload: Boolean get() = value is WithPayload<*>
+    public val hasPayload: Boolean get() = value is WithPayload<*>
 
     // value & exception retrieval
 
@@ -574,6 +594,31 @@ public value class KorneaResult<out T> @PublishedApi internal constructor(
             else -> null
         }
 }
+
+public inline fun <T> runResult(block: () -> T): KorneaResult<T> =
+    KorneaResult.successOrCatch(block)
+
+/**
+ * Runs [block] and returns [T], or null if an exception was thrown.
+ */
+public inline fun <T> runOrNull(block: () -> T): T? =
+    try {
+        block()
+    } catch (_: Throwable) {
+        null
+    }
+
+/**
+ * Runs [block] and returns [T], or null if an exception was thrown.
+ * Prints the exception's stack trace
+ */
+public inline fun <T> runOrNullStackTrace(block: () -> T): T? =
+    try {
+        block()
+    } catch (th: Throwable) {
+        th.printStackTrace()
+        null
+    }
 
 @PublishedApi
 internal fun KorneaResult<*>.throwOnFailure() {

@@ -39,7 +39,10 @@ public inline fun <T, reified F : KorneaResult.Failure> KorneaResult<T>.doOnType
 
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_1_ALPHA)
-public inline fun <T, F : KorneaResult.Failure> KorneaResult<T>.doOnTypedFailure(klass: KClass<F>, block: (F) -> Unit): KorneaResult<T> {
+public inline fun <T, F : KorneaResult.Failure> KorneaResult<T>.doOnTypedFailure(
+    klass: KClass<F>,
+    block: (F) -> Unit
+): KorneaResult<T> {
     contract {
         callsInPlace(block, InvocationKind.AT_MOST_ONCE)
     }
@@ -114,6 +117,41 @@ public inline fun <T, E : Throwable> KorneaResult<T>.doOnTypedThrown(
 }
 
 @OptIn(ExperimentalContracts::class)
+public inline fun <T> KorneaResult<T>.doOnPayload(block: (KorneaResult.WithPayload<*>) -> Unit): KorneaResult<T> =
+    doOnTypedFailure(block)
+
+@OptIn(ExperimentalContracts::class)
+@Suppress("UNCHECKED_CAST")
+public inline fun <T, reified P> KorneaResult<T>.doOnTypedPayload(block: (KorneaResult.WithPayload<P>) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    when (val failure = failureOrNull()) {
+        is KorneaResult.WithPayload<*> -> if (failure.payload is P) block(failure as KorneaResult.WithPayload<P>)
+    }
+
+    return this
+}
+
+@OptIn(ExperimentalContracts::class)
+@Suppress("UNCHECKED_CAST")
+public inline fun <T, P : Any> KorneaResult<T>.doOnTypedPayload(
+    klass: KClass<P>,
+    block: (KorneaResult.WithPayload<P>) -> Unit
+): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    when (val failure = failureOrNull()) {
+        is KorneaResult.WithPayload<*> -> if (klass.isInstance(failure.payload)) block(failure as KorneaResult.WithPayload<P>)
+    }
+
+    return this
+}
+
+@OptIn(ExperimentalContracts::class)
 public inline fun <T> KorneaResult<T>.doOnSuccess(block: (T) -> Unit): KorneaResult<T> {
     contract {
         callsInPlace(block, InvocationKind.AT_MOST_ONCE)
@@ -152,7 +190,7 @@ public inline fun <T> KorneaResult<T>.doOnFailureResult(block: (KorneaResult<*>)
 
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_0_1_ALPHA)
-public inline fun <T, reified F: KorneaResult.Failure> KorneaResult<T>.doOnTypedFailureResult(block: (KorneaResult<*>) -> Unit): KorneaResult<T> {
+public inline fun <T, reified F : KorneaResult.Failure> KorneaResult<T>.doOnTypedFailureResult(block: (KorneaResult<*>) -> Unit): KorneaResult<T> {
     contract {
         callsInPlace(block, InvocationKind.AT_MOST_ONCE)
     }
@@ -257,6 +295,50 @@ public inline fun <T, E : Throwable> KorneaResult<T>.doOnTypedThrownWithResult(
 
     when (val failure = failureOrNull()) {
         is KorneaResult.WithException<*> -> if (klass.isInstance(failure.exception)) block(this)
+    }
+
+    return this
+}
+
+@OptIn(ExperimentalContracts::class)
+@AvailableSince(KorneaErrors.VERSION_3_1_0_ALPHA)
+public inline fun <T> KorneaResult<T>.doOnPayloadAsResult(block: (KorneaResult<*>) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    if (isFailureWithException) block(this)
+    return this
+}
+
+@OptIn(ExperimentalContracts::class)
+@Suppress("UNCHECKED_CAST")
+@AvailableSince(KorneaErrors.VERSION_3_1_0_ALPHA)
+public inline fun <T, reified P> KorneaResult<T>.doOnTypedPayloadWithResult(block: (KorneaResult<*>) -> Unit): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    when (val failure = failureOrNull()) {
+        is KorneaResult.WithPayload<*> -> if (failure.payload is P) block(this)
+    }
+
+    return this
+}
+
+@OptIn(ExperimentalContracts::class)
+@Suppress("UNCHECKED_CAST")
+@AvailableSince(KorneaErrors.VERSION_3_1_0_ALPHA)
+public inline fun <T, P : Any> KorneaResult<T>.doOnTypedPayloadWithResult(
+    klass: KClass<P>,
+    block: (KorneaResult<*>) -> Unit
+): KorneaResult<T> {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    when (val failure = failureOrNull()) {
+        is KorneaResult.WithPayload<*> -> if (klass.isInstance(failure.payload)) block(this)
     }
 
     return this
