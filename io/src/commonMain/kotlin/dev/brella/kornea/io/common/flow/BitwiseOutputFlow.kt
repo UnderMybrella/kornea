@@ -5,12 +5,17 @@ import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.Uri
 import kotlin.math.min
 
-public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataCloseable(), OutputFlow {
+public open class BitwiseOutputFlow(
+    public val flow: OutputFlow,
+    override val location: String? = "Bitwise(${flow.location})"
+) : BaseDataCloseable(), OutputFlow {
     private var currentInt = 0
     private var currentPos = 0
     //    private val builder = StringBuilder()
 
 //    fun Int.toBitHex(): String = toString(16).padStart(2, '0')
+
+    override suspend fun position(): ULong = flow.position()
 
     public open suspend infix fun write(bool: Boolean): Unit = encodeData { bit(if (bool) 1 else 0) }
     public open suspend infix fun writeByte(byte: Number): Unit = byte(byte)
@@ -116,6 +121,7 @@ public open class BitwiseOutputFlow(public val flow: OutputFlow): BaseDataClosea
             }
         }
     }
+
     override suspend fun flush() {
         flow.flush()
     }

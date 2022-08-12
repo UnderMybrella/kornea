@@ -6,18 +6,19 @@ import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
-import dev.brella.kornea.io.common.flow.BufferedOutputFlow
-import dev.brella.kornea.io.common.flow.IntFlowState
-import dev.brella.kornea.io.common.flow.OutputFlowState
-import dev.brella.kornea.io.common.flow.SeekableOutputFlow
+import dev.brella.kornea.io.common.flow.*
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.set
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class PointerOutputFlow(public val pointer: CPointer<ByteVar>): SeekableOutputFlow, BaseDataCloseable(), OutputFlowState, IntFlowState by IntFlowState.base() {
+public class PointerOutputFlow(public val pointer: CPointer<ByteVar>, override val location: String?) : OutputFlow,
+    SeekableFlow, BaseDataCloseable(), OutputFlowState, IntFlowState by IntFlowState.base() {
     public var offset: Int = 0
         private set
+
+    override suspend fun position(): ULong =
+        offset.toULong()
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
 
@@ -42,5 +43,5 @@ public class PointerOutputFlow(public val pointer: CPointer<ByteVar>): SeekableO
     }
 }
 
-public inline fun BufferedPointerOutputFlow(pointer: CPointer<ByteVar>): BufferedOutputFlow =
-    BufferedOutputFlow(PointerOutputFlow(pointer))
+public inline fun BufferedPointerOutputFlow(pointer: CPointer<ByteVar>, location: String? = null): BufferedOutputFlow =
+    BufferedOutputFlow(PointerOutputFlow(pointer, location))

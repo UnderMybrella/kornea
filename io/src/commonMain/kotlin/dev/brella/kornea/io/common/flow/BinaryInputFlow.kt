@@ -2,7 +2,10 @@ package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.EnumSeekMode
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.toolkit.common.BinaryArrayView
 import dev.brella.kornea.toolkit.common.BinaryListView
 import dev.brella.kornea.toolkit.common.BinaryView
@@ -13,7 +16,7 @@ public class BinaryInputFlow(
     private val view: BinaryView,
     private var pos: Int = 0,
     override val location: String? = null
-) : BaseDataCloseable(), InputFlow, PeekableInputFlow, SeekableInputFlow {
+) : BaseDataCloseable(), InputFlow, PeekableInputFlow, SeekableFlow {
     public constructor(array: ByteArray, pos: Int = 0, location: String? = null) :
             this(BinaryArrayView(array), pos, location)
 

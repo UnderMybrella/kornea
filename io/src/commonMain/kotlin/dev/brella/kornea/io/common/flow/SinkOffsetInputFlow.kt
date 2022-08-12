@@ -2,7 +2,10 @@ package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.io.common.*
+import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.EnumSeekMode
+import dev.brella.kornea.io.common.KorneaIO
+import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.toolkit.common.SuspendInit0
 import dev.brella.kornea.toolkit.common.init
 
@@ -14,34 +17,36 @@ public open class SinkOffsetInputFlow private constructor(
         "${backing.location}+${baseOffset.toString(16)}h"
 ) : BaseDataCloseable(), OffsetInputFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
-        public suspend operator fun invoke(
-            backing: SeekableInputFlow,
+        public suspend fun <T> seekable(
+            backing: T,
             offset: ULong,
             location: String? = "${backing.location}+${offset.toString(16)}h"
-        ): Seekable = Seekable(backing, offset, location)
+        ): Seekable<T> where T : InputFlow, T : SeekableFlow =
+            Seekable(backing, offset, location)
 
         public suspend operator fun invoke(
             backing: InputFlow,
             offset: ULong,
             location: String? = "${backing.location}+${offset.toString(16)}h"
         ): SinkOffsetInputFlow {
-            if (backing is SeekableInputFlow) return Seekable(backing, offset, location)
+            if (backing is SeekableFlow) return Seekable(backing, offset, location)
 
             return init(SinkOffsetInputFlow(backing, offset, location))
         }
     }
 
-    public class Seekable private constructor(
-        override val backing: SeekableInputFlow,
+    public class Seekable<T> private constructor(
+        override val backing: T,
         override val baseOffset: ULong,
         override val location: String? = "${backing.location}+${baseOffset.toString(16)}h"
-    ) : SinkOffsetInputFlow(backing, baseOffset, location), SeekableInputFlow {
+    ) : SinkOffsetInputFlow(backing, baseOffset, location), SeekableFlow where T : InputFlow, T : SeekableFlow {
         public companion object {
-            public suspend operator fun invoke(
-                backing: SeekableInputFlow,
+            public suspend operator fun <T> invoke(
+                backing: T,
                 offset: ULong,
                 location: String? = "${backing.location}+${offset.toString(16)}h"
-            ): Seekable = init(Seekable(backing, offset, location))
+            ): Seekable<T> where T : InputFlow, T : SeekableFlow =
+                init(Seekable(backing, offset, location))
         }
 
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
@@ -113,7 +118,7 @@ public open class SinkOffsetInputFlow private constructor(
     }
 
     override suspend fun globalOffset(): ULong = baseOffset + backing.globalOffset()
-    override suspend fun absPosition(): ULong = (backing as? InputFlowWithBacking)?.absPosition() ?: backing.position()
+    override suspend fun absPosition(): ULong = (backing as? KorneaFlowWithBacking)?.absPosition() ?: backing.position()
 
     override fun locationAsUri(): KorneaResult<Uri> = backing.locationAsUri()
 }

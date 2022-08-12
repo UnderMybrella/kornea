@@ -13,12 +13,23 @@ import kotlinx.coroutines.runInterruptible
 import java.io.OutputStream
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public open class JVMOutputFlow(protected val stream: OutputStream) : BaseDataCloseable(), OutputFlow, OutputFlowState,
+public open class JVMOutputFlow(protected val stream: OutputStream, override val location: String? = null) :
+    BaseDataCloseable(), OutputFlow, OutputFlowState,
     IntFlowState by IntFlowState.base() {
-    override suspend fun write(byte: Int): Unit = runInterruptible(Dispatchers.IO) { stream.write(byte) }
-    override suspend fun write(b: ByteArray): Unit = runInterruptible(Dispatchers.IO) { stream.write(b) }
+    private var _position = 0uL
+
+    override suspend fun position(): ULong = _position
+    override suspend fun write(byte: Int): Unit =
+        runInterruptible(Dispatchers.IO) {
+            _position++
+            stream.write(byte)
+        }
+
     override suspend fun write(b: ByteArray, off: Int, len: Int): Unit =
-        runInterruptible(Dispatchers.IO) { stream.write(b, off, len) }
+        runInterruptible(Dispatchers.IO) {
+            _position += len.toUInt()
+            stream.write(b, off, len)
+        }
 
     override suspend fun flush(): Unit = runInterruptible(Dispatchers.IO) { stream.flush() }
 

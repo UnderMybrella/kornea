@@ -8,7 +8,7 @@ import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.InputFlowState
 import dev.brella.kornea.io.common.flow.IntFlowState
-import dev.brella.kornea.io.common.flow.SeekableInputFlow
+import dev.brella.kornea.io.common.flow.SeekableFlow
 import kotlinx.cinterop.CPointer
 import platform.posix.FILE
 import platform.posix.SEEK_CUR
@@ -16,7 +16,7 @@ import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class FileInputFlow(private val fp: FilePointer, override val location: String? = null) : SeekableInputFlow,
+public class FileInputFlow(private val fp: FilePointer, override val location: String? = null) : SeekableFlow,
     BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
     public constructor(fp: CPointer<FILE>, location: String? = null) : this(
         FilePointer(fp), location

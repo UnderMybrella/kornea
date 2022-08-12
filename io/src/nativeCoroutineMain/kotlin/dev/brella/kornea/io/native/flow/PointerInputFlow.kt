@@ -12,7 +12,7 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.get
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class PointerInputFlow(public val pointer: CPointer<ByteVar>, override val location: String? = pointer.toString()): SeekableInputFlow, BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
+public class PointerInputFlow(public val pointer: CPointer<ByteVar>, override val location: String? = pointer.toString()): SeekableFlow, BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
     private var offset: Int = 0
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
@@ -45,11 +45,11 @@ public class PointerInputFlow(public val pointer: CPointer<ByteVar>, override va
     }
 }
 
-public inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, location: String? = pointer.toString()): SeekableInputFlow =
+public inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, location: String? = pointer.toString()): SeekableFlow =
     BufferedInputFlow.Sink.Seekable(PointerInputFlow(pointer, location))
 
-public suspend inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, length: Int, location: String? = pointer.toString()): SeekableInputFlow =
+public suspend inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, length: Int, location: String? = pointer.toString()): SeekableFlow =
     BufferedInputFlow.Sink.Seekable(WindowedInputFlow.Seekable(PointerInputFlow(pointer, location), 0uL, length.toULong()))
 
-public suspend inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, offset: ULong, length: ULong, location: String? = pointer.toString()): SeekableInputFlow =
+public suspend inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, offset: ULong, length: ULong, location: String? = pointer.toString()): SeekableFlow =
     BufferedInputFlow.Sink.Seekable(WindowedInputFlow.Seekable(PointerInputFlow(pointer, location), offset, length))

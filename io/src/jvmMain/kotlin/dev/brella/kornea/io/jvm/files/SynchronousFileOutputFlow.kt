@@ -5,22 +5,22 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
-import dev.brella.kornea.io.common.flow.CountingOutputFlow
 import dev.brella.kornea.io.common.flow.IntFlowState
+import dev.brella.kornea.io.common.flow.OutputFlow
 import dev.brella.kornea.io.common.flow.OutputFlowState
-import dev.brella.kornea.io.common.flow.PrintOutputFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import java.io.File
 import java.io.FileOutputStream
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class SynchronousFileOutputFlow(public val backing: File) : BaseDataCloseable(), CountingOutputFlow,
-    OutputFlowState, IntFlowState by IntFlowState.base() {
+public class SynchronousFileOutputFlow(public val backing: File, override val location: String? = "SynchronousFileOutputFlow(${backing})") : BaseDataCloseable(),
+    OutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
     private val stream = FileOutputStream(backing)
     private val channel = stream.channel
-    override val streamOffset: Long
-        get() = channel.position()
+
+    override suspend fun position(): ULong =
+        runInterruptible(Dispatchers.IO) { channel.position().toULong() }
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backing))
 

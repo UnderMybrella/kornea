@@ -16,7 +16,7 @@ import java.io.RandomAccessFile
 public class SynchronousFileInputFlow(
     public val backingFile: File,
     override val location: String? = backingFile.absolutePath
-) : BaseDataCloseable(), InputFlow, SeekableInputFlow, InputFlowState, IntFlowState by IntFlowState.base() {
+) : BaseDataCloseable(), InputFlow, SeekableFlow, InputFlowState, IntFlowState by IntFlowState.base() {
     private val channel = RandomAccessFile(backingFile, "r")
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backingFile))

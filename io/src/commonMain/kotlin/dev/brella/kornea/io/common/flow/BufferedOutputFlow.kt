@@ -5,16 +5,16 @@ import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.Uri
 
-public open class BufferedOutputFlow(protected val backing: OutputFlow) : BaseDataCloseable(), CountingOutputFlow,
+public open class BufferedOutputFlow(
+    protected val backing: OutputFlow,
+    override val location: String? = "BufferedOutputFlow(${backing.location})"
+) : BaseDataCloseable(), OutputFlow,
     OutputFlowState, IntFlowState by IntFlowState.base() {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     protected var _flowCount: Long = 0L
     public val flowCount: Long
         get() = _flowCount
-
-    override val streamOffset: Long
-        get() = if (backing is CountingOutputFlow) backing.streamOffset + flowCount else flowCount
 
     /**
      * The internal buffer where data is stored.
@@ -35,6 +35,9 @@ public open class BufferedOutputFlow(protected val backing: OutputFlow) : BaseDa
             bufferCount = 0
         }
     }
+
+    override suspend fun position(): ULong =
+        backing.position() + flowCount.toUInt()
 
     override suspend fun write(byte: Int) {
         if (closed) return

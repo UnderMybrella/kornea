@@ -5,11 +5,8 @@ import dev.brella.kornea.errors.common.cast
 import dev.brella.kornea.errors.common.getOrBreak
 import dev.brella.kornea.errors.common.korneaNotEnoughData
 import dev.brella.kornea.io.common.EnumSeekMode
-import dev.brella.kornea.io.common.flow.BinaryPipeFlow
-import dev.brella.kornea.io.common.flow.InputFlow
+import dev.brella.kornea.io.common.flow.*
 import dev.brella.kornea.io.common.flow.extensions.*
-import dev.brella.kornea.io.common.flow.readBytes
-import dev.brella.kornea.io.common.flow.readExact
 
 class TargaImage(
     val imageID: ByteArray,

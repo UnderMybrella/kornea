@@ -4,6 +4,12 @@ package dev.brella.kornea.annotations
 @AvailableSince(KorneaAnnotations.VERSION_1_2_0_INDEV)
 public object KorneaAnnotations {
     /**
+     * kornea-annotations 1.3.0-alpha
+     * - Add [DangerousApiUsage]
+     */
+    public const val VERSION_1_3_0_ALPHA: String = "1.3.0-alpha"
+
+    /**
      * kornea-annotations 1.0.0-alpha
      * - Move to dev.brella
      */

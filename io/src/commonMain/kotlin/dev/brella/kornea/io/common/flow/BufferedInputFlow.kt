@@ -11,7 +11,8 @@ import kotlin.math.min
 
 @ChangedSince(KorneaIO.VERSION_4_2_0_INDEV)
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public abstract class BufferedInputFlow(override val location: String?) : BaseDataCloseable(), PeekableInputFlow, InputFlowState, IntFlowState by base() {
+public abstract class BufferedInputFlow(override val location: String?) : BaseDataCloseable(), PeekableInputFlow,
+    InputFlowState, IntFlowState by base() {
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
         public const val MAX_BUFFER_SIZE: Int = Int.MAX_VALUE - 8
@@ -19,12 +20,18 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
         public inline operator fun invoke(backing: InputFlow, location: String? = backing.location): Sink =
             Sink(backing, location)
 
-        public inline operator fun invoke(backing: SeekableInputFlow, location: String? = backing.location): Sink.Seekable =
+        public inline operator fun <T> invoke(
+            backing: T,
+            location: String? = backing.location
+        ): Sink.Seekable<T> where T : InputFlow, T : SeekableFlow =
             Sink.Seekable(backing, location)
     }
 
-    public open class Sink(protected open val backing: InputFlow, location: String? = backing.location): BufferedInputFlow(location) {
-        public open class Seekable(public override val backing: SeekableInputFlow, location: String? = backing.location): Sink(backing, location), SeekableInputFlow {
+    public open class Sink(protected open val backing: InputFlow, location: String? = backing.location) :
+        BufferedInputFlow(location) {
+        public open class Seekable<T>(public override val backing: T, location: String? = backing.location) :
+            Sink(backing, location), SeekableFlow where T : InputFlow, T : SeekableFlow {
+
             override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
                 val shift = backing.seek(pos, mode)
                 fill()
@@ -32,12 +39,12 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
             }
         }
 
-//        override suspend fun fillImpl(): Int? = readImpl(buffer, pos, buffer.size - pos)
+        //        override suspend fun fillImpl(): Int? = readImpl(buffer, pos, buffer.size - pos)
         override suspend fun readImpl(b: ByteArray, off: Int, len: Int): Int? = backing.read(b, off, len)
 
         override suspend fun available(): ULong = (count - pos).toULong() + (backing.available() ?: 0uL)
         override suspend fun position(): ULong = backing.position() + (pos - count).toULong()
-        override suspend fun remaining(): ULong = available()
+        override suspend fun remaining(): ULong? = backing.remaining()?.plus((count - pos).toULong())
         override suspend fun size(): ULong? = backing.size()
 
         override suspend fun whenClosed() {
@@ -61,7 +68,7 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
     protected suspend fun fillPartial() {
         count = 0
         val n = fillImpl()
-        if (n ?: 0 > 0) {
+        if ((n ?: 0) > 0) {
             count = n!! + pos
             absPos += n
         }
@@ -155,7 +162,8 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
     }
 
     override suspend fun read(b: ByteArray, off: Int, len: Int): Int? {
-        if ((off or len or (off + len) or (b.size - (off + len))) < 0) {
+        //if ((off or len or (off + len) or (b.size - (off + len))) < 0)
+        if (off < 0 || len < 0 || (off + len) < 0 || (b.size - (off + len)) < 0) {
             throw IndexOutOfBoundsException()
         } else if (len == 0) {
             return 0

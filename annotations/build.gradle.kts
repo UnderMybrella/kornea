@@ -1,6 +1,6 @@
 apply(plugin = KOTLIN_MULTIPLATFORM_PLUGIN)
 
-version = "1.2.0-alpha"
+version = "1.3.0-alpha"
 
 multiplatform {
     /* https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */

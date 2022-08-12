@@ -18,15 +18,17 @@ import dev.brella.kornea.toolkit.coroutines.SharedStateRW
 public open class MultiViewOutputFlow<O : OutputFlow> protected constructor(
     backing: O,
     semaphore: ReadWriteSemaphore,
-    protected val instanceCount: SharedStateRW<Int>
-) : SynchronisedOutputFlow<O>(backing, semaphore, false) {
+    protected val instanceCount: SharedStateRW<Int>,
+    location: String? = "MultiViewOutputFlow(${backing.location})"
+) : SynchronisedOutputFlow<O>(backing, semaphore, false, location) {
     public companion object {
         public suspend operator fun <O : OutputFlow> invoke(
             backing: O,
             semaphore: ReadWriteSemaphore = ReadWriteSemaphore(1),
-            instanceCount: SharedStateRW<Int>
+            instanceCount: SharedStateRW<Int>,
+            location: String? = "MultiViewOutputFlow(${backing.location})"
         ): MultiViewOutputFlow<O> {
-            val flow = MultiViewOutputFlow(backing, semaphore, instanceCount)
+            val flow = MultiViewOutputFlow(backing, semaphore, instanceCount, location)
             instanceCount.mutateState { it + 1 }
             return flow
         }

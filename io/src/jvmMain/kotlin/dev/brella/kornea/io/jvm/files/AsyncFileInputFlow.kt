@@ -9,7 +9,7 @@ import dev.brella.kornea.io.common.Uri
 import dev.brella.kornea.io.common.flow.InputFlowState
 import dev.brella.kornea.io.common.flow.IntFlowState
 import dev.brella.kornea.io.common.flow.PeekableInputFlow
-import dev.brella.kornea.io.common.flow.SeekableInputFlow
+import dev.brella.kornea.io.common.flow.SeekableFlow
 import dev.brella.kornea.io.jvm.bookmark
 import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.limitSafe
@@ -37,7 +37,7 @@ public class AsyncFileInputFlow private constructor(
     private val localChannel: Boolean,
     public val backing: Path,
     override val location: String?
-) : BaseDataCloseable(), PeekableInputFlow, SeekableInputFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
+) : BaseDataCloseable(), PeekableInputFlow, SeekableFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
 

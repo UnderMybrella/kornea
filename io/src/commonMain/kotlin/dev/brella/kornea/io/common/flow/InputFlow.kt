@@ -3,36 +3,29 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
-import dev.brella.kornea.base.common.ObservableDataCloseable
 import dev.brella.kornea.base.common.closeAfter
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.*
 import dev.brella.kornea.io.common.flow.extensions.copyTo
 
-public interface InputFlow : ObservableDataCloseable {
+public interface InputFlow : KorneaFlow {
     public companion object {
-        @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_BEGINNING", "dev.brella.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
-        public const val FROM_BEGINNING: Int = 0
-        @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_END", "dev.brella.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
-        public const val FROM_END: Int = 1
-        @Deprecated(replaceWith = ReplaceWith("EnumSeekMode.FROM_POSITION", "dev.brella.kornea.io.common.EnumSeekMode"), message = "Replace with generic seek constant", level = DeprecationLevel.ERROR)
-        public const val FROM_POSITION: Int = 2
     }
 
-    public val location: String?
+    public override val location: String?
+
+    public override suspend fun position(): ULong
+    public override fun locationAsUri(): KorneaResult<Uri>
 
     public suspend fun read(): Int?
     public suspend fun read(b: ByteArray): Int? = read(b, 0, b.size)
     public suspend fun read(b: ByteArray, off: Int, len: Int): Int?
     public suspend fun skip(n: ULong): ULong?
-    public suspend fun position(): ULong
 
     public suspend fun available(): ULong?
     public suspend fun remaining(): ULong?
     public suspend fun size(): ULong?
-
-    public fun locationAsUri(): KorneaResult<Uri>
 }
 
 public suspend inline fun InputFlow.skip(number: Number): ULong? = skip(number.toLong().toULong())
@@ -74,7 +67,7 @@ public suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray =
     }
 
 public suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<F>, crossinline block: suspend (F) -> T): KorneaResult<T> {
-    return if (this !is SeekableInputFlow) {
+    return if (this !is SeekableFlow) {
 //        val flow = dataSource.openInputFlow() ?: return null
         dataSource.openInputFlow().map { flow ->
             closeAfter(flow) {
@@ -83,7 +76,7 @@ public suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(
             }
         }
     } else {
-        bookmark(this as SeekableInputFlow) {
+        bookmark(this as SeekableFlow) {
             seek(offset.toLong(), EnumSeekMode.FROM_BEGINNING)
             val result = block(this)
             KorneaResult.success(result)
@@ -104,6 +97,3 @@ public suspend fun InputFlow.readChunked(bufferSize: Int = BufferedInputFlow.DEF
     }
     return bytesCopied
 }
-
-public suspend fun InputFlow.globalOffset(): ULong = if (this is InputFlowWithBacking) this.globalOffset() else 0u
-public suspend fun InputFlow.offsetPosition(): ULong = globalOffset() + position()

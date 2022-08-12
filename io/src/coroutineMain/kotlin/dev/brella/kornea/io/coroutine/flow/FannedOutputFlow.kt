@@ -18,9 +18,21 @@ import kotlinx.coroutines.launch
  */
 @AvailableSince(KorneaIO.VERSION_1_1_0_ALPHA)
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class FannedOutputFlow(private val fan: List<OutputFlow>) : BaseDataCloseable(), OutputFlow, OutputFlowState,
+public class FannedOutputFlow(
+    private val fan: List<OutputFlow>,
+    override val location: String? = fan.joinToString(
+        prefix = "FannedOutputFlow(",
+        postfix = ")"
+    ) { it.location.toString() }
+) : BaseDataCloseable(), OutputFlow, OutputFlowState,
     IntFlowState by IntFlowState.base() {
+
+    private var _counter = 0uL
+    override suspend fun position(): ULong = _counter
+
     override suspend fun write(byte: Int) {
+        _counter++
+
         coroutineScope {
             fan.forEach { flow ->
                 launch { flow.write(byte) }
@@ -29,6 +41,8 @@ public class FannedOutputFlow(private val fan: List<OutputFlow>) : BaseDataClose
     }
 
     override suspend fun write(b: ByteArray, off: Int, len: Int) {
+        _counter += len.toUInt()
+
         coroutineScope {
             fan.forEach { flow ->
                 launch { flow.write(b, off, len) }

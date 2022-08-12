@@ -67,6 +67,7 @@ public class NullableContinuationCompletionHandler<V> : CompletionHandler<V, Con
 
 public val INT_CONTINUATION_COMPLETION_HANDLER: ContinuationCompletionHandler<Int> =
     ContinuationCompletionHandler()
+
 public val INT_NULLABLE_CONTINUATION_COMPLETION_HANDLER: NullableContinuationCompletionHandler<Int> =
     NullableContinuationCompletionHandler()
 
@@ -100,8 +101,7 @@ public suspend fun AsynchronousFileChannel.writeAwaitOrNull(src: ByteBuffer, pos
             src, position, cont,
             INT_CONTINUATION_COMPLETION_HANDLER
         )
-    }
-        .takeIf(::readResultIsValid)
+    }.takeIf(::readResultIsValid)
 
 @BlockingOperation
 public fun openAsynchronousFileChannel(

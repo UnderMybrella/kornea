@@ -17,15 +17,16 @@ public open class WindowedInputFlow private constructor(
     override val location: String?
 ) : BaseDataCloseable(), OffsetInputFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
-        public suspend operator fun invoke(
-            window: SeekableInputFlow,
+        public suspend fun <T> seekable(
+            window: T,
             offset: ULong,
             windowSize: ULong,
             location: String? =
                 "${window.location}[${offset.toString(16).uppercase()}h,${
                     offset.plus(windowSize).toString(16).uppercase()
                 }h]"
-        ): WindowedInputFlow = Seekable(window, offset, windowSize, location)
+        ): Seekable<T> where T : InputFlow, T : SeekableFlow =
+            Seekable<T>(window, offset, windowSize, location)
 
         public suspend operator fun invoke(
             window: InputFlow,
@@ -37,22 +38,23 @@ public open class WindowedInputFlow private constructor(
                         .uppercase()
                 }h]"
         ): WindowedInputFlow {
-            if (window is SeekableInputFlow)
+            if (window is SeekableFlow)
                 return Seekable(window, offset, windowSize, location)
 
             return init(WindowedInputFlow(window, offset, windowSize, location))
         }
     }
 
-    public open class Seekable private constructor(
-        override val window: SeekableInputFlow,
+    public open class Seekable<T> private constructor(
+        override val window: T,
         baseOffset: ULong,
         windowSize: ULong,
         location: String?
-    ) : WindowedInputFlow(window, baseOffset, windowSize, location), SeekableInputFlow {
+    ) : WindowedInputFlow(window, baseOffset, windowSize, location),
+        SeekableFlow where T : InputFlow, T : SeekableFlow {
         public companion object {
-            public suspend operator fun invoke(
-                window: SeekableInputFlow,
+            public suspend operator fun <T> invoke(
+                window: T,
                 offset: ULong,
                 windowSize: ULong,
                 location: String? =
@@ -60,7 +62,7 @@ public open class WindowedInputFlow private constructor(
                         offset.plus(windowSize).toString(16)
                             .uppercase()
                     }h]"
-            ): Seekable = init(Seekable(window, offset, windowSize, location))
+            ): Seekable<T> where T : InputFlow, T : SeekableFlow = init(Seekable(window, offset, windowSize, location))
         }
 
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
@@ -142,7 +144,7 @@ public open class WindowedInputFlow private constructor(
     }
 
     override suspend fun globalOffset(): ULong = baseOffset + window.globalOffset()
-    override suspend fun absPosition(): ULong = (window as? InputFlowWithBacking)?.absPosition() ?: window.position()
+    override suspend fun absPosition(): ULong = (window as? KorneaFlowWithBacking)?.absPosition() ?: window.position()
 
     override fun locationAsUri(): KorneaResult<Uri> = window.locationAsUri()
 }

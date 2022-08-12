@@ -8,7 +8,7 @@ import dev.brella.kornea.errors.common.flatMap
 import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.errors.common.useAndFlatMap
 import dev.brella.kornea.io.common.flow.InputFlow
-import dev.brella.kornea.io.common.flow.SeekableInputFlow
+import dev.brella.kornea.io.common.flow.SeekableFlow
 import dev.brella.kornea.io.common.flow.bookmark
 
 @AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
@@ -26,7 +26,7 @@ public suspend inline fun <T : InputFlow, reified R> DataSource<T>.useInputFlowF
 @AvailableSince(KorneaIO.VERSION_4_1_0_INDEV)
 public suspend inline fun <F : InputFlow, reified T> F.fauxSeekFromStartForResult(
     offset: ULong, dataSource: DataSource<F>, crossinline block: suspend (F) -> KorneaResult<T>
-): KorneaResult<T> = if (this is SeekableInputFlow) {
+): KorneaResult<T> = if (this is SeekableFlow) {
     bookmark(this) {
         seek(offset.toLong(), EnumSeekMode.FROM_BEGINNING)
         block(this)

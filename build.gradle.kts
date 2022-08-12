@@ -15,6 +15,8 @@ plugins {
 
     id(JMH_PLUGIN) version JMH_PLUGIN_VERSION apply false
 
+    id("org.jetbrains.dokka") version "1.6.21"
+
 //    id("debuglog.plugin") version "1.0.0-indev" apply false
 }
 

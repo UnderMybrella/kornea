@@ -12,13 +12,25 @@ import dev.brella.kornea.io.common.Uri
  */
 @AvailableSince(KorneaIO.VERSION_1_1_0_ALPHA)
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class SequentialOutputFlow(private val sequence: List<OutputFlow>) : BaseDataCloseable(), OutputFlow,
+public class SequentialOutputFlow(
+    private val sequence: List<OutputFlow>,
+    override val location: String? = sequence.joinToString(
+        prefix = "SequentialOutputFlow(",
+        postfix = ")"
+    ) { it.location.toString() }
+) : BaseDataCloseable(), OutputFlow,
     OutputFlowState, IntFlowState by IntFlowState.base() {
+
+    private var _counter = 0uL
+    override suspend fun position(): ULong = _counter
+
     override suspend fun write(byte: Int) {
+        _counter++
         sequence.forEach { flow -> flow.write(byte) }
     }
 
     override suspend fun write(b: ByteArray, off: Int, len: Int) {
+        _counter += len.toUInt()
         sequence.forEach { flow -> flow.write(b, off, len) }
     }
 
