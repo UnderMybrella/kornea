@@ -6,6 +6,7 @@ import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.base.common.closeAfter
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
+import dev.brella.kornea.errors.common.switchIfEmpty
 import dev.brella.kornea.io.common.*
 import dev.brella.kornea.io.common.flow.extensions.copyTo
 
@@ -26,6 +27,10 @@ public interface InputFlow : KorneaFlow {
     public suspend fun available(): ULong?
     public suspend fun remaining(): ULong?
     public suspend fun size(): ULong?
+}
+
+public interface InputFlowConstituent: KorneaFlowConstituent {
+    override val flow: InputFlow
 }
 
 public suspend inline fun InputFlow.skip(number: Number): ULong? = skip(number.toLong().toULong())
@@ -66,23 +71,19 @@ public suspend fun InputFlow.readAndClose(bufferSize: Int = 8192): ByteArray =
         buffer.getData()
     }
 
-public suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<F>, crossinline block: suspend (F) -> T): KorneaResult<T> {
-    return if (this !is SeekableFlow) {
-//        val flow = dataSource.openInputFlow() ?: return null
+public suspend inline fun <reified F: InputFlow, reified T> F.fauxSeekFromStart(offset: ULong, dataSource: DataSource<F>, crossinline block: suspend (F) -> T): KorneaResult<T> =
+    seekable {
+        bookmark(offset.toLong(), EnumSeekMode.FROM_BEGINNING) {
+            block(this@fauxSeekFromStart)
+        }
+    }.switchIfEmpty {
         dataSource.openInputFlow().map { flow ->
             closeAfter(flow) {
                 flow.skip(offset)
                 block(flow)
             }
         }
-    } else {
-        bookmark(this as SeekableFlow) {
-            seek(offset.toLong(), EnumSeekMode.FROM_BEGINNING)
-            val result = block(this)
-            KorneaResult.success(result)
-        }
     }
-}
 
 public inline fun readResultIsValid(byte: Int): Boolean = byte != -1
 

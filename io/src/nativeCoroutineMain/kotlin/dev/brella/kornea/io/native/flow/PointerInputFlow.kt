@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.native.flow
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
@@ -12,7 +13,13 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.get
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class PointerInputFlow(public val pointer: CPointer<ByteVar>, override val location: String? = pointer.toString()): SeekableFlow, BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
+public class PointerInputFlow(
+    public val pointer: CPointer<ByteVar>,
+    override val location: String? = pointer.toString()
+) : InputFlow, SeekableFlow, BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
+    override val flow: KorneaFlow
+        get() = this
+
     private var offset: Int = 0
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
@@ -43,13 +50,44 @@ public class PointerInputFlow(public val pointer: CPointer<ByteVar>, override va
 
         return position()
     }
+
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> KorneaResult.success(this as T)
+            else -> KorneaResult.empty()
+        }
 }
 
-public inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, location: String? = pointer.toString()): SeekableFlow =
-    BufferedInputFlow.Sink.Seekable(PointerInputFlow(pointer, location))
+public inline fun BufferedPointerInputFlow(
+    pointer: CPointer<ByteVar>,
+    location: String? = pointer.toString()
+): BufferedInputFlow =
+    BufferedInputFlow(PointerInputFlow(pointer, location))
 
-public suspend inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, length: Int, location: String? = pointer.toString()): SeekableFlow =
-    BufferedInputFlow.Sink.Seekable(WindowedInputFlow.Seekable(PointerInputFlow(pointer, location), 0uL, length.toULong()))
+public suspend inline fun BufferedPointerInputFlow(
+    pointer: CPointer<ByteVar>,
+    length: Int,
+    location: String? = pointer.toString()
+): BufferedInputFlow =
+    BufferedInputFlow(
+        WindowedInputFlow(
+            PointerInputFlow(pointer, location),
+            0uL,
+            length.toULong()
+        )
+    )
 
-public suspend inline fun BufferedPointerInputFlow(pointer: CPointer<ByteVar>, offset: ULong, length: ULong, location: String? = pointer.toString()): SeekableFlow =
-    BufferedInputFlow.Sink.Seekable(WindowedInputFlow.Seekable(PointerInputFlow(pointer, location), offset, length))
+public suspend inline fun BufferedPointerInputFlow(
+    pointer: CPointer<ByteVar>,
+    offset: ULong,
+    length: ULong,
+    location: String? = pointer.toString()
+): BufferedInputFlow =
+    BufferedInputFlow(WindowedInputFlow(PointerInputFlow(pointer, location), offset, length))

@@ -1,27 +1,33 @@
 package dev.brella.kornea.io.coroutine.flow
 
 import dev.brella.kornea.annotations.ExperimentalKorneaToolkit
+import dev.brella.kornea.composite.common.Composite
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
-import dev.brella.kornea.io.common.flow.BinaryPipeFlow
+import dev.brella.kornea.io.common.flow.InputFlow
 import dev.brella.kornea.toolkit.common.asInt
 import dev.brella.kornea.toolkit.coroutines.ReadWriteSemaphore
 import dev.brella.kornea.toolkit.coroutines.withWritePermit
 import kotlin.math.min
 
 @OptIn(ExperimentalKorneaToolkit::class)
+@Deprecated("Deprecating PipeFlow until further notice", level = DeprecationLevel.ERROR)
+@Suppress("DEPRECATION_ERROR")
 public open class MutexListBackedBinaryPipeFlow(
     private val view: MutableList<Byte>,
     private var pos: Int = 0,
     override val location: String? = null,
     protected val semaphore: ReadWriteSemaphore = ReadWriteSemaphore(8),
-) : BaseDataCloseable(), BinaryPipeFlow {
+) : BaseDataCloseable(), dev.brella.kornea.io.common.flow.BinaryPipeFlow, Composite.Empty {
     public constructor() : this(ArrayList())
 
-    override val input: BinaryPipeFlow
+    override val flow: InputFlow
         get() = this
 
-    override val output: BinaryPipeFlow
+    override val input: dev.brella.kornea.io.common.flow.BinaryPipeFlow
+        get() = this
+
+    override val output: dev.brella.kornea.io.common.flow.BinaryPipeFlow
         get() = this
 
     protected suspend inline fun <T> doRead(crossinline block: suspend () -> T): T =

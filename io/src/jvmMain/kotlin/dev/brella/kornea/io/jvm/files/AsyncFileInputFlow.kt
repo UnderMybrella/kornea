@@ -1,15 +1,13 @@
 package dev.brella.kornea.io.jvm.files
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
-import dev.brella.kornea.io.common.flow.InputFlowState
-import dev.brella.kornea.io.common.flow.IntFlowState
-import dev.brella.kornea.io.common.flow.PeekableInputFlow
-import dev.brella.kornea.io.common.flow.SeekableFlow
+import dev.brella.kornea.io.common.flow.*
 import dev.brella.kornea.io.jvm.bookmark
 import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.limitSafe
@@ -37,7 +35,8 @@ public class AsyncFileInputFlow private constructor(
     private val localChannel: Boolean,
     public val backing: Path,
     override val location: String?
-) : BaseDataCloseable(), PeekableInputFlow, SeekableFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
+) : BaseDataCloseable(), InputFlow, PeekableInputFlow, SeekableFlow, SuspendInit0, InputFlowState,
+    IntFlowState by IntFlowState.base() {
     public companion object {
         public const val DEFAULT_BUFFER_SIZE: Int = 8192
 
@@ -76,6 +75,8 @@ public class AsyncFileInputFlow private constructor(
 
     //    private var coroutineContext: Poolable<CoroutineContext>? = null
     private val mutex: Mutex = Mutex()
+    override val flow: InputFlow
+        get() = this
 
     private var flowFilePointer: Long = 0L
     private var buffer: ByteBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE).apply { limitSafe(0) } //Force a refill
@@ -302,6 +303,7 @@ public class AsyncFileInputFlow private constructor(
                         buffer.positionSafe(0).limitSafe(0)
                     }
                 }
+
                 EnumSeekMode.FROM_POSITION -> {
                     if (buffer.position() + pos in 0..buffer.limit()) {
                         buffer.positionSafe((buffer.position() + pos).toInt())
@@ -310,6 +312,7 @@ public class AsyncFileInputFlow private constructor(
                         buffer.positionSafe(0).limitSafe(0)
                     }
                 }
+
                 EnumSeekMode.FROM_END -> {
                     val pos = size().toLong() - pos
                     if (pos in (flowFilePointer - buffer.limit()) until flowFilePointer) {
@@ -337,4 +340,21 @@ public class AsyncFileInputFlow private constructor(
 
 //        THREAD_POOL.retire(coroutineContext!!)
     }
+
+    // Composite
+
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key -> true
+            PeekableInputFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> KorneaResult.success(this as T)
+            PeekableInputFlow.Key -> KorneaResult.success(this as T)
+            else -> KorneaResult.empty()
+        }
 }

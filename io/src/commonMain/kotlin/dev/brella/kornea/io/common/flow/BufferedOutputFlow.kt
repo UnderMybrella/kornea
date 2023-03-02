@@ -1,6 +1,8 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.base.common.DataCloseableEventHandler
+import dev.brella.kornea.composite.common.Composite
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.Uri
@@ -9,7 +11,7 @@ public open class BufferedOutputFlow(
     protected val backing: OutputFlow,
     override val location: String? = "BufferedOutputFlow(${backing.location})"
 ) : BaseDataCloseable(), OutputFlow,
-    OutputFlowState, IntFlowState by IntFlowState.base() {
+    OutputFlowState, IntFlowState by IntFlowState.base(), Composite.Empty {
     override val closeHandlers: MutableList<DataCloseableEventHandler> = ArrayList()
 
     protected var _flowCount: Long = 0L

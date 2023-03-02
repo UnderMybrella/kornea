@@ -1,21 +1,28 @@
 package dev.brella.kornea.io.posix
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
+import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
-import dev.brella.kornea.io.common.flow.IntFlowState
-import dev.brella.kornea.io.common.flow.OutputFlow
-import dev.brella.kornea.io.common.flow.OutputFlowState
+import dev.brella.kornea.io.common.flow.*
 import kotlinx.cinterop.CPointer
 import platform.posix.FILE
+import platform.posix.SEEK_CUR
+import platform.posix.SEEK_END
+import platform.posix.SEEK_SET
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class FileOutputFlow(private val fp: FilePointer, override val location: String? = null) : OutputFlow, BaseDataCloseable(), OutputFlowState,
-    IntFlowState by IntFlowState.base() {
+public class FileOutputFlow(private val fp: FilePointer, override val location: String? = null) : OutputFlow,
+    BaseDataCloseable(), OutputFlowState,
+    IntFlowState by IntFlowState.base(), SeekableFlow {
 
     public constructor(fp: CPointer<FILE>, location: String? = null) : this(FilePointer(fp), location)
+
+    override val flow: KorneaFlow
+        get() = this
 
     override suspend fun position(): ULong =
         fp.pos().toULong()
@@ -36,9 +43,32 @@ public class FileOutputFlow(private val fp: FilePointer, override val location: 
         io { fp.flush() }
     }
 
+    override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
+        when (mode) {
+            EnumSeekMode.FROM_BEGINNING -> io { fp.seek(pos, SEEK_SET) }
+            EnumSeekMode.FROM_POSITION -> io { fp.seek(pos, SEEK_CUR) }
+            EnumSeekMode.FROM_END -> io { fp.seek(pos, SEEK_END) }
+        }
+
+        return position()
+    }
+
     override suspend fun whenClosed() {
         super.whenClosed()
 
         io { fp.close() }
     }
+
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> KorneaResult.success(this as T)
+            else -> KorneaResult.empty()
+        }
 }

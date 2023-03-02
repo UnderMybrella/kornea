@@ -2,7 +2,6 @@ package dev.brella.kornea.io.common
 
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
-import dev.brella.kornea.io.common.flow.SeekableFlow
 import dev.brella.kornea.io.common.flow.WindowedInputFlow
 
 public open class WindowedDataSource(
@@ -23,14 +22,7 @@ public open class WindowedDataSource(
             location: String?
         ): KorneaResult<WindowedInputFlow> =
             self.parent.openInputFlow().map { parentFlow ->
-                if (parentFlow is SeekableFlow)
-                    WindowedInputFlow.Seekable(
-                        parentFlow,
-                        self.windowOffset,
-                        self.windowSize,
-                        location ?: self.location
-                    )
-                else WindowedInputFlow(parentFlow, self.windowOffset, self.windowSize, location ?: self.location)
+                WindowedInputFlow(parentFlow, self.windowOffset, self.windowSize, location ?: self.location)
             }
     }
 

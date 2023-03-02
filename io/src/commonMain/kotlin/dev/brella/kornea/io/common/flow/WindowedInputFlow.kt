@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
@@ -17,6 +18,10 @@ public open class WindowedInputFlow private constructor(
     override val location: String?
 ) : BaseDataCloseable(), OffsetInputFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
+        @Deprecated(
+            "Base flow handles constituents now",
+            replaceWith = ReplaceWith("invoke(window, offset, windowSize, location)")
+        )
         public suspend fun <T> seekable(
             window: T,
             offset: ULong,
@@ -25,8 +30,8 @@ public open class WindowedInputFlow private constructor(
                 "${window.location}[${offset.toString(16).uppercase()}h,${
                     offset.plus(windowSize).toString(16).uppercase()
                 }h]"
-        ): Seekable<T> where T : InputFlow, T : SeekableFlow =
-            Seekable<T>(window, offset, windowSize, location)
+        ): WindowedInputFlow where T : InputFlow, T : SeekableFlow =
+            invoke(window, offset, windowSize, location)
 
         public suspend operator fun invoke(
             window: InputFlow,
@@ -37,50 +42,33 @@ public open class WindowedInputFlow private constructor(
                     offset.plus(windowSize).toString(16)
                         .uppercase()
                 }h]"
-        ): WindowedInputFlow {
-            if (window is SeekableFlow)
-                return Seekable(window, offset, windowSize, location)
-
-            return init(WindowedInputFlow(window, offset, windowSize, location))
-        }
+        ): WindowedInputFlow =
+            init(WindowedInputFlow(window, offset, windowSize, location))
     }
 
-    public open class Seekable<T> private constructor(
-        override val window: T,
-        baseOffset: ULong,
-        windowSize: ULong,
-        location: String?
-    ) : WindowedInputFlow(window, baseOffset, windowSize, location),
-        SeekableFlow where T : InputFlow, T : SeekableFlow {
-        public companion object {
-            public suspend operator fun <T> invoke(
-                window: T,
-                offset: ULong,
-                windowSize: ULong,
-                location: String? =
-                    "${window.location}[${offset.toString(16).uppercase()}h,${
-                        offset.plus(windowSize).toString(16)
-                            .uppercase()
-                    }h]"
-            ): Seekable<T> where T : InputFlow, T : SeekableFlow = init(Seekable(window, offset, windowSize, location))
-        }
+    public inner class SeekableConstituent(public val constituent: SeekableFlow) : SeekableFlow {
+        override val flow: KorneaFlow
+            get() = this@WindowedInputFlow
 
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
             when (mode) {
                 EnumSeekMode.FROM_BEGINNING -> {
                     val n = pos.coerceIn(0 until windowSize.toLong())
-                    this.windowPosition = n.toULong()
-                    window.seek(baseOffset.toLong() + n, mode)
+                    //TODO: Make sure this compiles
+                    windowPosition = n.toULong()
+                    constituent.seek(baseOffset.toLong() + n, mode)
                 }
+
                 EnumSeekMode.FROM_POSITION -> {
-                    val n = (this.windowPosition.toLong() + pos).coerceIn(0 until windowSize.toLong())
-                    this.windowPosition = n.toULong()
-                    window.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
+                    val n = (windowPosition.toLong() + pos).coerceIn(0 until windowSize.toLong())
+                    windowPosition = n.toULong()
+                    constituent.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
                 }
+
                 EnumSeekMode.FROM_END -> {
-                    val n = (this.windowSize.toLong() - pos).coerceIn(0 until windowSize.toLong())
-                    this.windowPosition = n.toULong()
-                    window.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
+                    val n = (windowSize.toLong() - pos).coerceIn(0 until windowSize.toLong())
+                    windowPosition = n.toULong()
+                    constituent.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
                 }
             }
 
@@ -88,7 +76,29 @@ public open class WindowedInputFlow private constructor(
         }
     }
 
-    protected var windowPosition: ULong = 0uL
+    public inner class PeekableConstituent(public val constituent: PeekableInputFlow) : PeekableInputFlow {
+        override val flow: InputFlow
+            get() = this@WindowedInputFlow
+
+        override suspend fun peek(forward: Int): Int? =
+            if (windowPosition + forward.toUInt() < windowSize) constituent.peek(forward)
+            else null
+
+        override suspend fun peek(forward: Int, b: ByteArray, off: Int, len: Int): Int? {
+            if (len < 0 || off < 0 || len > b.size - off)
+                throw IndexOutOfBoundsException()
+
+            val avail = minOf((windowSize - (windowPosition + forward.toUInt())).toInt(), len)
+
+            if (avail <= 0)
+                return null
+
+            return constituent.peek(b, off, avail)
+        }
+    }
+
+    public var windowPosition: ULong = 0uL
+        protected set
 
     override suspend fun read(): Int? = if (windowPosition < windowSize) {
         windowPosition++
@@ -106,8 +116,8 @@ public open class WindowedInputFlow private constructor(
         if (avail <= 0)
             return null
 
-        window.read(b, off, avail)
-        windowPosition += avail.toULong()
+        val read = window.read(b, off, avail) ?: return null
+        windowPosition += read.toULong()
         return avail
     }
 
@@ -147,4 +157,25 @@ public open class WindowedInputFlow private constructor(
     override suspend fun absPosition(): ULong = (window as? KorneaFlowWithBacking)?.absPosition() ?: window.position()
 
     override fun locationAsUri(): KorneaResult<Uri> = window.locationAsUri()
+
+    //Composite
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key,
+            PeekableInputFlow.Key -> window.hasConstituent(key)
+
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key ->
+                window.seekable { SeekableConstituent(this) as T }
+
+            PeekableInputFlow.Key ->
+                window.peekableInputFlow { PeekableConstituent(this) as T }
+
+            else -> KorneaResult.empty()
+        }
 }

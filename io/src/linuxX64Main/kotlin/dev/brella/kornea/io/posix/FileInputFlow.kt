@@ -1,14 +1,13 @@
 package dev.brella.kornea.io.posix
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
-import dev.brella.kornea.io.common.flow.InputFlowState
-import dev.brella.kornea.io.common.flow.IntFlowState
-import dev.brella.kornea.io.common.flow.SeekableFlow
+import dev.brella.kornea.io.common.flow.*
 import kotlinx.cinterop.CPointer
 import platform.posix.FILE
 import platform.posix.SEEK_CUR
@@ -16,11 +15,14 @@ import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class FileInputFlow(private val fp: FilePointer, override val location: String? = null) : SeekableFlow,
-    BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base() {
+public class FileInputFlow(private val fp: FilePointer, override val location: String? = null) : InputFlow,
+    BaseDataCloseable(), InputFlowState, IntFlowState by IntFlowState.base(), SeekableFlow {
     public constructor(fp: CPointer<FILE>, location: String? = null) : this(
         FilePointer(fp), location
     )
+
+    override val flow: KorneaFlow
+        get() = this
 
     private val size = fp.size()
 
@@ -62,4 +64,17 @@ public class FileInputFlow(private val fp: FilePointer, override val location: S
 
         io { fp.close() }
     }
+
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> KorneaResult.success(this as T)
+            else -> KorneaResult.empty()
+        }
 }

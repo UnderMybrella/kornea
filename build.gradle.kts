@@ -1,3 +1,5 @@
+import dev.brella.kornea.gradle.registerFillReadmeTask
+
 buildscript {
     dependencies {
         classpath(KOTLINX_ATOMICFU_GRADLE_PLUGIN)
@@ -16,6 +18,7 @@ plugins {
     id(JMH_PLUGIN) version JMH_PLUGIN_VERSION apply false
 
     id("org.jetbrains.dokka") version "1.6.21"
+    id("dev.brella.kornea") version "1.4.1"
 
 //    id("debuglog.plugin") version "1.0.0-indev" apply false
 }
@@ -80,4 +83,65 @@ configure(subprojects) {
 rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
     rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().nodeVersion = "16.0.0"
 //    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().n
+}
+
+registerFillReadmeTask("fillReadme") {
+    inputFile.set(File(rootDir, "README_TEMPLATE.md"))
+    outputFile.set(File(rootDir, "README.md"))
+
+    addReplacement("%PROJECT_BADGES%") {
+        buildString {
+            rootProject.subprojects
+                .filter { subproject -> subproject.version.toString() != "unspecified" }
+                .forEachIndexed { i, subproject ->
+                    if (i > 0) appendLine()
+                    append("- ![")
+                    append(subproject.name)
+                    append("](https://img.shields.io/maven-metadata/v?label=")
+                    append(subproject.name)
+                    append("&metadataUrl=https%3A%2F%2Fmaven.brella.dev%2F")
+                    append(subproject.group.toString().replace(".", "%2F"))
+                    append("%2F")
+                    append(subproject.name)
+                    append("%2Fmaven-metadata.xml)")
+                }
+        }
+    }
+
+    addReplacement("%PROJECT_GROOVY_IMPLEMENTATION%") {
+        buildString {
+            //implementation "dev.brella:kornea-annotations:%KORNEA-ANNOTATIONS-VERSION%"
+            rootProject.subprojects
+                .filter { subproject -> subproject.version.toString() != "unspecified" }
+                .forEachIndexed { i, subproject ->
+                    if (i > 0) appendLine()
+                    append("\timplementation \"")
+                    append(subproject.group)
+                    append(':')
+                    append(subproject.name)
+                    append(':')
+                    append(subproject.version)
+                    append('"')
+                }
+        }
+    }
+
+    addReplacement("%PROJECT_KOTLIN_IMPLEMENTATION%") {
+        buildString {
+            rootProject.subprojects
+                .filter { subproject -> subproject.version.toString() != "unspecified" }
+                .forEachIndexed { i, subproject ->
+                    if (i > 0) appendLine()
+                    append("\timplementation(\"")
+                    append(subproject.group)
+                    append(':')
+                    append(subproject.name)
+                    append(':')
+                    append(subproject.version)
+                    append("\")")
+                }
+        }
+    }
+
+    addReplacement("%GENERATED%") { "[//]: README_TEMPLATE.md (Note: This file is auto-generated; edit README_TEMPLATE.md and run fillReadme)" }
 }

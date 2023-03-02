@@ -1,5 +1,6 @@
 package dev.brella.kornea.io.common.flow
 
+import dev.brella.kornea.composite.common.Composite
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.Uri
@@ -8,7 +9,7 @@ import kotlin.math.min
 public open class BitwiseOutputFlow(
     public val flow: OutputFlow,
     override val location: String? = "Bitwise(${flow.location})"
-) : BaseDataCloseable(), OutputFlow {
+) : BaseDataCloseable(), OutputFlow, Composite.Empty {
     private var currentInt = 0
     private var currentPos = 0
     //    private val builder = StringBuilder()

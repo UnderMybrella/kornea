@@ -1,16 +1,23 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.AvailableSince
+import dev.brella.kornea.composite.common.Composite
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
 import kotlin.math.min
 
-public open class BitwiseInputFlow protected constructor(protected val flow: InputFlow, override val location: String? = null) : BaseDataCloseable(), InputFlow {
+public open class BitwiseInputFlow protected constructor(
+    protected val flow: InputFlow,
+    override val location: String? = null
+) : BaseDataCloseable(), InputFlow, Composite.Empty {
     public companion object {
-        public fun subflow(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = BitwiseInputFlow(flow, location)
-        public operator fun invoke(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow = if (flow is BitwiseInputFlow) flow else BitwiseInputFlow(flow, location)
+        public fun subflow(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow =
+            BitwiseInputFlow(flow, location)
+
+        public operator fun invoke(flow: InputFlow, location: String? = flow.location): BitwiseInputFlow =
+            if (flow is BitwiseInputFlow) flow else BitwiseInputFlow(flow, location)
     }
 
     public constructor(str: String) : this(BinaryInputFlow(str.chunked(2).map { it.toInt(16).toByte() }.toByteArray()))
@@ -37,6 +44,7 @@ public open class BitwiseInputFlow protected constructor(protected val flow: Inp
             }
         }
     }
+
     @AvailableSince(KorneaIO.VERSION_5_1_0_ALPHA)
     public suspend fun skipRemainingBits() {
         if (currentInt == null || currentPos > 0) {

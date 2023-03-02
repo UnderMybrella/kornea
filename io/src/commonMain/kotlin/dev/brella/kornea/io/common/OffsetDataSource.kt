@@ -2,7 +2,6 @@ package dev.brella.kornea.io.common
 
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.errors.common.map
-import dev.brella.kornea.io.common.flow.SeekableFlow
 import dev.brella.kornea.io.common.flow.SinkOffsetInputFlow
 
 public open class OffsetDataSource(
@@ -19,12 +18,7 @@ public open class OffsetDataSource(
             location: String?
         ): KorneaResult<SinkOffsetInputFlow> =
             self.parent.openInputFlow().map { parentFlow ->
-                if (parentFlow is SeekableFlow) SinkOffsetInputFlow.Seekable(
-                    parentFlow,
-                    self.offset,
-                    location ?: self.location
-                )
-                else SinkOffsetInputFlow(parentFlow, self.offset, location ?: self.location)
+                SinkOffsetInputFlow(parentFlow, self.offset, location ?: self.location)
             }
     }
 

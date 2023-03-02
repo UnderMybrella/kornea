@@ -1,7 +1,10 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
+import dev.brella.kornea.errors.common.filterNotNull
+import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
@@ -19,21 +22,16 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
 
         public inline operator fun invoke(backing: InputFlow, location: String? = backing.location): Sink =
             Sink(backing, location)
-
-        public inline operator fun <T> invoke(
-            backing: T,
-            location: String? = backing.location
-        ): Sink.Seekable<T> where T : InputFlow, T : SeekableFlow =
-            Sink.Seekable(backing, location)
     }
 
     public open class Sink(protected open val backing: InputFlow, location: String? = backing.location) :
         BufferedInputFlow(location) {
-        public open class Seekable<T>(public override val backing: T, location: String? = backing.location) :
-            Sink(backing, location), SeekableFlow where T : InputFlow, T : SeekableFlow {
+        public inner class SeekableConstituent(public val constituent: SeekableFlow) : SeekableFlow {
+            override val flow: KorneaFlow
+                get() = this@Sink
 
             override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
-                val shift = backing.seek(pos, mode)
+                val shift = constituent.seek(pos, mode)
                 fill()
                 return shift
             }
@@ -53,12 +51,33 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
         }
 
         override fun locationAsUri(): KorneaResult<Uri> = backing.locationAsUri()
+
+        /** Composite */
+        override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+            when (key) {
+                SeekableFlow.Key -> backing.hasConstituent(key)
+                else -> super.hasConstituent(key)
+            }
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+            when (key) {
+                SeekableFlow.Key ->
+                    backing.getConstituent(SeekableFlow.Key)
+                        .map { SeekableConstituent(it) as? T }
+                        .filterNotNull()
+
+                else -> super.getConstituent(key)
+            }
     }
 
     protected var buffer: ByteArray = ByteArray(DEFAULT_BUFFER_SIZE)
     protected var count: Int = 0
     protected var pos: Int = 0
     protected var absPos: Long = 0L
+
+    override val flow: InputFlow
+        get() = this
 
     protected suspend fun fill() {
         pos = 0
@@ -202,4 +221,18 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
 
     override suspend fun available(): ULong = (count - pos).toULong()
     override suspend fun position(): ULong = (absPos - count + pos).toULong()
+
+    /** Composite */
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            PeekableInputFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            PeekableInputFlow.Key -> KorneaResult.successOrEmpty(this as? T)
+            else -> KorneaResult.empty()
+        }
 }

@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.native.flow
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
@@ -14,6 +15,9 @@ import kotlinx.cinterop.set
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public class PointerOutputFlow(public val pointer: CPointer<ByteVar>, override val location: String?) : OutputFlow,
     SeekableFlow, BaseDataCloseable(), OutputFlowState, IntFlowState by IntFlowState.base() {
+    override val flow: KorneaFlow
+        get() = this
+
     public var offset: Int = 0
         private set
 
@@ -41,6 +45,19 @@ public class PointerOutputFlow(public val pointer: CPointer<ByteVar>, override v
 
         return offset.toULong()
     }
+
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> KorneaResult.success(this as T)
+            else -> KorneaResult.empty()
+        }
 }
 
 public inline fun BufferedPointerOutputFlow(pointer: CPointer<ByteVar>, location: String? = null): BufferedOutputFlow =

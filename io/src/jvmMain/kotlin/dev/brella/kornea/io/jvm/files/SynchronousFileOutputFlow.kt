@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.jvm.files
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Composite
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
@@ -14,8 +15,10 @@ import java.io.File
 import java.io.FileOutputStream
 
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
-public class SynchronousFileOutputFlow(public val backing: File, override val location: String? = "SynchronousFileOutputFlow(${backing})") : BaseDataCloseable(),
-    OutputFlow, OutputFlowState, IntFlowState by IntFlowState.base() {
+public class SynchronousFileOutputFlow(
+    public val backing: File,
+    override val location: String? = "SynchronousFileOutputFlow(${backing})"
+) : BaseDataCloseable(), OutputFlow, OutputFlowState, IntFlowState by IntFlowState.base(), Composite.Empty {
     private val stream = FileOutputStream(backing)
     private val channel = stream.channel
 

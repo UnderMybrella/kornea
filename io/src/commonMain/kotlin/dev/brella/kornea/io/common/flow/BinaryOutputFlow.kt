@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
@@ -79,10 +80,30 @@ public interface BinaryOutputFlow : SeekableFlow, OutputFlow, BinaryView {
         }
     }
 
+    override val flow: KorneaFlow
+        get() = this
+
     public fun getData(): ByteArray
     public fun getDataSize(): ULong
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.empty()
+
+    /** Composite */
+    /** Composite */
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key -> true
+            PeekableInputFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> KorneaResult.successOrEmpty(this as? T)
+            PeekableInputFlow.Key -> KorneaResult.successOrEmpty(this as? T)
+            else -> KorneaResult.empty()
+        }
 }
 
 public suspend inline fun buildBinaryFlowData(block: BinaryOutputFlow.() -> Unit): ByteArray =

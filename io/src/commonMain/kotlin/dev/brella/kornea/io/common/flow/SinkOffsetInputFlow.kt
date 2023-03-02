@@ -1,7 +1,9 @@
 package dev.brella.kornea.io.common.flow
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
+import dev.brella.kornea.errors.common.map
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
@@ -15,69 +17,73 @@ public open class SinkOffsetInputFlow private constructor(
     override val baseOffset: ULong,
     override val location: String? =
         "${backing.location}+${baseOffset.toString(16)}h"
-) : BaseDataCloseable(), OffsetInputFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
+) : BaseDataCloseable(),
+    OffsetInputFlow, SuspendInit0, InputFlowState, IntFlowState by IntFlowState.base() {
     public companion object {
+        @Deprecated(
+            "Base SinkOffsetInputFlow handles seeking too",
+            replaceWith = ReplaceWith("invoke(backing, offset, location)")
+        )
         public suspend fun <T> seekable(
             backing: T,
             offset: ULong,
             location: String? = "${backing.location}+${offset.toString(16)}h"
-        ): Seekable<T> where T : InputFlow, T : SeekableFlow =
-            Seekable(backing, offset, location)
+        ): SinkOffsetInputFlow where T : InputFlow, T : SeekableFlow =
+            invoke(backing, offset, location)
 
         public suspend operator fun invoke(
             backing: InputFlow,
             offset: ULong,
             location: String? = "${backing.location}+${offset.toString(16)}h"
         ): SinkOffsetInputFlow {
-            if (backing is SeekableFlow) return Seekable(backing, offset, location)
-
             return init(SinkOffsetInputFlow(backing, offset, location))
         }
     }
 
-    public class Seekable<T> private constructor(
-        override val backing: T,
-        override val baseOffset: ULong,
-        override val location: String? = "${backing.location}+${baseOffset.toString(16)}h"
-    ) : SinkOffsetInputFlow(backing, baseOffset, location), SeekableFlow where T : InputFlow, T : SeekableFlow {
-        public companion object {
-            public suspend operator fun <T> invoke(
-                backing: T,
-                offset: ULong,
-                location: String? = "${backing.location}+${offset.toString(16)}h"
-            ): Seekable<T> where T : InputFlow, T : SeekableFlow =
-                init(Seekable(backing, offset, location))
-        }
+    public inner class SeekableConstituent(public val constituent: SeekableFlow) : SeekableFlow {
+        override val flow: KorneaFlow
+            get() = this@SinkOffsetInputFlow
 
         override suspend fun seek(pos: Long, mode: EnumSeekMode): ULong {
             when (mode) {
                 EnumSeekMode.FROM_BEGINNING -> {
-                    this.sinkOffset = pos.toULong()
-                    backing.seek(baseOffset.toLong() + pos, mode)
+                    sinkOffset = pos.toULong()
+                    constituent.seek(baseOffset.toLong() + pos, mode)
                 }
+
                 EnumSeekMode.FROM_POSITION -> {
-                    val n = this.sinkOffset.toLong() + pos
-                    this.sinkOffset = n.toULong()
-                    backing.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
+                    val n = sinkOffset.toLong() + pos
+                    sinkOffset = n.toULong()
+                    constituent.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
                 }
+
                 EnumSeekMode.FROM_END -> {
                     val size = size()
                     if (size == null) {
-                        val result = backing.seek(pos, mode)
+                        val result = constituent.seek(pos, mode)
                         if (result < baseOffset) {
                             backing.skip(baseOffset - result)
-                            this.sinkOffset = 0u
+                            sinkOffset = 0u
                         }
                     } else {
                         val n = (size.toLong() - pos)
-                        this.sinkOffset = n.toULong()
-                        backing.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
+                        sinkOffset = n.toULong()
+                        constituent.seek(baseOffset.toLong() + n, EnumSeekMode.FROM_BEGINNING)
                     }
                 }
             }
 
             return position()
         }
+    }
+
+    public inner class PeekableConstituent(public val constituent: PeekableInputFlow) : PeekableInputFlow {
+        override val flow: InputFlow
+            get() = this@SinkOffsetInputFlow
+
+        override suspend fun peek(forward: Int): Int? = constituent.peek(forward)
+        override suspend fun peek(forward: Int, b: ByteArray, off: Int, len: Int): Int? =
+            constituent.peek(forward, b, off, len)
     }
 
     protected var sinkOffset: ULong = 0uL
@@ -121,4 +127,23 @@ public open class SinkOffsetInputFlow private constructor(
     override suspend fun absPosition(): ULong = (backing as? KorneaFlowWithBacking)?.absPosition() ?: backing.position()
 
     override fun locationAsUri(): KorneaResult<Uri> = backing.locationAsUri()
+
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key,
+            PeekableInputFlow.Key -> backing.hasConstituent(key)
+
+            else -> false
+        }
+
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> backing.getConstituent(SeekableFlow.Key)
+                .map { SeekableConstituent(it) as T }
+
+            PeekableInputFlow.Key -> backing.getConstituent(PeekableInputFlow.Key)
+                .map { PeekableConstituent(it) as T }
+
+            else -> KorneaResult.empty()
+        }
 }

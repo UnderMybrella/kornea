@@ -1,15 +1,13 @@
 package dev.brella.kornea.io.jvm.files
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
 import dev.brella.kornea.io.common.Uri
-import dev.brella.kornea.io.common.flow.IntFlowState
-import dev.brella.kornea.io.common.flow.OutputFlow
-import dev.brella.kornea.io.common.flow.OutputFlowState
-import dev.brella.kornea.io.common.flow.SeekableFlow
+import dev.brella.kornea.io.common.flow.*
 import dev.brella.kornea.io.jvm.clearSafe
 import dev.brella.kornea.io.jvm.flipSafe
 import dev.brella.kornea.io.jvm.limitSafe
@@ -116,6 +114,8 @@ public class AsyncFileOutputFlow(
     private var filePointer = 0L
     private val buffer = ByteBuffer.allocate(8192)
     private val mutex = Mutex()
+    override val flow: KorneaFlow
+        get() = this
 
     override suspend fun position(): ULong =
         filePointer.toULong()
@@ -180,6 +180,7 @@ public class AsyncFileOutputFlow(
                         buffer.positionSafe(0).limitSafe(0)
                     }
                 }
+
                 EnumSeekMode.FROM_POSITION -> {
                     if (buffer.position() + pos in 0..buffer.limit()) {
                         buffer.positionSafe((buffer.position() + pos).toInt())
@@ -188,6 +189,7 @@ public class AsyncFileOutputFlow(
                         buffer.positionSafe(0).limitSafe(0)
                     }
                 }
+
                 EnumSeekMode.FROM_END -> {
                     val pos = runInterruptible { channel.size() } - pos
                     if (pos in (filePointer - buffer.limit()) until filePointer) {
@@ -221,4 +223,19 @@ public class AsyncFileOutputFlow(
             }
         }
     }
+
+
+    //Composite
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> KorneaResult.success(this as T)
+            else -> KorneaResult.empty()
+        }
 }

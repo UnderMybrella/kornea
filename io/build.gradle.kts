@@ -32,6 +32,7 @@ multiplatform {
                 implementation(project(":kornea-annotations"))
                 api(project(":kornea-errors"))
                 api(project(":kornea-toolkit"))
+                api(project(":kornea-composite"))
             }
         }
 

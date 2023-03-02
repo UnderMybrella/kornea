@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.jvm.files
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
@@ -18,6 +19,8 @@ public class SynchronousFileInputFlow(
     override val location: String? = backingFile.absolutePath
 ) : BaseDataCloseable(), InputFlow, SeekableFlow, InputFlowState, IntFlowState by IntFlowState.base() {
     private val channel = RandomAccessFile(backingFile, "r")
+    override val flow: KorneaFlow
+        get() = this
 
     override fun locationAsUri(): KorneaResult<Uri> = KorneaResult.success(Uri.fromFile(backingFile))
 
@@ -50,4 +53,17 @@ public class SynchronousFileInputFlow(
 
         runInterruptible(Dispatchers.IO) { channel.close() }
     }
+
+    override fun hasConstituent(key: Constituent.Key<*>): Boolean =
+        when (key) {
+            SeekableFlow.Key -> true
+            else -> false
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
+        when (key) {
+            SeekableFlow.Key -> KorneaResult.success(this as T)
+            else -> KorneaResult.empty()
+        }
 }

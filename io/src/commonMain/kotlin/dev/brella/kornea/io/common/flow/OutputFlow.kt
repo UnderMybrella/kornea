@@ -36,6 +36,10 @@ public interface OutputFlow: KorneaFlow, PrintFlow {
     }
 }
 
+public interface OutputFlowConstituent: KorneaFlowConstituent {
+    override val flow: OutputFlow
+}
+
 public interface OutputFlowByDelegate<O: OutputFlow>: OutputFlow {
     public companion object {
         public inline operator fun <O: OutputFlow> invoke(output: O): OutputFlowByDelegate<O> = OutputFlowByDelegateImpl(output)

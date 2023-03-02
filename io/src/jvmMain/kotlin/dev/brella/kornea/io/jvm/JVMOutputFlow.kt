@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.jvm
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Composite
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
@@ -15,7 +16,7 @@ import java.io.OutputStream
 @ChangedSince(KorneaIO.VERSION_5_0_0_ALPHA, "Implement IntFlowState")
 public open class JVMOutputFlow(protected val stream: OutputStream, override val location: String? = null) :
     BaseDataCloseable(), OutputFlow, OutputFlowState,
-    IntFlowState by IntFlowState.base() {
+    IntFlowState by IntFlowState.base(), Composite.Empty {
     private var _position = 0uL
 
     override suspend fun position(): ULong = _position

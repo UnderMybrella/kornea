@@ -2,6 +2,7 @@ package dev.brella.kornea.io.coroutine.flow
 
 import dev.brella.kornea.annotations.AvailableSince
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Composite
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
@@ -24,8 +25,7 @@ public class FannedOutputFlow(
         prefix = "FannedOutputFlow(",
         postfix = ")"
     ) { it.location.toString() }
-) : BaseDataCloseable(), OutputFlow, OutputFlowState,
-    IntFlowState by IntFlowState.base() {
+) : BaseDataCloseable(), OutputFlow, OutputFlowState, IntFlowState by IntFlowState.base(), Composite.Empty {
 
     private var _counter = 0uL
     override suspend fun position(): ULong = _counter

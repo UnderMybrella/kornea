@@ -1,6 +1,7 @@
 package dev.brella.kornea.io.jvm
 
 import dev.brella.kornea.annotations.ChangedSince
+import dev.brella.kornea.composite.common.Composite
 import dev.brella.kornea.errors.common.KorneaResult
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.KorneaIO
@@ -17,7 +18,7 @@ import java.io.InputStream
 public open class JVMInputFlow private constructor(
     protected val stream: CountingInputStream,
     override val location: String? = null
-) : BaseDataCloseable(), InputFlow, InputFlowState, IntFlowState by IntFlowState.base() {
+) : BaseDataCloseable(), InputFlow, InputFlowState, IntFlowState by IntFlowState.base(), Composite.Empty {
     public constructor(stream: InputStream, location: String?) : this(CountingInputStream(stream), location)
 
     override suspend fun read(): Int? =
