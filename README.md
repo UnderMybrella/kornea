@@ -17,27 +17,28 @@ A set of libraries for use in Kotlin MPP projects
 - ![kornea-serialisation-errors](https://img.shields.io/maven-metadata/v?label=kornea-serialisation-errors&metadataUrl=https%3A%2F%2Fmaven.brella.dev%2Fdev%2Fbrella%2Fkornea-serialisation-errors%2Fmaven-metadata.xml)
 - ![kornea-serialisation-io](https://img.shields.io/maven-metadata/v?label=kornea-serialisation-io&metadataUrl=https%3A%2F%2Fmaven.brella.dev%2Fdev%2Fbrella%2Fkornea-serialisation-io%2Fmaven-metadata.xml)
 
+
 ## Gradle (Groovy)
 
 ```groovy
 repositories {
-  maven { url "https://maven.brella.dev" }
+    maven { url "https://maven.brella.dev" }
 }
 
 dependencies {
-	implementation "dev.brella:kornea-annotations:1.3.0-alpha"
-	implementation "dev.brella:kornea-apollo:1.1.0-alpha"
-	implementation "dev.brella:kornea-base:1.1.0-alpha"
-	implementation "dev.brella:kornea-composite:1.0.0-indev"
-	implementation "dev.brella:kornea-config:1.2.0-indev"
-	implementation "dev.brella:kornea-errors:3.1.0-alpha"
-	implementation "dev.brella:kornea-img:1.4.0-alpha"
-	implementation "dev.brella:kornea-io:6.0.0-alpha"
-	implementation "dev.brella:kornea-modelling:1.2.0-alpha"
-	implementation "dev.brella:kornea-toolkit:3.5.0-alpha"
-	implementation "dev.brella:kornea-serialisation-core:1.0.0-alpha"
-	implementation "dev.brella:kornea-serialisation-errors:1.0.0-alpha"
-	implementation "dev.brella:kornea-serialisation-io:1.0.0-alpha"
+    implementation "dev.brella:kornea-annotations:1.3.0-alpha"
+    implementation "dev.brella:kornea-apollo:1.1.0-alpha"
+    implementation "dev.brella:kornea-base:1.1.0-alpha"
+    implementation "dev.brella:kornea-composite:1.0.0-indev"
+    implementation "dev.brella:kornea-config:1.2.0-indev"
+    implementation "dev.brella:kornea-errors:3.1.0-alpha"
+    implementation "dev.brella:kornea-img:1.4.0-alpha"
+    implementation "dev.brella:kornea-io:6.0.0-alpha"
+    implementation "dev.brella:kornea-modelling:1.2.0-alpha"
+    implementation "dev.brella:kornea-toolkit:3.5.0-alpha"
+    implementation "dev.brella:kornea-serialisation-core:1.0.0-alpha"
+    implementation "dev.brella:kornea-serialisation-errors:1.0.0-alpha"
+    implementation "dev.brella:kornea-serialisation-io:1.0.0-alpha"
 }
 ```
 
@@ -45,22 +46,50 @@ dependencies {
 
 ```kotlin
 repositories {
-  maven(url = "https://maven.brella.dev")
+    maven(url = "https://maven.brella.dev")
 }
 
 dependencies {
-	implementation("dev.brella:kornea-annotations:1.3.0-alpha")
-	implementation("dev.brella:kornea-apollo:1.1.0-alpha")
-	implementation("dev.brella:kornea-base:1.1.0-alpha")
-	implementation("dev.brella:kornea-composite:1.0.0-indev")
-	implementation("dev.brella:kornea-config:1.2.0-indev")
-	implementation("dev.brella:kornea-errors:3.1.0-alpha")
-	implementation("dev.brella:kornea-img:1.4.0-alpha")
-	implementation("dev.brella:kornea-io:6.0.0-alpha")
-	implementation("dev.brella:kornea-modelling:1.2.0-alpha")
-	implementation("dev.brella:kornea-toolkit:3.5.0-alpha")
-	implementation("dev.brella:kornea-serialisation-core:1.0.0-alpha")
-	implementation("dev.brella:kornea-serialisation-errors:1.0.0-alpha")
-	implementation("dev.brella:kornea-serialisation-io:1.0.0-alpha")
+    implementation("dev.brella:kornea-annotations:1.3.0-alpha")
+    implementation("dev.brella:kornea-apollo:1.1.0-alpha")
+    implementation("dev.brella:kornea-base:1.1.0-alpha")
+    implementation("dev.brella:kornea-composite:1.0.0-indev")
+    implementation("dev.brella:kornea-config:1.2.0-indev")
+    implementation("dev.brella:kornea-errors:3.1.0-alpha")
+    implementation("dev.brella:kornea-img:1.4.0-alpha")
+    implementation("dev.brella:kornea-io:6.0.0-alpha")
+    implementation("dev.brella:kornea-modelling:1.2.0-alpha")
+    implementation("dev.brella:kornea-toolkit:3.5.0-alpha")
+    implementation("dev.brella:kornea-serialisation-core:1.0.0-alpha")
+    implementation("dev.brella:kornea-serialisation-errors:1.0.0-alpha")
+    implementation("dev.brella:kornea-serialisation-io:1.0.0-alpha")
+}
+```
+
+## [kornea-gradle](https://github.com/UnderMybrella/kornea-gradle)
+
+```kotlin
+plugins {
+    id("dev.brella.kornea") version "1.4.1"
+}
+
+repositories {
+    mavenBrella()
+}
+
+dependencies {
+    implementation(korneaAnnotations("1.3.0-alpha"))
+    implementation(korneaApollo("1.1.0-alpha"))
+    implementation(korneaBase("1.1.0-alpha"))
+    implementation(korneaComposite("1.0.0-indev"))
+    implementation(korneaConfig("1.2.0-indev"))
+    implementation(korneaErrors("3.1.0-alpha"))
+    implementation(korneaImg("1.4.0-alpha"))
+    implementation(korneaIo("6.0.0-alpha"))
+    implementation(korneaModelling("1.2.0-alpha"))
+    implementation(korneaToolkit("3.5.0-alpha"))
+    implementation(korneaSerialisationCore("1.0.0-alpha"))
+    implementation(korneaSerialisationErrors("1.0.0-alpha"))
+    implementation(korneaSerialisationIo("1.0.0-alpha"))
 }
 ```

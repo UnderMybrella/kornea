@@ -115,7 +115,7 @@ registerFillReadmeTask("fillReadme") {
                 .filter { subproject -> subproject.version.toString() != "unspecified" }
                 .forEachIndexed { i, subproject ->
                     if (i > 0) appendLine()
-                    append("\timplementation \"")
+                    append("    implementation \"")
                     append(subproject.group)
                     append(':')
                     append(subproject.name)
@@ -132,13 +132,37 @@ registerFillReadmeTask("fillReadme") {
                 .filter { subproject -> subproject.version.toString() != "unspecified" }
                 .forEachIndexed { i, subproject ->
                     if (i > 0) appendLine()
-                    append("\timplementation(\"")
+                    append("    implementation(\"")
                     append(subproject.group)
                     append(':')
                     append(subproject.name)
                     append(':')
                     append(subproject.version)
                     append("\")")
+                }
+        }
+    }
+
+    addReplacement("%PROJECT_KORNEA_IMPLEMENTATION%") {
+        buildString {
+            rootProject.subprojects
+                .filter { subproject -> subproject.version.toString() != "unspecified" }
+                .forEachIndexed { i, subproject ->
+                    if (i > 0) appendLine()
+                    append("    implementation(")
+                    subproject.name.split('-')
+                        .forEachIndexed { j, word ->
+                            if (j > 0) {
+                                append(word.first().toUpperCase())
+                                append(word.drop(1).toLowerCase())
+                            } else {
+                                append(word.toLowerCase())
+                            }
+                        }
+
+                    append("(\"")
+                    append(subproject.version)
+                    append("\"))")
                 }
         }
     }
