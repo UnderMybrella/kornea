@@ -3,6 +3,7 @@ package dev.brella.kornea.io.common.flow
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
+import dev.brella.kornea.errors.common.asType
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
@@ -54,7 +55,6 @@ public open class WindowedInputFlow private constructor(
             when (mode) {
                 EnumSeekMode.FROM_BEGINNING -> {
                     val n = pos.coerceIn(0 until windowSize.toLong())
-                    //TODO: Make sure this compiles
                     windowPosition = n.toULong()
                     constituent.seek(baseOffset.toLong() + n, mode)
                 }
@@ -96,6 +96,9 @@ public open class WindowedInputFlow private constructor(
             return constituent.peek(b, off, avail)
         }
     }
+
+    private val seekableConstituent by lazy { window.seekable { SeekableConstituent(this) } }
+    private val peekableConstituent by lazy { window.peekableInputFlow { PeekableConstituent(this) } }
 
     public var windowPosition: ULong = 0uL
         protected set
@@ -170,11 +173,8 @@ public open class WindowedInputFlow private constructor(
     @Suppress("UNCHECKED_CAST")
     override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
         when (key) {
-            SeekableFlow.Key ->
-                window.seekable { SeekableConstituent(this) as T }
-
-            PeekableInputFlow.Key ->
-                window.peekableInputFlow { PeekableConstituent(this) as T }
+            SeekableFlow.Key -> seekableConstituent.asType()
+            PeekableInputFlow.Key -> peekableConstituent.asType()
 
             else -> KorneaResult.empty()
         }

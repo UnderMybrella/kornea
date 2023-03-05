@@ -3,7 +3,7 @@ package dev.brella.kornea.io.common.flow
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.errors.common.map
+import dev.brella.kornea.errors.common.asType
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
@@ -76,7 +76,6 @@ public open class SinkOffsetInputFlow private constructor(
             return position()
         }
     }
-
     public inner class PeekableConstituent(public val constituent: PeekableInputFlow) : PeekableInputFlow {
         override val flow: InputFlow
             get() = this@SinkOffsetInputFlow
@@ -85,6 +84,9 @@ public open class SinkOffsetInputFlow private constructor(
         override suspend fun peek(forward: Int, b: ByteArray, off: Int, len: Int): Int? =
             constituent.peek(forward, b, off, len)
     }
+
+    private val seekableConstituent by lazy { backing.seekable { SeekableConstituent(this) } }
+    private val peekableConstituent by lazy { backing.peekableInputFlow { PeekableConstituent(this) } }
 
     protected var sinkOffset: ULong = 0uL
 
@@ -138,11 +140,8 @@ public open class SinkOffsetInputFlow private constructor(
 
     override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
         when (key) {
-            SeekableFlow.Key -> backing.getConstituent(SeekableFlow.Key)
-                .map { SeekableConstituent(it) as T }
-
-            PeekableInputFlow.Key -> backing.getConstituent(PeekableInputFlow.Key)
-                .map { PeekableConstituent(it) as T }
+            SeekableFlow.Key -> seekableConstituent.asType()
+            PeekableInputFlow.Key -> peekableConstituent.asType()
 
             else -> KorneaResult.empty()
         }

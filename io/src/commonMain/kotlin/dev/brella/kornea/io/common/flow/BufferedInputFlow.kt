@@ -3,8 +3,7 @@ package dev.brella.kornea.io.common.flow
 import dev.brella.kornea.annotations.ChangedSince
 import dev.brella.kornea.composite.common.Constituent
 import dev.brella.kornea.errors.common.KorneaResult
-import dev.brella.kornea.errors.common.filterNotNull
-import dev.brella.kornea.errors.common.map
+import dev.brella.kornea.errors.common.asType
 import dev.brella.kornea.io.common.BaseDataCloseable
 import dev.brella.kornea.io.common.EnumSeekMode
 import dev.brella.kornea.io.common.KorneaIO
@@ -37,6 +36,7 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
             }
         }
 
+        private val seekableConstituent by lazy { backing.seekable { SeekableConstituent(this) } }
         //        override suspend fun fillImpl(): Int? = readImpl(buffer, pos, buffer.size - pos)
         override suspend fun readImpl(b: ByteArray, off: Int, len: Int): Int? = backing.read(b, off, len)
 
@@ -62,10 +62,7 @@ public abstract class BufferedInputFlow(override val location: String?) : BaseDa
         @Suppress("UNCHECKED_CAST")
         override fun <T : Constituent> getConstituent(key: Constituent.Key<T>): KorneaResult<T> =
             when (key) {
-                SeekableFlow.Key ->
-                    backing.getConstituent(SeekableFlow.Key)
-                        .map { SeekableConstituent(it) as? T }
-                        .filterNotNull()
+                SeekableFlow.Key -> seekableConstituent.asType()
 
                 else -> super.getConstituent(key)
             }
