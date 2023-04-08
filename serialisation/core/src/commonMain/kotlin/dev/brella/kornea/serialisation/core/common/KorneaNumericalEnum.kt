@@ -7,20 +7,20 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-public interface KorneaEnum {
+public interface KorneaNumericalEnum {
     public val type: Int
 }
 
-public sealed class KorneaEnumSerialiser<T : KorneaEnum>(
+public sealed class KorneaNumericalEnumSerialiser<T : KorneaNumericalEnum>(
     public val serialName: String,
     public val default: (Int) -> T,
 ) : KSerializer<T> {
-    public sealed class MapBased<T : KorneaEnum>(
+    public sealed class MapBased<T : KorneaNumericalEnum>(
         public val values: Lazy<Map<Int, T>>,
         serialName: String,
         default: (Int) -> T,
-    ) : KorneaEnumSerialiser<T>(serialName, default) {
-        public open class AsByte<T : KorneaEnum>(values: Lazy<Map<Int, T>>, serialName: String, default: (Int) -> T) :
+    ) : KorneaNumericalEnumSerialiser<T>(serialName, default) {
+        public open class AsByte<T : KorneaNumericalEnum>(values: Lazy<Map<Int, T>>, serialName: String, default: (Int) -> T) :
             MapBased<T>(values, serialName, default) {
             override val descriptor: SerialDescriptor =
                 PrimitiveSerialDescriptor(serialName, PrimitiveKind.BYTE)
@@ -36,7 +36,7 @@ public sealed class KorneaEnumSerialiser<T : KorneaEnum>(
             }
         }
 
-        public open class AsInt<T : KorneaEnum>(values: Lazy<Map<Int, T>>, serialName: String, default: (Int) -> T) :
+        public open class AsInt<T : KorneaNumericalEnum>(values: Lazy<Map<Int, T>>, serialName: String, default: (Int) -> T) :
             MapBased<T>(values, serialName, default) {
             override val descriptor: SerialDescriptor =
                 PrimitiveSerialDescriptor(serialName, PrimitiveKind.INT)
@@ -53,12 +53,12 @@ public sealed class KorneaEnumSerialiser<T : KorneaEnum>(
         }
     }
 
-    public sealed class ArrayBased<T : KorneaEnum>(
+    public sealed class ArrayBased<T : KorneaNumericalEnum>(
         public val values: Lazy<Array<T?>>,
         serialName: String,
         default: (Int) -> T,
-    ) : KorneaEnumSerialiser<T>(serialName, default) {
-        public open class AsByte<T : KorneaEnum>(values: Lazy<Array<T?>>, serialName: String, default: (Int) -> T) :
+    ) : KorneaNumericalEnumSerialiser<T>(serialName, default) {
+        public open class AsByte<T : KorneaNumericalEnum>(values: Lazy<Array<T?>>, serialName: String, default: (Int) -> T) :
             ArrayBased<T>(values, serialName, default) {
             override val descriptor: SerialDescriptor =
                 PrimitiveSerialDescriptor(serialName, PrimitiveKind.BYTE)
@@ -74,7 +74,7 @@ public sealed class KorneaEnumSerialiser<T : KorneaEnum>(
             }
         }
 
-        public open class AsInt<T : KorneaEnum>(values: Lazy<Array<T?>>, serialName: String, default: (Int) -> T) :
+        public open class AsInt<T : KorneaNumericalEnum>(values: Lazy<Array<T?>>, serialName: String, default: (Int) -> T) :
             ArrayBased<T>(values, serialName, default) {
             override val descriptor: SerialDescriptor =
                 PrimitiveSerialDescriptor(serialName, PrimitiveKind.INT)
@@ -92,7 +92,7 @@ public sealed class KorneaEnumSerialiser<T : KorneaEnum>(
     }
 }
 
-public sealed class KorneaEnumLikeSerialiser<T>(
+public sealed class KorneaNumericalEnumLikeSerialiser<T>(
     public val serialName: String,
     public val typeToDefault: (Int) -> T,
     public val unknownToType: (T) -> Int,
@@ -102,7 +102,7 @@ public sealed class KorneaEnumLikeSerialiser<T>(
         serialName: String,
         typeToDefault: (Int) -> T,
         unknownToType: (T) -> Int,
-    ) : KorneaEnumLikeSerialiser<T>(serialName, typeToDefault, unknownToType) {
+    ) : KorneaNumericalEnumLikeSerialiser<T>(serialName, typeToDefault, unknownToType) {
         public open class AsByte<T>(
             values: Map<Int, T>,
             serialName: String,
@@ -151,7 +151,7 @@ public sealed class KorneaEnumLikeSerialiser<T>(
         serialName: String,
         typeToDefault: (Int) -> T,
         unknownToType: (T) -> Int,
-    ) : KorneaEnumLikeSerialiser<T>(serialName, typeToDefault, unknownToType) {
+    ) : KorneaNumericalEnumLikeSerialiser<T>(serialName, typeToDefault, unknownToType) {
         public open class AsByte<T>(
             values: Array<T?>,
             serialName: String,
@@ -200,7 +200,7 @@ public inline fun <reified K, reified V> lazyMap(noinline block: MutableMap<K, V
 public inline fun <reified T> buildArray(size: Int, block: Array<T?>.() -> Unit): Array<T?> =
     arrayOfNulls<T>(size).apply(block)
 
-public inline fun <T: KorneaEnum> Array<T?>.with(value: T): Array<T?> {
+public inline fun <T: KorneaNumericalEnum> Array<T?>.with(value: T): Array<T?> {
     this[value.type] = value
     return this
 }
