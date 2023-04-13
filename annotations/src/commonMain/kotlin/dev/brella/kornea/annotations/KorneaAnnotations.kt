@@ -4,6 +4,14 @@ package dev.brella.kornea.annotations
 @AvailableSince(KorneaAnnotations.VERSION_1_2_0_INDEV)
 public object KorneaAnnotations {
     /**
+     * kornea-annotations 1.4.0-alpha
+     * - Add [ExampleValue], [ExampleIntegerValue], [ExampleDecimalValue]
+     * - Add [ValueRange], [IntegerValueRange], [DecimalValueRange]
+     * - Add [ValueRegex]
+     */
+    public const val VERSION_1_4_0_ALPHA: String = "1.4.0-alpha"
+
+    /**
      * kornea-annotations 1.3.0-alpha
      * - Add [DangerousApiUsage]
      */
