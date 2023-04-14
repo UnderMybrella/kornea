@@ -112,19 +112,6 @@ public inline fun <R, T : R, E : Throwable> KorneaResult<T>.switchIfHasTypedExce
     }
 }
 
-@OptIn(ExperimentalContracts::class)
-@AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-public inline fun <R, T : R> KorneaResult<T>.switchIfHasCause(block: (KorneaResult.WithCause) -> KorneaResult<R>): KorneaResult<R> {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-
-    return when (val failure = failureOrNull()) {
-        is KorneaResult.WithCause -> block(failure)
-        else -> this
-    }
-}
-
 public inline fun <R, T : R> KorneaResult<T>.switchIfHasPayload(block: (KorneaResult.WithPayload<*>) -> KorneaResult<R>): KorneaResult<R> =
     switchIfTypedFailure(block)
 

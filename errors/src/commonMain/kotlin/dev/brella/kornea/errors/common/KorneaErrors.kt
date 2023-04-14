@@ -3,6 +3,29 @@ package dev.brella.kornea.errors.common
 import dev.brella.kornea.annotations.AvailableSince
 
 public object KorneaErrors {
+    /**
+     * kornea-errors 4.0.0-alpha
+     * - Change how WithPayload<T> is implemented; all failures are expected to have a payload-able implementation
+     * - Remove WithCause; all failures have an optional cause
+     * - Remove deprecations:
+     *
+     *      - Consumption:
+     *          - [dev.brella.kornea.errors.common.consumeAndGet][consumeAndGet]
+     *          - [dev.brella.kornea.errors.common.consumeAndGetOrNull][consumeAndGetOrNull]
+     *          - [dev.brella.kornea.errors.common.consumeAndGetOrElse][consumeAndGetOrElse]
+     *          - [dev.brella.kornea.errors.common.consumeAndGetOrBreak][consumeAndGetOrBreak]
+     *          - [dev.brella.kornea.errors.common.consumeOnSuccessGetOrBreak][consumeOnSuccessGetOrBreak]
+     *          - [dev.brella.kornea.errors.common.consume][consume]
+     *          - [dev.brella.kornea.errors.common.consumeInner][consumeInner]
+     *      - Contracts:
+     *          - [dev.brella.kornea.errors.common.requireSuccessful][requireSuccessful]
+     *          - [dev.brella.kornea.errors.common.isSuccessful][isSuccessful]
+     *          - [dev.brella.kornea.errors.common.isFailure][isFailure]
+     *      - Misc:
+     *          - [dev.brella.kornea.errors.common.getOrElseTransform][getOrElseTransform]
+     */
+    public const val VERSION_4_0_0_ALPHA: String = "4.0.0-alpha"
+
     public const val VERSION_3_1_0_ALPHA: String = "3.1.0-alpha"
 
     public const val VERSION_3_0_2_ALPHA: String = "3.0.2-alpha"

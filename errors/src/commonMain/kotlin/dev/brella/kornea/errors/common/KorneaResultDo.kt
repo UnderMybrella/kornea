@@ -72,11 +72,6 @@ public inline fun <T> KorneaResult<T>.doWithErrorDetails(block: (KorneaResult.Wi
     doOnTypedFailure(block)
 
 @OptIn(ExperimentalContracts::class)
-@AvailableSince(KorneaErrors.VERSION_3_2_0_INDEV)
-public inline fun <T> KorneaResult<T>.doWithCause(block: (KorneaResult.WithCause) -> Unit): KorneaResult<T> =
-    doOnTypedFailure(block)
-
-@OptIn(ExperimentalContracts::class)
 @ChangedSince(KorneaErrors.VERSION_3_2_0_INDEV, "[block] now accepts the empty instance")
 public inline fun <T> KorneaResult<T>.doOnEmpty(block: (KorneaResult.Empty) -> Unit): KorneaResult<T> =
     doOnTypedFailure(block)
@@ -268,7 +263,6 @@ public inline fun <T> KorneaResult<T>.doOnThrownAsResult(block: (KorneaResult<*>
 }
 
 @OptIn(ExperimentalContracts::class)
-@Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_0_0_ALPHA)
 public inline fun <T, reified E : Throwable> KorneaResult<T>.doOnTypedThrownWithResult(block: (KorneaResult<*>) -> Unit): KorneaResult<T> {
     contract {
@@ -283,7 +277,6 @@ public inline fun <T, reified E : Throwable> KorneaResult<T>.doOnTypedThrownWith
 }
 
 @OptIn(ExperimentalContracts::class)
-@Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_0_0_ALPHA)
 public inline fun <T, E : Throwable> KorneaResult<T>.doOnTypedThrownWithResult(
     klass: KClass<E>,
@@ -312,7 +305,6 @@ public inline fun <T> KorneaResult<T>.doOnPayloadAsResult(block: (KorneaResult<*
 }
 
 @OptIn(ExperimentalContracts::class)
-@Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_1_0_ALPHA)
 public inline fun <T, reified P> KorneaResult<T>.doOnTypedPayloadWithResult(block: (KorneaResult<*>) -> Unit): KorneaResult<T> {
     contract {
@@ -327,7 +319,6 @@ public inline fun <T, reified P> KorneaResult<T>.doOnTypedPayloadWithResult(bloc
 }
 
 @OptIn(ExperimentalContracts::class)
-@Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_1_0_ALPHA)
 public inline fun <T, P : Any> KorneaResult<T>.doOnTypedPayloadWithResult(
     klass: KClass<P>,
