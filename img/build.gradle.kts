@@ -1,6 +1,6 @@
 apply(plugin = KOTLIN_MULTIPLATFORM_PLUGIN)
 
-version = "1.4.0-alpha"
+version = "1.4.1-alpha"
 
 multiplatform {
     /* Targets configuration omitted.
@@ -41,8 +41,6 @@ multiplatform {
         }
         all {
             languageSettings.apply {
-                enableLanguageFeature("InlineClasses")
-                useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
             }
         }
     }

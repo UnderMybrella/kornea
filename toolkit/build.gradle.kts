@@ -1,7 +1,7 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 
-version = "3.5.0-alpha"
+version = "3.5.1-alpha"
 
 multiplatform {
     jvm()
@@ -78,10 +78,7 @@ multiplatform {
 
         all {
             languageSettings.apply {
-                useExperimentalAnnotation("kotlin.RequiresOptIn")
-                useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
-
-                enableLanguageFeature("InlineClasses")
+                optIn("kotlin.RequiresOptIn")
                 explicitApi()
             }
         }

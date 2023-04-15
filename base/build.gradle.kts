@@ -1,7 +1,7 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 
-version = "1.1.0-alpha"
+version = "1.2.0-alpha"
 
 multiplatform {
     /* https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
@@ -75,21 +75,11 @@ multiplatform {
 
         all {
             languageSettings.apply {
-                enableLanguageFeature("InlineClasses")
+                optIn("kotlin.RequiresOptIn")
                 explicitApi()
             }
         }
     }
-
-//    targets.all {
-//        compilations.all {
-//            kotlinOptions {
-//                freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
-//            }
-//        }
-//    }
-
-    addCompilerArgs("-Xopt-in=kotlin.RequiresOptIn")
 }
 
 configure<kotlinx.atomicfu.plugin.gradle.AtomicFUPluginExtension> {

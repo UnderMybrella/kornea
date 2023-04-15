@@ -1,6 +1,6 @@
 apply(plugin = KOTLIN_MULTIPLATFORM_PLUGIN)
 
-version = "1.1.0-alpha"
+version = "1.1.1-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
@@ -42,8 +42,7 @@ multiplatform {
 
         all {
             languageSettings.apply {
-                useExperimentalAnnotation("kotlin.RequiresOptIn")
-                useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
+                optIn("kotlin.RequiresOptIn")
                 explicitApi()
             }
         }

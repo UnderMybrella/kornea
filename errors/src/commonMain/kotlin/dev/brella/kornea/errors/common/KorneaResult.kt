@@ -1178,6 +1178,7 @@ public value class KorneaResult<out T> @PublishedApi internal constructor(
 
     // value & exception retrieval
 
+    
     @Suppress("UNCHECKED_CAST")
     public inline fun getOrNull(): T? =
         when {
@@ -1284,28 +1285,26 @@ public inline fun <T, E : Throwable> KorneaResult<T>.mapFailureException(excepti
         else -> this
     }
 
-@Suppress("UNCHECKED_CAST")
 @AvailableSince(KorneaErrors.VERSION_3_1_0_INDEV)
 public inline fun <R, T : KorneaResult<R>> KorneaResult<T>.flatten(): KorneaResult<R> =
-    if (isSuccess) value as T
+    if (isSuccess) getUnsafe()
     else asType()
+
 
 @Suppress("UNCHECKED_CAST")
 public inline fun <T> KorneaResult<*>.asType(): KorneaResult<T> = this as KorneaResult<T>
 
-@Suppress("UNCHECKED_CAST")
+
 @ChangedSince(
     KorneaErrors.VERSION_3_1_0_INDEV,
     "Casting no longer creates a new instance, and when a cast fails instances have the chance to recover themselves"
 )
 public inline fun <T, reified R> KorneaResult<T>.cast(): KorneaResult<R> =
-    if (isSuccess)
-        if (value is R) this as KorneaResult<R>
-        else KorneaResult.typeCastEmpty()
+    if (isSuccess && value !is R)
+        KorneaResult.typeCastEmpty()
     else
         asType()
 
-@Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalContracts::class)
 public inline fun <T, R> KorneaResult<T>.map(transform: (T) -> R): KorneaResult<R> {
     contract {
@@ -1314,12 +1313,12 @@ public inline fun <T, R> KorneaResult<T>.map(transform: (T) -> R): KorneaResult<
 
 
     return if (isSuccess)
-        KorneaResult(transform(value as T))
+        KorneaResult(transform(getUnsafe()))
     else
         asType()
 }
 
-@Suppress("UNCHECKED_CAST")
+
 @OptIn(ExperimentalContracts::class)
 public inline fun <T, R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<R>): KorneaResult<R> {
     contract {
@@ -1327,12 +1326,12 @@ public inline fun <T, R> KorneaResult<T>.flatMap(transform: (T) -> KorneaResult<
     }
 
     return if (isSuccess)
-        transform(value as T)
+        transform(getUnsafe())
     else
         asType()
 }
 
-@Suppress("UNCHECKED_CAST")
+
 @OptIn(ExperimentalContracts::class)
 @AvailableSince(KorneaErrors.VERSION_3_3_0_INDEV)
 public inline fun <T> KorneaResult<T>.flatMapOrSelf(transform: (T) -> KorneaResult<T>?): KorneaResult<T> {
@@ -1341,7 +1340,7 @@ public inline fun <T> KorneaResult<T>.flatMapOrSelf(transform: (T) -> KorneaResu
     }
 
     return if (isSuccess)
-        when (val result = transform(value as T)) {
+        when (val result = transform(getUnsafe())) {
             null -> this
             else -> result
         }
@@ -1368,11 +1367,11 @@ public suspend inline fun <T : DataCloseable, reified R> KorneaResult<T>.useAndF
 public inline fun <T> Optional<KorneaResult<T>>.flatten(): KorneaResult<T> =
     getOrElseRun { KorneaResult.empty() }
 
-@Suppress("UNCHECKED_CAST")
+
 @AvailableSince(KorneaErrors.VERSION_2_1_0_ALPHA)
 public inline fun <T> KorneaResult<Optional<T>>.filter(): KorneaResult<T> =
     if (isSuccess) {
-        val opt = value as Optional<T>
+        val opt = getUnsafe()
         if (opt.isPresent) KorneaResult.success(opt.value)
         else KorneaResult.empty()
     } else {

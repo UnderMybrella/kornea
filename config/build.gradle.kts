@@ -1,7 +1,7 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlinx-atomicfu")
 
-version = "1.2.0-indev"
+version = "1.2.1-indev"
 
 multiplatform {
     /* https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
@@ -73,7 +73,6 @@ multiplatform {
 
         all {
             languageSettings.apply {
-                enableLanguageFeature("InlineClasses")
                 explicitApi()
             }
         }

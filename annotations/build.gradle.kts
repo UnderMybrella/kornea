@@ -1,6 +1,6 @@
 apply(plugin = KOTLIN_MULTIPLATFORM_PLUGIN)
 
-version = "1.4.0-alpha"
+version = "1.4.1-alpha"
 
 multiplatform {
     /* https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
@@ -48,8 +48,7 @@ multiplatform {
     sourceSets {
         all {
             languageSettings.apply {
-                useExperimentalAnnotation("kotlin.RequiresOptIn")
-                useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
+                optIn("kotlin.RequiresOptIn")
                 explicitApi()
             }
         }

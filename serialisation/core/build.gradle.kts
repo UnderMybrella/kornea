@@ -1,6 +1,6 @@
 apply(plugin = "org.jetbrains.kotlin.multiplatform")
 
-version = "2.1.0-alpha"
+version = "2.1.1-alpha"
 
 multiplatform {
     /* Targets configuration omitted. 
@@ -76,7 +76,6 @@ multiplatform {
 
         all {
             languageSettings.apply {
-                enableLanguageFeature("InlineClasses")
                 explicitApi()
             }
         }
