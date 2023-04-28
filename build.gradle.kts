@@ -12,10 +12,12 @@ plugins {
     id(KOTLIN_MULTIPLATFORM_PLUGIN) apply false
     id(KOTLIN_JVM_PLUGIN) apply false
     id(KOTLIN_SERIALISATION_PLUGIN) version KOTLIN_VERSION apply false
+    id(KAPT_PLUGIN) apply false
 
     id(SHADOW_PLUGIN) version SHADOW_PLUGIN_VERSION apply false
 
     id(JMH_PLUGIN) version JMH_PLUGIN_VERSION apply false
+    id(JCSTRESS_PLUGIN) version "0.8.15" apply false
 
     id("org.jetbrains.dokka") version "1.6.21"
     id("dev.brella.kornea") version "1.4.1"

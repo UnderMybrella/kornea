@@ -17,9 +17,13 @@ const val KOTLINX_ATOMICFU_GRADLE_PLUGIN = "org.jetbrains.kotlinx:atomicfu-gradl
 const val KOTLIN_MULTIPLATFORM_PLUGIN = "org.jetbrains.kotlin.multiplatform"
 const val KOTLIN_JVM_PLUGIN = "org.jetbrains.kotlin.jvm"
 const val KOTLIN_SERIALISATION_PLUGIN = "org.jetbrains.kotlin.plugin.serialization"
+const val KAPT_PLUGIN = "org.jetbrains.kotlin.kapt"
 
 const val SHADOW_PLUGIN = "com.github.johnrengelman.shadow"
 const val JMH_PLUGIN = "me.champeau.gradle.jmh"
+const val JCSTRESS_PLUGIN = "io.github.reyerizo.gradle.jcstress"
+
+const val JCSTRESS_DEPENDENCY = "org.openjdk.jcstress:jcstress-core:0.16"
 
 
 inline fun Project.defineSourceSet(newName: String, dependsOn: List<String>, noinline includedIn: (String) -> Boolean) =
